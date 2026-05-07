@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CourtSync — Account &amp; Data Deletion</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 720px;
+      margin: 2rem auto;
+      padding: 0 1.25rem;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #fff;
+    }
+    @media (prefers-color-scheme: dark) {
+      body { background: #111; color: #eee; }
+      a { color: #79b8ff; }
+    }
+    h1 { font-size: 1.75rem; margin-bottom: 0.25rem; }
+    h2 { font-size: 1.2rem; margin-top: 2rem; }
+    .meta { color: #666; font-size: 0.9rem; margin-bottom: 2rem; }
+    ol, ul { padding-left: 1.25rem; }
+    .box {
+      border: 1px solid rgba(127,127,127,0.3);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0;
+      background: rgba(127,127,127,0.06);
+    }
+    footer { margin-top: 3rem; font-size: 0.85rem; color: #666; }
+  </style>
+</head>
+<body>
+  <h1>CourtSync — Account &amp; Data Deletion</h1>
+  <p class="meta">Last updated: 7 May 2026</p>
+
+  <p>
+    This page explains how to permanently delete your CourtSync account and all
+    associated personal data. CourtSync respects your right to erasure under the
+    UK General Data Protection Regulation (UK GDPR).
+  </p>
+
+  <h2>Option 1 — Delete from inside the app (recommended)</h2>
+  <ol>
+    <li>Open the CourtSync app and sign in.</li>
+    <li>Go to <strong>Settings</strong> &rarr; <strong>Account</strong>.</li>
+    <li>Tap <strong>Delete account</strong>.</li>
+    <li>Confirm the action when prompted.</li>
+  </ol>
+  <p>
+    Your account and personal data will be removed from our database
+    immediately. Some derived records (e.g. session history that other players
+    rely on for their own match statistics) may be anonymised rather than
+    deleted, so other players' historical data is not corrupted.
+  </p>
+
+  <h2>Option 2 — Email request</h2>
+  <p>
+    If you cannot access the app, send an email to
+    <a href="mailto:kreed_uk@hotmail.com?subject=CourtSync%20account%20deletion%20request">
+      kreed_uk@hotmail.com
+    </a>
+    with the subject line <strong>"CourtSync account deletion request"</strong>
+    and include:
+  </p>
+  <ul>
+    <li>The email address associated with your CourtSync account.</li>
+    <li>The full name on your account.</li>
+  </ul>
+  <p>
+    We will verify your identity and complete the deletion within
+    <strong>30 days</strong>. You will receive a confirmation email when the
+    deletion is finished.
+  </p>
+
+  <div class="box">
+    <strong>What gets deleted:</strong>
+    <ul>
+      <li>Your profile (name, email, profile picture, gender, date of birth).</li>
+      <li>Your authentication record (Supabase Auth and any linked Facebook / Google / Apple identity).</li>
+      <li>Your subscription association in RevenueCat (any active App Store / Play Store subscription must be cancelled separately by you).</li>
+      <li>Your club memberships, friendships, push notification tokens, and personal stats.</li>
+      <li>Any shadow / guest profiles you created as a host.</li>
+    </ul>
+    <strong>What may be retained (anonymised):</strong>
+    <ul>
+      <li>Aggregate match results and session history kept for the integrity of other players' statistics. Your name is replaced with a generic identifier and your account is no longer linked to those records.</li>
+      <li>Records we are legally required to retain (e.g. financial transaction logs).</li>
+    </ul>
+  </div>
+
+  <h2>Cancelling subscriptions</h2>
+  <p>
+    Deleting your CourtSync account does <strong>not</strong> automatically
+    cancel a paid subscription. To stop being billed, cancel the subscription
+    via:
+  </p>
+  <ul>
+    <li><strong>iOS:</strong> Settings &rarr; Apple ID &rarr; Subscriptions &rarr; CourtSync.</li>
+    <li><strong>Android:</strong> Google Play Store &rarr; Profile &rarr; Payments &amp; subscriptions &rarr; Subscriptions &rarr; CourtSync.</li>
+  </ul>
+
+  <h2>Questions</h2>
+  <p>
+    For any questions about deletion or the data we hold on you, contact
+    <a href="mailto:kreed_uk@hotmail.com">kreed_uk@hotmail.com</a>. See also the
+    <a href="./privacy.html">Privacy Policy</a>.
+  </p>
+
+  <footer>
+    &copy; 2026 CourtSync. All rights reserved.
+  </footer>
+</body>
+</html>
