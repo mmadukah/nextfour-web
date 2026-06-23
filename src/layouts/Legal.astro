@@ -3,16 +3,56 @@
 // deletion). Renders a Markdown content entry inside the simple 720px column
 // styling these pages have always used.
 import Base from './Base.astro';
+import { getRelativeLocaleUrl, getAbsoluteLocaleUrl } from 'astro:i18n';
 
 interface Props {
   title: string;
   meta: string;
+  lang: string;
+  slug: string;
 }
-const { title, meta } = Astro.props;
+const { title, meta, lang, slug } = Astro.props;
 const fullTitle = `NextFour — ${title}`;
+
+const locales = ['en', 'fr'] as const;
+const localeNames: Record<string, string> = { en: 'English', fr: 'Français' };
+
+// UI strings that aren't part of the Markdown body.
+const ui: Record<string, { home: string; crumbs: Record<string, string> }> = {
+  en: {
+    home: 'Home',
+    crumbs: {
+      privacy: 'Privacy Policy',
+      terms: 'Terms & Conditions',
+      support: 'Support',
+      'delete-account': 'Account & Data Deletion',
+    },
+  },
+  fr: {
+    home: 'Accueil',
+    crumbs: {
+      privacy: 'Politique de confidentialité',
+      terms: 'Conditions générales',
+      support: 'Assistance',
+      'delete-account': 'Suppression du compte et des données',
+    },
+  },
+};
+const t = ui[lang] ?? ui.en;
+const crumbSlugs = ['privacy', 'terms', 'support', 'delete-account'];
+
+// hreflang alternates for the <head>, including x-default -> English.
+const alternates = [
+  ...locales.map((loc) => ({ hreflang: loc, href: getAbsoluteLocaleUrl(loc, `${slug}.html`) })),
+  { hreflang: 'x-default', href: getAbsoluteLocaleUrl('en', `${slug}.html`) },
+];
 ---
 
-<Base title={fullTitle}>
+<Base title={fullTitle} lang={lang}>
+  {alternates.map((alt) => (
+    <link slot="head" rel="alternate" hreflang={alt.hreflang} href={alt.href} />
+  ))}
+
   <style slot="head" is:global>
     :root { color-scheme: light dark; }
     body {
@@ -42,10 +82,23 @@ const fullTitle = `NextFour — ${title}`;
     }
     .faq dt { font-weight: 600; margin-top: 1.25rem; }
     .faq dd { margin: 0.25rem 0 0; padding-left: 0; }
+    .langbar { display: flex; gap: 0.75rem; justify-content: flex-end; font-size: 0.85rem; margin-bottom: 1.5rem; }
+    .langbar a { text-decoration: none; opacity: 0.7; }
+    .langbar a[aria-current="true"] { font-weight: 700; opacity: 1; }
     nav.crumbs { margin-top: 2.5rem; font-size: 0.9rem; }
     nav.crumbs a { margin-right: 1rem; }
     footer { margin-top: 3rem; font-size: 0.85rem; color: #666; }
   </style>
+
+  <nav class="langbar" aria-label="Language">
+    {locales.map((loc) => (
+      <a
+        href={getRelativeLocaleUrl(loc, `${slug}.html`)}
+        aria-current={loc === lang ? 'true' : undefined}
+        hreflang={loc}
+      >{localeNames[loc]}</a>
+    ))}
+  </nav>
 
   <h1>{fullTitle}</h1>
   <p class="meta">{meta}</p>
@@ -53,11 +106,10 @@ const fullTitle = `NextFour — ${title}`;
   <slot />
 
   <nav class="crumbs">
-    <a href="/index.html">Home</a>
-    <a href="/privacy.html">Privacy Policy</a>
-    <a href="/terms.html">Terms &amp; Conditions</a>
-    <a href="/support.html">Support</a>
-    <a href="/delete-account.html">Account &amp; Data Deletion</a>
+    <a href={getRelativeLocaleUrl(lang, 'index.html')}>{t.home}</a>
+    {crumbSlugs.map((s) => (
+      <a href={getRelativeLocaleUrl(lang, `${s}.html`)}>{t.crumbs[s]}</a>
+    ))}
   </nav>
 
   <footer>&copy; 2026 NextFour. All rights reserved.</footer>

@@ -1,0 +1,343 @@
+---
+// The marketing landing page, rendered from a per-language strings table so
+// the same markup serves /  (en) and /fr/ (fr).
+import Base from '../layouts/Base.astro';
+import { getRelativeLocaleUrl, getAbsoluteLocaleUrl } from 'astro:i18n';
+
+interface Props {
+  lang: string;
+}
+const { lang } = Astro.props;
+
+const locales = ['en', 'fr'] as const;
+const localeNames: Record<string, string> = { en: 'English', fr: 'Français' };
+
+type Card = { ico: string; title: string; body: string };
+type Step = { title: string; body: string };
+type Strings = {
+  title: string;
+  description: string;
+  ogDescription: string;
+  heroLine1: string;
+  heroLine2: string;
+  lead: string;
+  ctaPlay: string;
+  ctaAppStore: string;
+  note: string;
+  featuresHead: string;
+  featuresSub: string;
+  cards: Card[];
+  stepsHead: string;
+  stepsSub: string;
+  steps: Step[];
+  closingHead: string;
+  closingSub: string;
+  nav: { support: string; privacy: string; terms: string; delete: string };
+  questions: string;
+  copyright: string;
+};
+
+const content: Record<string, Strings> = {
+  en: {
+    title: 'NextFour — The racket sport club manager',
+    description:
+      'NextFour runs your racket sports club night — live courts, a digital pegboard, fair player picks, stats and your crew. Built for badminton, squash, tennis, padel and table tennis clubs.',
+    ogDescription:
+      'Fair picks. Every night. Live courts, a digital pegboard, stats and your crew — all in one app.',
+    heroLine1: 'Fair picks.',
+    heroLine2: 'Every night.',
+    lead: 'The racket sport club manager. Live courts, a digital pegboard and your whole crew — in one app.',
+    ctaPlay: 'Get it on Google Play',
+    ctaAppStore: 'Download on the App Store',
+    note: 'Free to get started. Built for badminton, squash, tennis, padel & table tennis clubs.',
+    featuresHead: 'Everything your club night needs',
+    featuresSub: 'Stop juggling whiteboards and group chats. Run the whole session from your phone.',
+    cards: [
+      { ico: '🎯', title: 'Fair, automatic picks', body: 'No more “who’s next?” arguments. Players rotate fairly through the queue so everyone gets a game.' },
+      { ico: '📋', title: 'A digital pegboard', body: 'The queue your club already knows, made smart. Peg on, pair partners and send the next four to a free court with a tap.' },
+      { ico: '⏱️', title: 'Live sessions', body: 'See every court at a glance — who’s on, who’s next and how long they’ve waited. Updates in real time for everyone.' },
+      { ico: '📊', title: 'Stats that matter', body: 'Games played, wins and who you play with most. Players build a history without anyone keeping score on paper.' },
+      { ico: '👥', title: 'Bring your crew', body: 'Add members and guests, see who’s in tonight, and grow your community session by session.' },
+      { ico: '📱', title: 'Terminal mode', body: 'Turn a spare tablet into a courtside kiosk. Players check themselves in while hosts run the night.' },
+    ],
+    stepsHead: 'Up and running in minutes',
+    stepsSub: 'Set up a session in seconds, share it, and let the board do the rest.',
+    steps: [
+      { title: 'Create a session', body: 'Pick the date, courts and how players are chosen — Pegboard, Skill-based or Manual.' },
+      { title: 'Share with your members', body: 'Players check in from their phones, or at a courtside tablet in Terminal mode.' },
+      { title: 'Let the board run the night', body: 'The queue fills courts fairly and live, so you can focus on playing.' },
+    ],
+    closingHead: 'Less faff at the door. More time on court.',
+    closingSub: 'Join the clubs running their nights with NextFour.',
+    nav: { support: 'Support', privacy: 'Privacy', terms: 'Terms', delete: 'Account & Data Deletion' },
+    questions: 'Questions? Email',
+    copyright: '© 2026 NextFour. All rights reserved.',
+  },
+  fr: {
+    title: 'NextFour — Le gestionnaire de club de sports de raquette',
+    description:
+      'NextFour gère votre soirée de club de sports de raquette — terrains en direct, tableau numérique, sélections de joueurs équitables, statistiques et votre équipe. Conçu pour les clubs de badminton, squash, tennis, padel et tennis de table.',
+    ogDescription:
+      'Des sélections équitables. Chaque soir. Terrains en direct, un tableau numérique, des statistiques et votre équipe — dans une seule application.',
+    heroLine1: 'Sélections équitables.',
+    heroLine2: 'Chaque soir.',
+    lead: 'Le gestionnaire de club de sports de raquette. Terrains en direct, un tableau numérique et toute votre équipe — dans une seule application.',
+    ctaPlay: 'Disponible sur Google Play',
+    ctaAppStore: 'Télécharger dans l’App Store',
+    note: 'Gratuit pour commencer. Conçu pour les clubs de badminton, squash, tennis, padel et tennis de table.',
+    featuresHead: 'Tout ce qu’il faut pour votre soirée de club',
+    featuresSub: 'Fini les tableaux blancs et les discussions de groupe. Gérez toute la session depuis votre téléphone.',
+    cards: [
+      { ico: '🎯', title: 'Des sélections équitables et automatiques', body: 'Fini les disputes du « c’est à qui ? ». Les joueurs tournent équitablement dans la file pour que chacun joue.' },
+      { ico: '📋', title: 'Un tableau numérique', body: 'La file que votre club connaît déjà, en plus intelligente. Inscrivez-vous, associez les partenaires et envoyez les quatre suivants sur un terrain libre d’une simple touche.' },
+      { ico: '⏱️', title: 'Sessions en direct', body: 'Visualisez chaque terrain d’un coup d’œil — qui joue, qui est le prochain et depuis combien de temps il attend. Mises à jour en temps réel pour tout le monde.' },
+      { ico: '📊', title: 'Des statistiques qui comptent', body: 'Parties jouées, victoires et avec qui vous jouez le plus. Les joueurs se constituent un historique sans que personne ne tienne le score sur papier.' },
+      { ico: '👥', title: 'Rassemblez votre équipe', body: 'Ajoutez des membres et des invités, voyez qui est présent ce soir et développez votre communauté session après session.' },
+      { ico: '📱', title: 'Mode Terminal', body: 'Transformez une tablette en borne au bord du terrain. Les joueurs s’enregistrent eux-mêmes pendant que les hôtes gèrent la soirée.' },
+    ],
+    stepsHead: 'Opérationnel en quelques minutes',
+    stepsSub: 'Créez une session en quelques secondes, partagez-la et laissez le tableau faire le reste.',
+    steps: [
+      { title: 'Créez une session', body: 'Choisissez la date, les terrains et le mode de sélection des joueurs — Pegboard, Par niveau ou Manuel.' },
+      { title: 'Partagez avec vos membres', body: 'Les joueurs s’enregistrent depuis leur téléphone ou sur une tablette au bord du terrain en mode Terminal.' },
+      { title: 'Laissez le tableau gérer la soirée', body: 'La file remplit les terrains équitablement et en direct, pour que vous puissiez vous concentrer sur le jeu.' },
+    ],
+    closingHead: 'Moins de tracas à l’entrée. Plus de temps sur le terrain.',
+    closingSub: 'Rejoignez les clubs qui gèrent leurs soirées avec NextFour.',
+    nav: { support: 'Assistance', privacy: 'Confidentialité', terms: 'Conditions', delete: 'Suppression du compte et des données' },
+    questions: 'Des questions ? Écrivez à',
+    copyright: '© 2026 NextFour. Tous droits réservés.',
+  },
+};
+
+const s = content[lang] ?? content.en;
+const ogUrl = getAbsoluteLocaleUrl(lang, '');
+const alternates = [
+  ...locales.map((loc) => ({ hreflang: loc, href: getAbsoluteLocaleUrl(loc, '') })),
+  { hreflang: 'x-default', href: getAbsoluteLocaleUrl('en', '') },
+];
+---
+
+<Base title={s.title} description={s.description} lang={lang}>
+  <Fragment slot="head">
+    <meta property="og:title" content={s.title} />
+    <meta property="og:description" content={s.ogDescription} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={ogUrl} />
+    {alternates.map((alt) => (
+      <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
+    ))}
+  </Fragment>
+
+  <style is:global>
+    :root {
+      color-scheme: light dark;
+      --accent: #ff5a5a;
+      --accent-dark: #e23d3d;
+      --ink: #1a1a1a;
+      --muted: #666;
+      --bg: #fff;
+      --card: rgba(127,127,127,0.06);
+      --border: rgba(127,127,127,0.25);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --ink: #eee; --muted: #9a9a9a; --bg: #111; --card: rgba(255,255,255,0.04); --border: rgba(255,255,255,0.12); }
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      line-height: 1.6;
+      color: var(--ink);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 0 1.25rem; }
+
+    /* ---------- Language switcher ---------- */
+    .langbar { display: flex; justify-content: flex-end; gap: 0.85rem; padding-top: 1.25rem; font-size: 0.85rem; }
+    .langbar a { color: #c9c9d1; text-decoration: none; opacity: 0.85; }
+    .langbar a[aria-current="true"] { color: #fff; font-weight: 700; opacity: 1; }
+
+    /* ---------- Hero (always dark, brand-consistent) ---------- */
+    .hero {
+      background: radial-gradient(120% 120% at 80% 0%, #1b1c22 0%, #0c0c0f 55%);
+      color: #fff;
+      padding: 0 0 4rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .hero .wrap.body { padding-top: 3.25rem; }
+    .brand {
+      font-weight: 800;
+      letter-spacing: 0.35em;
+      font-size: 0.85rem;
+      color: #fff;
+      text-transform: uppercase;
+      margin-bottom: 1.75rem;
+    }
+    .hero h1 {
+      font-size: clamp(2.4rem, 6vw, 3.8rem);
+      line-height: 1.05;
+      margin: 0 0 1rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .hero h1 .accent { color: var(--accent); }
+    .hero p.lead {
+      font-size: clamp(1.05rem, 2.4vw, 1.35rem);
+      color: #c9c9d1;
+      max-width: 36ch;
+      margin: 0 0 2.25rem;
+    }
+    .cta-row { display: flex; flex-wrap: wrap; gap: 0.85rem; align-items: center; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-weight: 600; font-size: 0.98rem;
+      padding: 0.8rem 1.35rem; border-radius: 10px;
+      text-decoration: none; transition: transform .08s ease, opacity .2s ease;
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-dark); }
+    .btn-ghost { background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.18); }
+    .btn-ghost:hover { background: rgba(255,255,255,0.14); }
+    .hero .note { color: #8b8b95; font-size: 0.85rem; margin: 1.4rem 0 0; }
+
+    /* ---------- Features ---------- */
+    section.features { padding: 4rem 0 1rem; }
+    .section-head { text-align: center; max-width: 40ch; margin: 0 auto 2.75rem; }
+    .section-head h2 { font-size: clamp(1.6rem, 4vw, 2.1rem); margin: 0 0 0.6rem; letter-spacing: -0.01em; }
+    .section-head p { color: var(--muted); margin: 0; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+    .card {
+      border: 1px solid var(--border); border-radius: 14px;
+      padding: 1.4rem 1.4rem 1.5rem; background: var(--card);
+    }
+    .card .ico { font-size: 1.5rem; margin-bottom: 0.6rem; }
+    .card h3 { margin: 0 0 0.35rem; font-size: 1.1rem; }
+    .card p { margin: 0; color: var(--muted); font-size: 0.96rem; }
+
+    /* ---------- How it works ---------- */
+    section.steps { padding: 3.5rem 0; }
+    .steps ol { counter-reset: step; list-style: none; padding: 0; margin: 0; display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); }
+    .steps li { position: relative; padding: 1.3rem 1.3rem 1.3rem 3.5rem; border: 1px solid var(--border); border-radius: 14px; background: var(--card); }
+    .steps li::before {
+      counter-increment: step; content: counter(step);
+      position: absolute; left: 1.1rem; top: 1.2rem;
+      width: 1.7rem; height: 1.7rem; border-radius: 50%;
+      background: var(--accent); color: #fff; font-weight: 700; font-size: 0.9rem;
+      display: grid; place-items: center;
+    }
+    .steps li strong { display: block; margin-bottom: 0.2rem; }
+    .steps li span { color: var(--muted); font-size: 0.95rem; }
+
+    /* ---------- Closing CTA ---------- */
+    section.closing { text-align: center; padding: 4rem 0 4.5rem; }
+    section.closing h2 { font-size: clamp(1.6rem, 4vw, 2.2rem); margin: 0 0 0.5rem; }
+    section.closing p { color: var(--muted); margin: 0 0 1.75rem; }
+
+    /* ---------- Footer ---------- */
+    footer { border-top: 1px solid var(--border); padding: 2.5rem 0 3rem; }
+    footer .cols { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1.5rem; align-items: center; }
+    footer nav a { color: var(--ink); text-decoration: none; margin-right: 1.25rem; font-size: 0.92rem; opacity: 0.85; }
+    footer nav a:hover { opacity: 1; text-decoration: underline; }
+    footer .small { color: var(--muted); font-size: 0.85rem; margin-top: 1.5rem; }
+  </style>
+
+  <!-- ============ HERO ============ -->
+  <header class="hero">
+    <div class="wrap">
+      <nav class="langbar" aria-label="Language">
+        {locales.map((loc) => (
+          <a
+            href={getRelativeLocaleUrl(loc, 'index.html')}
+            aria-current={loc === lang ? 'true' : undefined}
+            hreflang={loc}
+          >{localeNames[loc]}</a>
+        ))}
+      </nav>
+    </div>
+    <div class="wrap body">
+      <div class="brand">NextFour</div>
+      <h1>{s.heroLine1}<br /><span class="accent">{s.heroLine2}</span></h1>
+      <p class="lead">{s.lead}</p>
+      <div class="cta-row">
+        {/* TODO: replace href with the live Google Play listing URL once public */}
+        <a class="btn btn-primary" href="#">{s.ctaPlay}</a>
+        {/* TODO: replace href with the live App Store listing URL once published */}
+        <a class="btn btn-ghost" href="#">{s.ctaAppStore}</a>
+      </div>
+      <p class="note">{s.note}</p>
+    </div>
+  </header>
+
+  <!-- ============ FEATURES ============ -->
+  <section class="features">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>{s.featuresHead}</h2>
+        <p>{s.featuresSub}</p>
+      </div>
+      <div class="grid">
+        {s.cards.map((card) => (
+          <div class="card">
+            <div class="ico">{card.ico}</div>
+            <h3>{card.title}</h3>
+            <p>{card.body}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ HOW IT WORKS ============ -->
+  <section class="steps">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>{s.stepsHead}</h2>
+        <p>{s.stepsSub}</p>
+      </div>
+      <ol>
+        {s.steps.map((step) => (
+          <li><strong>{step.title}</strong><span>{step.body}</span></li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ CLOSING CTA ============ -->
+  <section class="closing">
+    <div class="wrap">
+      <h2>{s.closingHead}</h2>
+      <p>{s.closingSub}</p>
+      <div class="cta-row" style="justify-content:center;">
+        <a class="btn btn-primary" href="#">{s.ctaPlay}</a>
+        <a class="btn btn-ghost" href="#" style="background:var(--card);color:var(--ink);border-color:var(--border);">{s.ctaAppStore}</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer>
+    <div class="wrap">
+      <div class="cols">
+        <div class="brand" style="letter-spacing:0.35em;color:var(--ink);margin:0;">NextFour</div>
+        <nav>
+          <a href={getRelativeLocaleUrl(lang, 'support.html')}>{s.nav.support}</a>
+          <a href={getRelativeLocaleUrl(lang, 'privacy.html')}>{s.nav.privacy}</a>
+          <a href={getRelativeLocaleUrl(lang, 'terms.html')}>{s.nav.terms}</a>
+          <a href={getRelativeLocaleUrl(lang, 'delete-account.html')}>{s.nav.delete}</a>
+        </nav>
+      </div>
+      <p class="small">
+        {s.questions} <a href="mailto:support@nextfour.app?subject=NextFour">support@nextfour.app</a>.<br />
+        {s.copyright}
+      </p>
+    </div>
+  </footer>
+</Base>
