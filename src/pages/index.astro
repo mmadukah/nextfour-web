@@ -1,18 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NextFour — The racket sport club manager</title>
-  <meta name="description" content="NextFour runs your racket sports club night — live courts, a digital pegboard, fair player picks, stats and your crew. Built for badminton, squash, tennis, padel and table tennis clubs." />
+---
+import Base from '../layouts/Base.astro';
+---
 
-  <!-- Open Graph / social preview -->
-  <meta property="og:title" content="NextFour — The racket sport club manager" />
-  <meta property="og:description" content="Fair picks. Every night. Live courts, a digital pegboard, stats and your crew — all in one app." />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://nextfour.app/" />
+<Base
+  title="NextFour — The racket sport club manager"
+  description="NextFour runs your racket sports club night — live courts, a digital pegboard, fair player picks, stats and your crew. Built for badminton, squash, tennis, padel and table tennis clubs."
+>
+  <Fragment slot="head">
+    <!-- Open Graph / social preview -->
+    <meta property="og:title" content="NextFour — The racket sport club manager" />
+    <meta property="og:description" content="Fair picks. Every night. Live courts, a digital pegboard, stats and your crew — all in one app." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://nextfour.app/" />
+  </Fragment>
 
-  <style>
+  <style is:global>
     :root {
       color-scheme: light dark;
       --accent: #ff5a5a;
@@ -125,8 +127,6 @@
     footer nav a:hover { opacity: 1; text-decoration: underline; }
     footer .small { color: var(--muted); font-size: 0.85rem; margin-top: 1.5rem; }
   </style>
-</head>
-<body>
 
   <!-- ============ HERO ============ -->
   <header class="hero">
@@ -219,10 +219,10 @@
       <div class="cols">
         <div class="brand" style="letter-spacing:0.35em;color:var(--ink);margin:0;">NextFour</div>
         <nav>
-          <a href="./support.html">Support</a>
-          <a href="./privacy.html">Privacy</a>
-          <a href="./terms.html">Terms</a>
-          <a href="./delete-account.html">Account &amp; Data Deletion</a>
+          <a href="/support.html">Support</a>
+          <a href="/privacy.html">Privacy</a>
+          <a href="/terms.html">Terms</a>
+          <a href="/delete-account.html">Account &amp; Data Deletion</a>
         </nav>
       </div>
       <p class="small">
@@ -231,6 +231,4 @@
       </p>
     </div>
   </footer>
-
-</body>
-</html>
+</Base>
