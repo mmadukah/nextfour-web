@@ -4,10 +4,12 @@ import { defineConfig } from 'astro/config';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://nextfour.app',
-  // Output flat files (privacy.html, terms.html, ...) instead of directories
-  // (privacy/index.html). This preserves the existing public URLs that are
-  // already submitted to the App Store / Play Store and linked across the site.
-  build: { format: 'file' },
+  // 'preserve' keeps each route's on-disk shape: index pages stay as
+  // index.html (so / and /fr/ work), while the legal routes emit flat files
+  // (privacy.html, fr/privacy.html, ...). This preserves the existing public
+  // URLs already submitted to the App Store / Play Store and linked across the
+  // site, and gives the per-locale homepages clean /fr/ URLs.
+  build: { format: 'preserve' },
   i18n: {
     defaultLocale: 'en',
     locales: ['en', 'fr'],

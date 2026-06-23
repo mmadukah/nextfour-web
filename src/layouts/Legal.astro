@@ -106,7 +106,7 @@ const alternates = [
   <slot />
 
   <nav class="crumbs">
-    <a href={getRelativeLocaleUrl('en', 'index.html')}>{t.home}</a>
+    <a href={getRelativeLocaleUrl(lang, 'index.html')}>{t.home}</a>
     {crumbSlugs.map((s) => (
       <a href={getRelativeLocaleUrl(lang, `${s}.html`)}>{t.crumbs[s]}</a>
     ))}
