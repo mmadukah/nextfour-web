@@ -2,7 +2,7 @@
 // The marketing landing page, rendered from a per-language strings table so
 // the same markup serves /  (en) and /fr/ (fr).
 import Base from '../layouts/Base.astro';
-import { getRelativeLocaleUrl, getAbsoluteLocaleUrl } from 'astro:i18n';
+import { getRelativeLocaleUrl } from 'astro:i18n';
 
 interface Props {
   lang: string;
@@ -111,10 +111,13 @@ const content: Record<string, Strings> = {
 };
 
 const s = content[lang] ?? content.en;
-const ogUrl = getAbsoluteLocaleUrl(lang, '');
+// Clean per-locale homepage paths: / for the default, /<loc>/ otherwise.
+const localeHome = (loc: string) => (loc === 'en' ? '/' : `/${loc}/`);
+const homeUrl = (loc: string) => new URL(localeHome(loc), Astro.site).href;
+const ogUrl = homeUrl(lang);
 const alternates = [
-  ...locales.map((loc) => ({ hreflang: loc, href: getAbsoluteLocaleUrl(loc, '') })),
-  { hreflang: 'x-default', href: getAbsoluteLocaleUrl('en', '') },
+  ...locales.map((loc) => ({ hreflang: loc, href: homeUrl(loc) })),
+  { hreflang: 'x-default', href: homeUrl('en') },
 ];
 ---
 
@@ -255,7 +258,7 @@ const alternates = [
       <nav class="langbar" aria-label="Language">
         {locales.map((loc) => (
           <a
-            href={getRelativeLocaleUrl(loc, 'index.html')}
+            href={localeHome(loc)}
             aria-current={loc === lang ? 'true' : undefined}
             hreflang={loc}
           >{localeNames[loc]}</a>
