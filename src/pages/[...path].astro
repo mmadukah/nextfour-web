@@ -1,0 +1,22 @@
+---
+import { getCollection, render } from 'astro:content';
+import Legal from '../layouts/Legal.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('legal');
+  return entries.map((entry) => {
+    // entry.id is "<lang>/<slug>", e.g. "en/privacy" or "fr/privacy".
+    const [lang, slug] = entry.id.split('/');
+    // Default locale (en) stays at the bare path; others are prefixed.
+    const path = lang === 'en' ? slug : `${lang}/${slug}`;
+    return { params: { path }, props: { entry, lang, slug } };
+  });
+}
+
+const { entry, lang, slug } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<Legal title={entry.data.title} meta={entry.data.meta} lang={lang} slug={slug}>
+  <Content />
+</Legal>
