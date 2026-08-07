@@ -3,6 +3,7 @@
 // the same markup serves /  (en) and /fr/ (fr).
 import Base from '../layouts/Base.astro';
 import { getRelativeLocaleUrl } from 'astro:i18n';
+import { PLAY_URL, APP_STORE_URL } from '../store-links';
 
 interface Props {
   lang: string;
@@ -270,10 +271,10 @@ const alternates = [
       <h1>{s.heroLine1}<br /><span class="accent">{s.heroLine2}</span></h1>
       <p class="lead">{s.lead}</p>
       <div class="cta-row">
-        {/* TODO: replace href with the live Google Play listing URL once public */}
-        <a class="btn btn-primary" href="#">{s.ctaPlay}</a>
-        {/* TODO: replace href with the live App Store listing URL once published */}
-        <a class="btn btn-ghost" href="#">{s.ctaAppStore}</a>
+        {PLAY_URL && <a class="btn btn-primary" href={PLAY_URL}>{s.ctaPlay}</a>}
+        {APP_STORE_URL && (
+          <a class="btn btn-ghost" href={APP_STORE_URL}>{s.ctaAppStore}</a>
+        )}
       </div>
       <p class="note">{s.note}</p>
     </div>
@@ -319,8 +320,10 @@ const alternates = [
       <h2>{s.closingHead}</h2>
       <p>{s.closingSub}</p>
       <div class="cta-row" style="justify-content:center;">
-        <a class="btn btn-primary" href="#">{s.ctaPlay}</a>
-        <a class="btn btn-ghost" href="#" style="background:var(--card);color:var(--ink);border-color:var(--border);">{s.ctaAppStore}</a>
+        {PLAY_URL && <a class="btn btn-primary" href={PLAY_URL}>{s.ctaPlay}</a>}
+        {APP_STORE_URL && (
+          <a class="btn btn-ghost" href={APP_STORE_URL} style="background:var(--card);color:var(--ink);border-color:var(--border);">{s.ctaAppStore}</a>
+        )}
       </div>
     </div>
   </section>
