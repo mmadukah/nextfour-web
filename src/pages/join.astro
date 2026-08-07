@@ -1,0 +1,130 @@
+---
+// Invite landing page: https://nextfour.app/join?c=ABC234
+//
+// The path is /join rather than something shorter like /i so the Android App
+// Links pathPrefix cannot collide: a prefix of "/i" would also match
+// /index.html, since this site builds flat files rather than directories.
+//
+// Reached in two situations, and it has to serve both:
+//
+//   * The app is installed. Android App Links hands the URL straight to the
+//     app and this page is never rendered.
+//   * The app is not installed. This page is what the recipient sees, so it
+//     has to get them to the store AND keep the code visible, because a store
+//     install loses the URL entirely. They type the code in the app afterwards.
+//
+// The code lives in a query string rather than a path segment because the site
+// is statically built: /join/ABC234 would need every code prerendered.
+import Base from '../layouts/Base.astro';
+import { PLAY_URL, APP_STORE_URL } from '../store-links';
+
+const anyStoreLive = PLAY_URL !== null || APP_STORE_URL !== null;
+---
+
+<Base
+  title="You've been invited | NextFour"
+  description="Join a badminton, tennis, squash or padel session on NextFour."
+>
+  <style slot="head">
+    :root { color-scheme: light dark; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      background: #0b1220;
+      color: #f1f5f9;
+      display: flex;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+    .card {
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+    }
+    h1 { font-size: 1.5rem; margin: 0 0 8px; }
+    p { color: #b0b8c0; line-height: 1.5; margin: 0 0 24px; }
+    .code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: 0.35em;
+      /* Trailing letter-spacing would push it off-centre. */
+      text-indent: 0.35em;
+      padding: 16px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      margin-bottom: 8px;
+      word-break: break-all;
+    }
+    .hint { font-size: 0.85rem; margin-bottom: 24px; }
+    .btn {
+      display: block;
+      padding: 14px 20px;
+      border-radius: 999px;
+      background: #e8695f;
+      color: #fff;
+      font-weight: 600;
+      text-decoration: none;
+      margin-bottom: 12px;
+    }
+    .btn-secondary {
+      background: transparent;
+      color: #f1f5f9;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+    .pending {
+      font-size: 0.95rem;
+      color: #f1f5f9;
+      margin: 0;
+    }
+    .steps {
+      margin-top: 24px;
+      font-size: 0.85rem;
+      color: #b0b8c0;
+      text-align: left;
+    }
+    .steps li { margin-bottom: 6px; }
+    [hidden] { display: none !important; }
+  </style>
+
+  <main class="card">
+    <h1>You've been invited to a session</h1>
+    <p>Install NextFour, then enter this code to join.</p>
+
+    <div id="code" class="code" hidden></div>
+    <p id="hint" class="hint" hidden>Write this down before you install.</p>
+
+    {PLAY_URL && <a class="btn" href={PLAY_URL}>Get it on Google Play</a>}
+    {APP_STORE_URL && (
+      <a class="btn btn-secondary" href={APP_STORE_URL}>
+        Download on the App Store
+      </a>
+    )}
+    {!anyStoreLive && (
+      <p class="pending">Search for <strong>NextFour</strong> in your app store.</p>
+    )}
+
+    <ol class="steps">
+      <li>Install the app and create your account.</li>
+      <li>Go to Profile, then "Join with an invite code".</li>
+      <li>Enter the code above.</li>
+    </ol>
+  </main>
+
+  <script is:inline>
+    // Client-side because the page is statically generated: the code is only
+    // known at request time. Uppercased and stripped so a code pasted with
+    // stray spaces or in lower case still reads correctly.
+    const raw = new URLSearchParams(location.search).get('c') || '';
+    const code = raw.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    if (code) {
+      const el = document.getElementById('code');
+      el.textContent = code;
+      el.hidden = false;
+      document.getElementById('hint').hidden = false;
+    }
+  </script>
+</Base>
