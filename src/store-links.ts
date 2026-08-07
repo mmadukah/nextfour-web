@@ -9,7 +9,8 @@
 export const PLAY_URL: string | null =
   'https://play.google.com/store/apps/details?id=app.nextfour.mobile';
 
-// No country segment: Apple redirects to the visitor's own storefront, so a
-// hardcoded /gb/ would send everyone else through a needless bounce.
+// The country segment is required: https://apps.apple.com/app/id<id> returns
+// 404. Apple redirects visitors from other storefronts, so /gb/ is a safe
+// default rather than a restriction.
 export const APP_STORE_URL: string | null =
-  'https://apps.apple.com/app/id6778069129';
+  'https://apps.apple.com/gb/app/id6778069129';
