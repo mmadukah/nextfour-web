@@ -20,7 +20,7 @@ Besoin d'aide avec NextFour ? La plupart des questions trouvent leur réponse ci
   <dd>Connectez-vous, appuyez pour créer une nouvelle session, définissez la date, les terrains et le mode de sélection des joueurs (Pegboard, Par niveau ou Manuel), puis partagez-la avec vos membres.</dd>
 
   <dt>Qu'est-ce que le mode Pegboard ?</dt>
-  <dd>C'est le tableau de club classique, version numérique. Les joueurs « s'inscrivent » à leur arrivée, la file d'attente se met à jour en direct et les terrains se remplissent équitablement dans le bon ordre à mesure que les parties se terminent — ainsi chacun voit qui est le prochain sans se bousculer autour du tableau.</dd>
+  <dd>C'est le tableau de club classique, version numérique. Les joueurs « s'inscrivent » à leur arrivée, la file d'attente se met à jour en direct et les terrains se remplissent équitablement dans le bon ordre à mesure que les parties se terminent. Ainsi, chacun voit qui est le prochain sans se bousculer autour du tableau.</dd>
 
   <dt>Comment les joueurs s'enregistrent-ils / s'inscrivent-ils ?</dt>
   <dd>Les joueurs ouvrent la session et s'enregistrent depuis leur téléphone. Vous pouvez aussi faire fonctionner NextFour sur une tablette près des terrains (mode Terminal) pour que les joueurs s'enregistrent eux-mêmes.</dd>

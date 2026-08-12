@@ -13,12 +13,12 @@ NextFour est une application mobile destinée aux clubs et aux joueurs de sports
 
 Nous ne collectons que les données nécessaires au fonctionnement du Service :
 
-- **Informations de compte** — nom, adresse e-mail et, lorsque vous les fournissez, photo de profil, sexe et date de naissance.
-- **Données d'authentification** — lorsque vous vous connectez avec Facebook, Google ou Apple, nous recevons votre nom, votre adresse e-mail et un identifiant unique fourni par le prestataire.
-- **Données de club et de session** — clubs auxquels vous appartenez, sessions auxquelles vous participez, résultats des matchs, statistiques, appariements et position dans la file d'attente.
-- **Statut d'abonnement** — votre formule d'abonnement (Free, Performance, Pro ou Club) est gérée par RevenueCat. Nous ne conservons aucune coordonnée bancaire.
-- **Informations sur l'appareil** — pour les activations de terminaux/bornes, nous conservons un nom d'appareil et un horodatage de dernière connexion.
-- **Données d'utilisation** — journaux de base (erreurs, horodatages) pour le diagnostic des problèmes.
+- **Informations de compte**: nom, adresse e-mail et, lorsque vous les fournissez, photo de profil, sexe et date de naissance.
+- **Données d'authentification**: lorsque vous vous connectez avec Facebook, Google ou Apple, nous recevons votre nom, votre adresse e-mail et un identifiant unique fourni par le prestataire.
+- **Données de club et de session**: clubs auxquels vous appartenez, sessions auxquelles vous participez, résultats des matchs, statistiques, appariements et position dans la file d'attente.
+- **Statut d'abonnement**: votre formule d'abonnement (Free, Performance, Pro ou Club) est gérée par RevenueCat. Nous ne conservons aucune coordonnée bancaire.
+- **Informations sur l'appareil**: pour les activations de terminaux/bornes, nous conservons un nom d'appareil et un horodatage de dernière connexion.
+- **Données d'utilisation**: journaux de base (erreurs, horodatages) pour le diagnostic des problèmes.
 
 Nous ne collectons **pas** votre localisation précise, vos contacts, vos photos, votre microphone ni vos identifiants publicitaires.
 
@@ -26,9 +26,9 @@ Nous ne collectons **pas** votre localisation précise, vos contacts, vos photos
 
 Nous traitons les données personnelles sur les bases légales suivantes du UK GDPR :
 
-- **Contrat** — pour fournir le Service auquel vous avez souscrit.
-- **Intérêts légitimes** — pour assurer la sécurité du Service, prévenir les abus et améliorer les fonctionnalités.
-- **Consentement** — pour toute fonctionnalité optionnelle qui le requiert (par exemple les notifications push), que vous pouvez retirer à tout moment.
+- **Contrat**: pour fournir le Service auquel vous avez souscrit.
+- **Intérêts légitimes**: pour assurer la sécurité du Service, prévenir les abus et améliorer les fonctionnalités.
+- **Consentement**: pour toute fonctionnalité optionnelle qui le requiert (par exemple les notifications push), que vous pouvez retirer à tout moment.
 
 ## 4. Comment nous utilisons vos données
 
@@ -43,10 +43,10 @@ Nous traitons les données personnelles sur les bases légales suivantes du UK G
 
 Nous ne partageons les données qu'avec les sous-traitants nécessaires au fonctionnement du Service :
 
-- **Supabase** — héberge notre base de données et l'authentification. Les données sont stockées dans des régions de l'UE lorsque cela est possible.
-- **RevenueCat** — gère l'état des abonnements.
-- **Apple, Google, Facebook** — prestataires d'authentification (uniquement si vous choisissez la connexion via les réseaux sociaux).
-- **Apple Push Notification Service / Firebase Cloud Messaging** — distribution des notifications push.
+- **Supabase**: héberge notre base de données et l'authentification. Les données sont stockées dans des régions de l'UE lorsque cela est possible.
+- **RevenueCat**: gère l'état des abonnements.
+- **Apple, Google, Facebook**: prestataires d'authentification (uniquement si vous choisissez la connexion via les réseaux sociaux).
+- **Apple Push Notification Service / Firebase Cloud Messaging**: distribution des notifications push.
 
 Nous ne vendons ni ne louons vos données personnelles. Nous ne partageons pas de données avec des annonceurs.
 

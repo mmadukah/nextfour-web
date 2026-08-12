@@ -1,12 +1,51 @@
 ---
 // Minimal HTML shell shared by every page. Page-specific <style> blocks and
 // extra <head> tags are supplied via the `head` slot.
+//
+// Social metadata lives here rather than in each page so that every route gets
+// a link preview by default. Before this, only the homepage carried any Open
+// Graph tags and none of them referenced an image, so an invite link pasted
+// into a group chat rendered as a bare URL.
 interface Props {
   title: string;
   description?: string;
   lang?: string;
+  /** Overrides `description` for the social preview when a shorter line reads better. */
+  ogDescription?: string;
+  /** Root-relative path to the preview image in public/. */
+  image?: string;
+  ogType?: string;
+  /** Escape hatch for a route whose public URL is not derivable from the path. */
+  canonicalPath?: string;
 }
-const { title, description, lang = 'en' } = Astro.props;
+const {
+  title,
+  description,
+  lang = 'en',
+  ogDescription,
+  image = '/og.png',
+  ogType = 'website',
+  canonicalPath,
+} = Astro.props;
+
+const ogLocales: Record<string, string> = { en: 'en_GB', fr: 'fr_FR' };
+
+// `build.format: 'preserve'` emits flat files for everything except the locale
+// homepages, so /privacy.html is a real URL and /privacy/ is a 404. Astro.url
+// always reports the directory form, so it has to be converted back or the
+// canonical and og:url point at pages that do not exist.
+const isLocaleRoot = (p: string) =>
+  p === '/' || Object.keys(ogLocales).some((loc) => p === `/${loc}/`);
+
+const path = Astro.url.pathname;
+const publicPath = canonicalPath
+  ?? (isLocaleRoot(path) ? path : `${path.replace(/\/$/, '')}.html`);
+
+// Absolute URLs: the scrapers behind WhatsApp, Facebook, iMessage and Slack
+// will not resolve a root-relative og:image.
+const canonical = new URL(publicPath, Astro.site).href;
+const imageUrl = new URL(image, Astro.site).href;
+const social = ogDescription ?? description;
 ---
 
 <!DOCTYPE html>
@@ -16,6 +55,27 @@ const { title, description, lang = 'en' } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
+    <link rel="canonical" href={canonical} />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <meta property="og:site_name" content="NextFour" />
+    <meta property="og:title" content={title} />
+    {social && <meta property="og:description" content={social} />}
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={ogLocales[lang] ?? 'en_GB'} />
+    <meta property="og:image" content={imageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="NextFour, the racket sport club manager" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    {social && <meta name="twitter:description" content={social} />}
+    <meta name="twitter:image" content={imageUrl} />
+
     <slot name="head" />
   </head>
   <body>

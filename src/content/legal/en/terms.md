@@ -53,7 +53,7 @@ Hosts and deputies have additional permissions within their own clubs and sessio
 
 ## 7. Intellectual property
 
-All rights in the Service — including the NextFour name, logo, software, designs, and documentation — are owned by us or our licensors. You are granted a personal, non-exclusive, non-transferable, revocable licence to use the Service for its intended purpose. No other rights are granted.
+All rights in the Service, including the NextFour name, logo, software, designs, and documentation, are owned by us or our licensors. You are granted a personal, non-exclusive, non-transferable, revocable licence to use the Service for its intended purpose. No other rights are granted.
 
 ## 8. Third-party services
 
@@ -71,7 +71,7 @@ The Service is provided "as is" and "as available", without warranty of any kind
 
 To the maximum extent permitted by law, our total liability to you for any claim arising from or in connection with the Service shall not exceed the greater of (a) the total amount you paid us in the twelve months before the claim, or (b) GBP £50. We shall not be liable for any indirect, incidental, consequential, special, or exemplary damages, including loss of data, loss of profits, or loss of goodwill.
 
-Nothing in these Terms limits any liability that cannot legally be limited — including liability for death or personal injury caused by negligence, fraud, or fraudulent misrepresentation.
+Nothing in these Terms limits any liability that cannot legally be limited, including liability for death or personal injury caused by negligence, fraud, or fraudulent misrepresentation.
 
 ## 12. Indemnification
 

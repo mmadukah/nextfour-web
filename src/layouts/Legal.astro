@@ -12,7 +12,7 @@ interface Props {
   slug: string;
 }
 const { title, meta, lang, slug } = Astro.props;
-const fullTitle = `NextFour — ${title}`;
+const fullTitle = lang === 'fr' ? `NextFour : ${title}` : `NextFour: ${title}`;
 
 const locales = ['en', 'fr'] as const;
 const localeNames: Record<string, string> = { en: 'English', fr: 'Français' };

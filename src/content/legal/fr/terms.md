@@ -53,7 +53,7 @@ Les hôtes et les adjoints disposent d'autorisations supplémentaires au sein de
 
 ## 7. Propriété intellectuelle
 
-Tous les droits relatifs au Service — y compris le nom NextFour, le logo, le logiciel, les designs et la documentation — appartiennent à nous-mêmes ou à nos concédants de licence. Une licence personnelle, non exclusive, non transférable et révocable vous est accordée pour utiliser le Service aux fins prévues. Aucun autre droit n'est accordé.
+Tous les droits relatifs au Service, y compris le nom NextFour, le logo, le logiciel, les designs et la documentation, appartiennent à nous-mêmes ou à nos concédants de licence. Une licence personnelle, non exclusive, non transférable et révocable vous est accordée pour utiliser le Service aux fins prévues. Aucun autre droit n'est accordé.
 
 ## 8. Services tiers
 
@@ -71,7 +71,7 @@ Le Service est fourni « en l'état » et « selon disponibilité », sans garan
 
 Dans toute la mesure permise par la loi, notre responsabilité totale envers vous pour toute réclamation découlant du Service ou liée à celui-ci ne pourra excéder le plus élevé des montants suivants : (a) le montant total que vous nous avez versé au cours des douze mois précédant la réclamation, ou (b) 50 GBP. Nous ne saurions être tenus responsables des dommages indirects, accessoires, consécutifs, spéciaux ou exemplaires, y compris la perte de données, la perte de bénéfices ou la perte de clientèle.
 
-Aucune disposition des présentes Conditions ne limite une responsabilité qui ne peut légalement l'être — y compris la responsabilité en cas de décès ou de blessure corporelle causés par une négligence, une fraude ou une déclaration frauduleuse.
+Aucune disposition des présentes Conditions ne limite une responsabilité qui ne peut légalement l'être, y compris la responsabilité en cas de décès ou de blessure corporelle causés par une négligence, une fraude ou une déclaration frauduleuse.
 
 ## 12. Indemnisation
 

@@ -20,7 +20,7 @@ Need a hand with NextFour? Most questions are answered below. If you're still st
   <dd>Sign in, tap to create a new session, set the date, courts and how you want players picked (Pegboard, Skill-based or Manual), then share it with your members.</dd>
 
   <dt>What is Pegboard mode?</dt>
-  <dd>It's the classic club pegboard, made digital. Players "peg on" when they arrive, the queue updates live, and courts fill fairly in the right order as games finish — so everyone can see who's next without crowding the board.</dd>
+  <dd>It's the classic club pegboard, made digital. Players "peg on" when they arrive, the queue updates live, and courts fill fairly in the right order as games finish. Everyone can see who's next without crowding the board.</dd>
 
   <dt>How do players check in / peg on?</dt>
   <dd>Players open the session and check in from their phone. You can also run NextFour on a tablet by the courts (Terminal mode) so players check themselves in there.</dd>

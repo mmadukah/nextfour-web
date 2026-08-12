@@ -13,12 +13,12 @@ NextFour is a mobile application for racket sport clubs and players, enabling se
 
 We collect only the data needed to operate the Service:
 
-- **Account information** — name, email address, and (where you provide them) profile photo, gender, and date of birth.
-- **Authentication data** — when you sign in with Facebook, Google, or Apple, we receive your name, email address, and a unique identifier from the provider.
-- **Club & session data** — clubs you belong to, sessions you join, match results, statistics, pairings, and queue position.
-- **Subscription status** — your subscription tier (Free, Performance, Pro, or Club) is managed by RevenueCat. We do not store payment card details.
-- **Device information** — for terminal/kiosk activations, we store a device name and last-seen timestamp.
-- **Usage data** — basic logs (errors, timestamps) for diagnosing issues.
+- **Account information**: name, email address, and (where you provide them) profile photo, gender, and date of birth.
+- **Authentication data**: when you sign in with Facebook, Google, or Apple, we receive your name, email address, and a unique identifier from the provider.
+- **Club & session data**: clubs you belong to, sessions you join, match results, statistics, pairings, and queue position.
+- **Subscription status**: your subscription tier (Free, Performance, Pro, or Club) is managed by RevenueCat. We do not store payment card details.
+- **Device information**: for terminal/kiosk activations, we store a device name and last-seen timestamp.
+- **Usage data**: basic logs (errors, timestamps) for diagnosing issues.
 
 We do **not** collect precise location, contacts, photos, microphone, or advertising identifiers.
 
@@ -26,9 +26,9 @@ We do **not** collect precise location, contacts, photos, microphone, or adverti
 
 We process personal data under the following UK GDPR lawful bases:
 
-- **Contract** — to provide the Service you've signed up for.
-- **Legitimate interests** — to keep the Service secure, prevent abuse, and improve features.
-- **Consent** — for any optional features that require it (e.g. push notifications), which you can withdraw at any time.
+- **Contract**: to provide the Service you've signed up for.
+- **Legitimate interests**: to keep the Service secure, prevent abuse, and improve features.
+- **Consent**: for any optional features that require it (e.g. push notifications), which you can withdraw at any time.
 
 ## 4. How we use your data
 
@@ -43,10 +43,10 @@ We process personal data under the following UK GDPR lawful bases:
 
 We share data only with the sub-processors needed to run the Service:
 
-- **Supabase** — hosts our database and authentication. Data is stored in EU regions where available.
-- **RevenueCat** — handles subscription state.
-- **Apple, Google, Facebook** — authentication providers (only if you choose social sign-in).
-- **Apple Push Notification Service / Firebase Cloud Messaging** — delivery of push notifications.
+- **Supabase**: hosts our database and authentication. Data is stored in EU regions where available.
+- **RevenueCat**: handles subscription state.
+- **Apple, Google, Facebook**: authentication providers (only if you choose social sign-in).
+- **Apple Push Notification Service / Firebase Cloud Messaging**: delivery of push notifications.
 
 We do not sell or rent your personal data. We do not share data with advertisers.
 
