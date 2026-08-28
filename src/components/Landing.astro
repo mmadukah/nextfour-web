@@ -25,6 +25,9 @@ type Strings = {
   ctaPlay: string;
   ctaAppStore: string;
   note: string;
+  showcaseHead: string;
+  showcaseSub: string;
+  shots: { src: string; alt: string; caption: string }[];
   featuresHead: string;
   featuresSub: string;
   cards: Card[];
@@ -51,6 +54,20 @@ const content: Record<string, Strings> = {
     ctaPlay: 'Get it on Google Play',
     ctaAppStore: 'Download on the App Store',
     note: 'Free to get started. Built for badminton, squash, tennis, padel & table tennis clubs.',
+    showcaseHead: 'This is what your club night looks like',
+    showcaseSub: 'Not a mock-up. The live board and the stats, exactly as your players see them.',
+    shots: [
+      {
+        src: '/screens/courts.png',
+        alt: 'The live courts board showing two teams on Court 1',
+        caption: 'Every court at a glance: who is on, who is next, and who has been waiting.',
+      },
+      {
+        src: '/screens/stats.png',
+        alt: 'A player stats screen showing win rate and recent match scores',
+        caption: 'Scores and win rates build up on their own. Nobody keeps a paper tally.',
+      },
+    ],
     featuresHead: 'Everything your club night needs',
     featuresSub: 'Stop juggling whiteboards and group chats. Run the whole session from your phone.',
     cards: [
@@ -86,6 +103,20 @@ const content: Record<string, Strings> = {
     ctaPlay: 'Disponible sur Google Play',
     ctaAppStore: 'Télécharger dans l’App Store',
     note: 'Gratuit pour commencer. Conçu pour les clubs de badminton, squash, tennis, padel et tennis de table.',
+    showcaseHead: 'Voilà à quoi ressemble votre soirée de club',
+    showcaseSub: 'Pas une maquette. Le tableau en direct et les statistiques, tels que vos joueurs les voient.',
+    shots: [
+      {
+        src: '/screens/courts.png',
+        alt: 'Le tableau des terrains en direct montrant deux équipes sur le terrain 1',
+        caption: 'Tous les terrains d’un coup d’œil : qui joue, qui suit, et qui attend depuis longtemps.',
+      },
+      {
+        src: '/screens/stats.png',
+        alt: 'Un écran de statistiques montrant le taux de victoire et les scores récents',
+        caption: 'Les scores et les taux de victoire s’accumulent tout seuls. Plus de feuille de papier.',
+      },
+    ],
     featuresHead: 'Tout ce qu’il faut pour votre soirée de club',
     featuresSub: 'Fini les tableaux blancs et les discussions de groupe. Gérez toute la session depuis votre téléphone.',
     cards: [
@@ -211,6 +242,36 @@ const alternates = [
     .btn-ghost:hover { background: rgba(255,255,255,0.14); }
     .hero .note { color: #8b8b95; font-size: 0.85rem; margin: 1.4rem 0 0; }
 
+    /* ---------- Showcase ---------- */
+    section.showcase { padding: 4rem 0 1rem; }
+    .shots {
+      display: grid;
+      /* Two up on desktop, stacked on phones. Screenshots are 1170x2532, so
+         they are capped rather than allowed to run the full column height. */
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 2.5rem;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .shots figure { margin: 0; text-align: center; }
+    .shots img {
+      display: block;
+      width: 100%;
+      max-width: 300px;
+      height: auto;
+      margin: 0 auto 1rem;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+    }
+    .shots figcaption {
+      color: #8b8b95;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      max-width: 34ch;
+      margin: 0 auto;
+    }
+
     /* ---------- Features ---------- */
     section.features { padding: 4rem 0 1rem; }
     .section-head { text-align: center; max-width: 40ch; margin: 0 auto 2.75rem; }
@@ -279,6 +340,27 @@ const alternates = [
       <p class="note">{s.note}</p>
     </div>
   </header>
+
+  <!-- ============ SHOWCASE ============ -->
+  <!-- Directly under the hero on purpose: a club organiser being asked to
+       change how they run their night wants to see the thing before reading
+       six feature cards about it. -->
+  <section class="showcase">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>{s.showcaseHead}</h2>
+        <p>{s.showcaseSub}</p>
+      </div>
+      <div class="shots">
+        {s.shots.map((shot) => (
+          <figure>
+            <img src={shot.src} alt={shot.alt} width="1170" height="2532" loading="lazy" decoding="async" />
+            <figcaption>{shot.caption}</figcaption>
+          </figure>
+        ))}
+      </div>
+    </div>
+  </section>
 
   <!-- ============ FEATURES ============ -->
   <section class="features">
