@@ -99,9 +99,9 @@ const anyStoreLive = PLAY_URL !== null || APP_STORE_URL !== null;
     <div id="code" class="code" hidden></div>
     <p id="hint" class="hint" hidden>Write this down before you install.</p>
 
-    {PLAY_URL && <a class="btn" href={PLAY_URL}>Get it on Google Play</a>}
+    {PLAY_URL && <a id="play" class="btn" href={PLAY_URL}>Get it on Google Play</a>}
     {APP_STORE_URL && (
-      <a class="btn btn-secondary" href={APP_STORE_URL}>
+      <a id="appstore" class="btn btn-secondary" href={APP_STORE_URL}>
         Download on the App Store
       </a>
     )}
@@ -110,9 +110,9 @@ const anyStoreLive = PLAY_URL !== null || APP_STORE_URL !== null;
     )}
 
     <ol class="steps">
-      <li>Install the app and create your account.</li>
-      <li>Go to Profile, then "Join a session with an invite code".</li>
-      <li>Enter the code above.</li>
+      <li>Install the app and create your account, or sign in.</li>
+      <li>On Android the app opens your code by itself. On iPhone, the App Store button copies it, so tap Paste when the app offers.</li>
+      <li>Otherwise go to Profile, then "Join a session with an invite code", and enter the code above.</li>
     </ol>
   </main>
 
@@ -127,6 +127,27 @@ const anyStoreLive = PLAY_URL !== null || APP_STORE_URL !== null;
       el.textContent = code;
       el.hidden = false;
       document.getElementById('hint').hidden = false;
+    }
+    // Carry the code through the install so it need not be retyped. Google
+    // Play hands the app a referrer (read once on first launch); Apple has no
+    // equivalent, so the App Store button copies this link for the app to
+    // offer to paste. The copy waits briefly before leaving: navigating away
+    // straight after writeText can cancel it.
+    if (code) {
+      const play = document.getElementById('play');
+      if (play) play.href += '&referrer=' + encodeURIComponent('join=' + code);
+      const appStore = document.getElementById('appstore');
+      if (appStore) appStore.addEventListener('click', async (event) => {
+        event.preventDefault();
+        const link = location.origin + '/join?c=' + code;
+        try {
+          await Promise.race([
+            navigator.clipboard.writeText(link),
+            new Promise((resolve) => setTimeout(resolve, 800)),
+          ]);
+        } catch (_) {}
+        location.href = appStore.href;
+      });
     }
   </script>
 </Base>
