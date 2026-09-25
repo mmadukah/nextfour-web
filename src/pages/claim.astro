@@ -1,0 +1,130 @@
+---
+// Guest profile claim landing page: https://nextfour.app/claim?c=ABCD2345
+//
+// The QR a host shows from the live queue for a player who has been playing
+// as a guest. Like /join it has two audiences:
+//
+//   * The app is installed. Android App Links hands the URL to the app, which
+//     previews the guest's name and asks "Is this you?". This page is never
+//     rendered.
+//   * The app is not installed. This page gets them to the store and keeps
+//     the code visible, because a store install loses the URL. They type the
+//     code in the app afterwards (Profile, then Claim a guest profile).
+//
+// Codes are 8 characters and last 14 days, so the page says so: someone may
+// install at home, not in the hall. The path is /claim for the same reason
+// /join is not shorter: an App Links pathPrefix must not match /index.html.
+import Base from '../layouts/Base.astro';
+import { PLAY_URL, APP_STORE_URL } from '../store-links';
+
+const anyStoreLive = PLAY_URL !== null || APP_STORE_URL !== null;
+---
+
+<Base
+  title="Keep your matches | NextFour"
+  description="Claim the matches you played as a guest on NextFour."
+  ogDescription="Keep the matches, rating and clubs you played as a guest."
+>
+  <style slot="head">
+    :root { color-scheme: light dark; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      background: #0b1220;
+      color: #f1f5f9;
+      display: flex;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+    .card {
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+    }
+    h1 { font-size: 1.5rem; margin: 0 0 8px; }
+    p { color: #b0b8c0; line-height: 1.5; margin: 0 0 24px; }
+    .code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: 0.35em;
+      /* Trailing letter-spacing would push it off-centre. */
+      text-indent: 0.35em;
+      padding: 16px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      margin-bottom: 8px;
+      word-break: break-all;
+    }
+    .hint { font-size: 0.85rem; margin-bottom: 24px; }
+    .btn {
+      display: block;
+      padding: 14px 20px;
+      border-radius: 999px;
+      background: #e8695f;
+      color: #fff;
+      font-weight: 600;
+      text-decoration: none;
+      margin-bottom: 12px;
+    }
+    .btn-secondary {
+      background: transparent;
+      color: #f1f5f9;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+    .pending {
+      font-size: 0.95rem;
+      color: #f1f5f9;
+      margin: 0;
+    }
+    .steps {
+      margin-top: 24px;
+      font-size: 0.85rem;
+      color: #b0b8c0;
+      text-align: left;
+    }
+    .steps li { margin-bottom: 6px; }
+    [hidden] { display: none !important; }
+  </style>
+
+  <main class="card">
+    <h1>Keep your matches</h1>
+    <p>You've been playing as a guest. Install NextFour and enter this code to move your matches, rating and clubs into your own account.</p>
+
+    <div id="code" class="code" hidden></div>
+    <p id="hint" class="hint" hidden>Works once, for 14 days. Write it down before you install.</p>
+
+    {PLAY_URL && <a class="btn" href={PLAY_URL}>Get it on Google Play</a>}
+    {APP_STORE_URL && (
+      <a class="btn btn-secondary" href={APP_STORE_URL}>
+        Download on the App Store
+      </a>
+    )}
+    {!anyStoreLive && (
+      <p class="pending">Search for <strong>NextFour</strong> in your app store.</p>
+    )}
+
+    <ol class="steps">
+      <li>Install the app and create your account, or sign in.</li>
+      <li>Go to Profile, then "Claim a guest profile".</li>
+      <li>Enter the code above and confirm it's you.</li>
+    </ol>
+  </main>
+
+  <script is:inline>
+    // Client-side because the page is statically generated: the code is only
+    // known at request time. Normalised as the app does it, then split in two
+    // so it is easy to copy by hand: ABCD 2345.
+    const raw = new URLSearchParams(location.search).get('c') || '';
+    const code = raw.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    if (code) {
+      const el = document.getElementById('code');
+      el.textContent = code.length === 8 ? code.slice(0, 4) + ' ' + code.slice(4) : code;
+      el.hidden = false;
+      document.getElementById('hint').hidden = false;
+    }
+  </script>
+</Base>
