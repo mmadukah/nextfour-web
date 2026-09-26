@@ -1,0 +1,149 @@
+---
+// Club claim landing page: https://nextfour.app/club-claim?t=TOKEN
+//
+// The link we email an unclaimed club. Whoever opens it and signs in to the
+// app gets the club, and its listed sessions, straight away: having the
+// club's email is the proof, so there is no moderation step. Audiences:
+//
+//   * Android with the app installed. App Links hands the URL to the app and
+//     this page is never rendered.
+//   * iPhone with the app installed. Universal Links are not set up yet, so
+//     this page opens instead. "I already have the app" hands the link over
+//     through the app's own URL scheme.
+//   * No app. The store buttons carry the token through the install: Google
+//     Play as the referrer, the App Store by copying the link for the app to
+//     offer to paste.
+//
+// Unlike /claim and /join there is no code to show: the token is 32 random
+// characters, never typed by hand. The path is /club-claim, not /claim-club,
+// because the app's /claim App Links pathPrefix would match the latter.
+import Base from '../layouts/Base.astro';
+import { PLAY_URL, APP_STORE_URL } from '../store-links';
+
+const anyStoreLive = PLAY_URL !== null || APP_STORE_URL !== null;
+---
+
+<Base
+  title="Claim your club | NextFour"
+  description="Claim your club on NextFour and manage its sessions."
+  ogDescription="Your club is listed on NextFour. Claim it to manage its sessions."
+>
+  <Fragment slot="head">
+    <!-- The token is a credential: keep it out of the Referer sent to the
+         stores, and keep the page out of search results. -->
+    <meta name="referrer" content="no-referrer" />
+    <meta name="robots" content="noindex" />
+  </Fragment>
+  <style slot="head">
+    :root { color-scheme: light dark; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      background: #0b1220;
+      color: #f1f5f9;
+      display: flex;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+    .card {
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+    }
+    h1 { font-size: 1.5rem; margin: 0 0 8px; }
+    p { color: #b0b8c0; line-height: 1.5; margin: 0 0 24px; }
+    .btn {
+      display: block;
+      padding: 14px 20px;
+      border-radius: 999px;
+      background: #e8695f;
+      color: #fff;
+      font-weight: 600;
+      text-decoration: none;
+      margin-bottom: 12px;
+    }
+    .btn-secondary {
+      background: transparent;
+      color: #f1f5f9;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+    .pending {
+      font-size: 0.95rem;
+      color: #f1f5f9;
+      margin: 0 0 12px;
+    }
+    .steps {
+      margin-top: 24px;
+      font-size: 0.85rem;
+      color: #b0b8c0;
+      text-align: left;
+    }
+    .steps li { margin-bottom: 6px; }
+    [hidden] { display: none !important; }
+  </style>
+
+  <main class="card">
+    <h1>Claim your club</h1>
+    <p id="intro">Your club's sessions are listed on NextFour. Install the app and create an account to take them over: you'll manage the club and host its sessions straight away.</p>
+    <p id="missing" hidden>This link is incomplete. Open it again from the email we sent, or reply to that email and we'll send a new one.</p>
+
+    <div id="actions">
+      {PLAY_URL && <a id="play" class="btn" href={PLAY_URL}>Get it on Google Play</a>}
+      {APP_STORE_URL && (
+        <a id="appstore" class="btn btn-secondary" href={APP_STORE_URL}>
+          Download on the App Store
+        </a>
+      )}
+      {!anyStoreLive && (
+        <p class="pending">Search for <strong>NextFour</strong> in your app store.</p>
+      )}
+      <a id="open-app" class="btn btn-secondary" href="#">I already have the app</a>
+
+      <ol class="steps">
+        <li>Install the app, then create your account or sign in.</li>
+        <li>On Android the app picks up your club by itself. On iPhone, the App Store button copies this link, so tap Paste when the app offers.</li>
+        <li>If that doesn't happen, open this email link again and tap "I already have the app".</li>
+        <li>The link works once and expires after 30 days.</li>
+      </ol>
+    </div>
+  </main>
+
+  <script is:inline>
+    // Client-side because the page is statically generated: the token is only
+    // known at request time. Same shape check as the app, so a mangled link
+    // (an email client wrapping it, say) says so here rather than in the app.
+    const token = new URLSearchParams(location.search).get('t') || '';
+    if (!/^[A-Za-z0-9_-]{32}$/.test(token)) {
+      document.getElementById('intro').hidden = true;
+      document.getElementById('actions').hidden = true;
+      document.getElementById('missing').hidden = false;
+    } else {
+      // An installed app, reached through its own URL scheme: the app routes
+      // host "app" by path, like the NFC tag links.
+      document.getElementById('open-app').href =
+        'app.nextfour.mobile://app/club-claim?t=' + token;
+      // Carry the token through a fresh install. Google Play hands the app a
+      // referrer (read once on first launch); Apple has no equivalent, so the
+      // App Store button copies this link for the app to offer to paste. The
+      // copy waits briefly before leaving: navigating away straight after
+      // writeText can cancel it.
+      const play = document.getElementById('play');
+      if (play) play.href += '&referrer=' + encodeURIComponent('club_claim=' + token);
+      const appStore = document.getElementById('appstore');
+      if (appStore) appStore.addEventListener('click', async (event) => {
+        event.preventDefault();
+        const link = location.origin + '/club-claim?t=' + token;
+        try {
+          await Promise.race([
+            navigator.clipboard.writeText(link),
+            new Promise((resolve) => setTimeout(resolve, 800)),
+          ]);
+        } catch (_) {}
+        location.href = appStore.href;
+      });
+    }
+  </script>
+</Base>
