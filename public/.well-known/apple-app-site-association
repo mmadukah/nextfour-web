@@ -1,0 +1,14 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["MRUQ2F7383.app.nextfour.mobile"],
+        "components": [
+          { "/": "/join", "comment": "Session invite: /join?c=CODE" },
+          { "/": "/claim", "comment": "Guest profile claim: /claim?c=CODE" },
+          { "/": "/club-claim", "comment": "Club claim invite: /club-claim?t=TOKEN" }
+        ]
+      }
+    ]
+  }
+}
