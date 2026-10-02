@@ -13,46 +13,56 @@ NextFour est une application mobile destinée aux clubs et aux joueurs de sports
 
 Nous ne collectons que les données nécessaires au fonctionnement du Service :
 
-- **Informations de compte**: nom, adresse e-mail et, lorsque vous les fournissez, photo de profil, sexe et date de naissance.
-- **Données d'authentification**: lorsque vous vous connectez avec Facebook, Google ou Apple, nous recevons votre nom, votre adresse e-mail et un identifiant unique fourni par le prestataire.
-- **Données de club et de session**: clubs auxquels vous appartenez, sessions auxquelles vous participez, résultats des matchs, statistiques, appariements et position dans la file d'attente.
+- **Informations de compte**: nom, surnom, adresse e-mail et, lorsque vous les fournissez, photo de profil, sexe, tranche d'âge, ainsi que les sports que vous pratiquez et votre niveau. Certains comptes plus anciens comportent aussi une date de naissance.
+- **Données d'authentification**: lorsque vous vous connectez avec Google ou Apple, nous recevons votre nom, votre adresse e-mail et un identifiant unique fourni par le prestataire.
+- **Localisation**: la zone que vous choisissez en recherchant un lieu. Nous conservons le lieu sélectionné (ses coordonnées et son adresse) afin de vous montrer les séances et les clubs proches de vous. L'application n'utilise pas le GPS de votre appareil. Nous vous conseillons de choisir votre ville ou votre quartier plutôt que votre adresse personnelle.
+- **Données de club et de session**: clubs auxquels vous appartenez, sessions auxquelles vous participez, enregistrements, réponses aux sondages de disponibilité, résultats des matchs, statistiques, appariements et position dans la file d'attente.
+- **Classements de niveau**: nous calculons un classement par sport et par format à partir de vos résultats, afin d'équilibrer les matchs. Les classements ne sont pas affichés publiquement.
 - **Statut d'abonnement**: votre formule d'abonnement (Free, Performance, Pro ou Club) est gérée par RevenueCat. Nous ne conservons aucune coordonnée bancaire.
-- **Informations sur l'appareil**: pour les activations de terminaux/bornes, nous conservons un nom d'appareil et un horodatage de dernière connexion.
-- **Données d'utilisation**: journaux de base (erreurs, horodatages) pour le diagnostic des problèmes.
+- **Informations sur l'appareil**: un jeton de notifications push et, pour les activations de terminaux/bornes, un nom d'appareil, un identifiant d'appareil et un horodatage de dernière connexion.
+- **Données publicitaires**: la formule gratuite affiche des publicités de Google AdMob. AdMob reçoit l'identifiant publicitaire de votre appareil et votre adresse IP, et nous lui transmettons les sports que vous pratiquez afin que les publicités soient pertinentes. La personnalisation des publicités dépend du choix que vous faites dans la demande de consentement, que vous pouvez modifier ensuite (voir la section 3).
+- **Données d'utilisation et de diagnostic**: événements de l'application (par exemple l'inscription ou la participation à une séance) via Firebase Analytics et notre propre journal d'événements, et rapports de plantage via Firebase Crashlytics. Les données Firebase ne sont pas liées à votre nom ; notre propre journal d'événements est lié à votre compte.
 
-Nous ne collectons **pas** votre localisation précise, vos contacts, vos photos, votre microphone ni vos identifiants publicitaires.
+L'appareil photo n'est utilisé que pour prendre une photo de profil ou de club, ou pour scanner le QR code d'une borne. Nous n'accédons ni à vos contacts, ni à votre microphone, ni à la localisation de votre appareil.
 
 ## 3. Base légale
 
 Nous traitons les données personnelles sur les bases légales suivantes du UK GDPR :
 
 - **Contrat**: pour fournir le Service auquel vous avez souscrit.
-- **Intérêts légitimes**: pour assurer la sécurité du Service, prévenir les abus et améliorer les fonctionnalités.
-- **Consentement**: pour toute fonctionnalité optionnelle qui le requiert (par exemple les notifications push), que vous pouvez retirer à tout moment.
+- **Intérêts légitimes**: pour assurer la sécurité du Service, prévenir les abus, comprendre l'utilisation du Service, corriger les plantages, améliorer les fonctionnalités et calculer les classements de niveau.
+- **Consentement**: pour la publicité personnalisée et les notifications push, que vous pouvez retirer à tout moment. Pour modifier votre choix publicitaire, allez dans Profil → Privacy Settings → Ad privacy choices dans l'application.
 
 ## 4. Comment nous utilisons vos données
 
 - Pour créer et gérer votre compte.
-- Pour gérer les sessions en direct, les rotations de terrains, les files d'attente et les matchs.
+- Pour vous montrer les séances et les clubs proches de vous.
+- Pour gérer les sessions en direct, les rotations de terrains, les files d'attente et les matchs, et pour équilibrer les matchs à l'aide des classements de niveau.
 - Pour afficher vos adhésions à des clubs et vos interactions sociales.
 - Pour traiter les abonnements via RevenueCat.
 - Pour envoyer des notifications liées au service (par exemple les enregistrements de session).
-- Pour diagnostiquer les bogues et préserver l'intégrité du Service.
+- Pour afficher des publicités dans la formule gratuite.
+- Pour comprendre l'utilisation du Service, diagnostiquer les bogues et préserver l'intégrité du Service.
 
 ## 5. Partage et sous-traitants
 
 Nous ne partageons les données qu'avec les sous-traitants nécessaires au fonctionnement du Service :
 
-- **Supabase**: héberge notre base de données et l'authentification. Les données sont stockées dans des régions de l'UE lorsque cela est possible.
+- **Supabase**: héberge notre base de données, l'authentification et le stockage des fichiers. Les données sont stockées dans des régions de l'UE lorsque cela est possible.
 - **RevenueCat**: gère l'état des abonnements.
-- **Apple, Google, Facebook**: prestataires d'authentification (uniquement si vous choisissez la connexion via les réseaux sociaux).
-- **Apple Push Notification Service / Firebase Cloud Messaging**: distribution des notifications push.
+- **Apple et Google**: prestataires d'authentification (uniquement si vous choisissez la connexion via ces services).
+- **Google Firebase**: statistiques d'utilisation, rapports de plantage, configuration de l'application et notifications push (Firebase Cloud Messaging).
+- **Apple Push Notification Service**: notifications push sur iOS.
+- **Google AdMob**: publicité dans la formule gratuite, comme décrit à la section 2.
+- **LocationIQ**: reçoit les noms de lieux que vous recherchez, afin de trouver les adresses.
+- **OpenFreeMap**: fournit les cartes ; il reçoit votre adresse IP et la zone de carte que vous consultez.
+- **Resend**: envoie nos e-mails de service.
 
-Nous ne vendons ni ne louons vos données personnelles. Nous ne partageons pas de données avec des annonceurs.
+Nous ne vendons ni ne louons vos données personnelles. En dehors de Google AdMob comme décrit ci-dessus, nous ne partageons pas de données avec des annonceurs.
 
-## 6. Autres membres du club
+## 6. Autres utilisateurs et membres du club
 
-Lorsque vous rejoignez un club ou une session, certaines informations (votre nom, photo de profil, statistiques, position dans la file d'attente, appariements) sont visibles par les autres membres de ce club ou de cette session. Cela est nécessaire au fonctionnement du Service. Les hôtes et adjoints du club peuvent voir des informations supplémentaires, telles que votre historique d'enregistrement au sein de leur club.
+Votre nom, votre surnom, votre photo de profil, vos sports, votre niveau et la localisation que vous avez choisie peuvent être vus par les autres utilisateurs de NextFour, par exemple dans les listes de séances et la recherche de joueurs. Les photos de profil sont stockées à une adresse web publique. Lorsque vous rejoignez un club ou une session, vos statistiques, votre position dans la file d'attente et vos appariements sont visibles par les autres membres de ce club ou de cette session. Cela est nécessaire au fonctionnement du Service. Les hôtes et adjoints du club peuvent voir des informations supplémentaires, telles que votre historique d'enregistrement au sein de leur club.
 
 ## 7. Profils fantômes
 
@@ -90,7 +100,7 @@ Les données sont stockées chiffrées au repos par Supabase et transmises via H
 
 ## 12. Enfants
 
-NextFour est destiné aux utilisateurs âgés de 13 ans et plus. Si vous pensez qu'un enfant de moins de 13 ans a créé un compte, veuillez nous contacter afin que nous puissions le supprimer.
+NextFour est destiné aux utilisateurs âgés de 13 ans et plus. Si vous nous indiquez avoir moins de 18 ans, nous désactivons Firebase Analytics pour vous, cessons de transmettre vos sports à notre prestataire publicitaire et demandons à Google d'appliquer ses protections pour adolescents aux publicités que vous voyez. Si vous pensez qu'un enfant de moins de 13 ans a créé un compte, veuillez nous contacter afin que nous puissions le supprimer.
 
 ## 13. Transferts internationaux
 
