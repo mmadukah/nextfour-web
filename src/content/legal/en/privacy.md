@@ -1,6 +1,6 @@
 ---
 title: Privacy Policy
-meta: "Last updated: 7 May 2026"
+meta: "Last updated: 2 October 2026"
 ---
 
 This Privacy Policy explains how NextFour ("we", "us", "our") collects, uses, stores, and shares your personal data when you use the NextFour mobile application and related services (the "Service"). NextFour is operated from the United Kingdom and complies with the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018.
@@ -58,11 +58,19 @@ When you join a club or session, certain information (your name, profile picture
 
 Hosts may add "guest" players to a session without those players holding a NextFour account. These shadow profiles store only a name and (optionally) email and gender so the player can be referenced in the session. Shadow profiles do not have logins, are not used for analytics, and can be deleted at the host's request.
 
-## 8. Data retention
+## 8. Club and session listings from public sources
+
+To help players find somewhere to play, some club and session listings in NextFour are created by us rather than by the club. We compile them from publicly available sources such as league, county, club and venue websites. A listing shows the club's name, venue, day and time, and a link to its source. It does not show anyone's personal contact details.
+
+Where a source publishes a contact address for a club, we may keep it privately so that we can contact the club about its listing. It is not shown in the app. Our lawful basis is legitimate interests: helping players find clubs and keeping listings accurate.
+
+If you run a club and want its listing corrected or removed, or you object to us holding a contact address, email [clubs@nextfour.app](mailto:clubs@nextfour.app). A club can also claim its listing in the app to manage it directly.
+
+## 9. Data retention
 
 We retain your data while your account is active. When you delete your account, we delete or anonymise your personal data within 30 days, except where we are required to retain it by law (e.g. financial records). Data retained for legal reasons is restricted from further processing.
 
-## 9. Your rights
+## 10. Your rights
 
 Under UK GDPR you have the right to:
 
@@ -76,22 +84,22 @@ Under UK GDPR you have the right to:
 
 To exercise any of these rights, email [privacy@nextfour.app](mailto:privacy@nextfour.app). See also the [Account & Data Deletion](/delete-account.html) page.
 
-## 10. Security
+## 11. Security
 
 Data is stored encrypted at rest by Supabase and transmitted over HTTPS. Database access is controlled by row-level security policies. We restrict administrative access and do not log raw passwords (authentication is handled by Supabase Auth or social providers).
 
-## 11. Children
+## 12. Children
 
 NextFour is intended for users aged 13 and over. If you believe a child under 13 has created an account, please contact us so we can delete it.
 
-## 12. International transfers
+## 13. International transfers
 
 Where data is transferred outside the UK or EEA (for example to US-based sub-processors), it is protected by the UK International Data Transfer Agreement, EU Standard Contractual Clauses, or an equivalent safeguard.
 
-## 13. Changes to this policy
+## 14. Changes to this policy
 
 We may update this policy from time to time. Material changes will be announced in-app or by email. The "Last updated" date at the top reflects the most recent revision.
 
-## 14. Contact
+## 15. Contact
 
 For any privacy questions or to exercise your rights, contact: [privacy@nextfour.app](mailto:privacy@nextfour.app)

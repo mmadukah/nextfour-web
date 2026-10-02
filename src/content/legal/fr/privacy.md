@@ -1,6 +1,6 @@
 ---
 title: Politique de confidentialité
-meta: "Dernière mise à jour : 7 mai 2026"
+meta: "Dernière mise à jour : 2 octobre 2026"
 ---
 
 La présente Politique de confidentialité explique comment NextFour (« nous », « notre ») collecte, utilise, conserve et partage vos données personnelles lorsque vous utilisez l'application mobile NextFour et les services associés (le « Service »). NextFour est exploité depuis le Royaume-Uni et se conforme au Règlement général sur la protection des données du Royaume-Uni (UK GDPR) ainsi qu'au Data Protection Act 2018.
@@ -58,11 +58,19 @@ Lorsque vous rejoignez un club ou une session, certaines informations (votre nom
 
 Les hôtes peuvent ajouter des joueurs « invités » à une session sans que ces joueurs ne possèdent de compte NextFour. Ces profils fantômes ne stockent qu'un nom et (éventuellement) une adresse e-mail et un sexe afin que le joueur puisse être référencé dans la session. Les profils fantômes ne disposent pas d'identifiants de connexion, ne sont pas utilisés à des fins d'analyse et peuvent être supprimés à la demande de l'hôte.
 
-## 8. Conservation des données
+## 8. Clubs et séances issus de sources publiques
+
+Pour aider les joueurs à trouver où jouer, certaines fiches de clubs et de séances dans NextFour sont créées par nous et non par le club. Nous les établissons à partir de sources accessibles au public, telles que les sites de ligues, de comités, de clubs et de salles. Une fiche indique le nom du club, la salle, le jour et l'horaire, ainsi qu'un lien vers sa source. Elle n'affiche les coordonnées personnelles de personne.
+
+Lorsqu'une source publie une adresse de contact pour un club, nous pouvons la conserver, sans la publier, afin de contacter le club au sujet de sa fiche. Elle n'apparaît pas dans l'application. Notre base légale est l'intérêt légitime : aider les joueurs à trouver des clubs et garder les fiches exactes.
+
+Si vous gérez un club et souhaitez que sa fiche soit corrigée ou supprimée, ou si vous vous opposez à ce que nous conservions une adresse de contact, écrivez à [clubs@nextfour.app](mailto:clubs@nextfour.app). Un club peut aussi revendiquer sa fiche dans l'application pour la gérer directement.
+
+## 9. Conservation des données
 
 Nous conservons vos données tant que votre compte est actif. Lorsque vous supprimez votre compte, nous supprimons ou anonymisons vos données personnelles dans un délai de 30 jours, sauf lorsque la loi nous impose de les conserver (par exemple les registres financiers). Les données conservées pour des raisons légales font l'objet d'une limitation de traitement.
 
-## 9. Vos droits
+## 10. Vos droits
 
 En vertu du UK GDPR, vous avez le droit de :
 
@@ -76,22 +84,22 @@ En vertu du UK GDPR, vous avez le droit de :
 
 Pour exercer l'un de ces droits, écrivez à [privacy@nextfour.app](mailto:privacy@nextfour.app). Consultez également la page [Suppression du compte et des données](/fr/delete-account.html).
 
-## 10. Sécurité
+## 11. Sécurité
 
 Les données sont stockées chiffrées au repos par Supabase et transmises via HTTPS. L'accès à la base de données est contrôlé par des politiques de sécurité au niveau des lignes. Nous limitons l'accès administratif et ne journalisons pas les mots de passe en clair (l'authentification est gérée par Supabase Auth ou par les prestataires sociaux).
 
-## 11. Enfants
+## 12. Enfants
 
 NextFour est destiné aux utilisateurs âgés de 13 ans et plus. Si vous pensez qu'un enfant de moins de 13 ans a créé un compte, veuillez nous contacter afin que nous puissions le supprimer.
 
-## 12. Transferts internationaux
+## 13. Transferts internationaux
 
 Lorsque des données sont transférées en dehors du Royaume-Uni ou de l'EEE (par exemple vers des sous-traitants établis aux États-Unis), elles sont protégées par l'International Data Transfer Agreement du Royaume-Uni, les clauses contractuelles types de l'UE ou une garantie équivalente.
 
-## 13. Modifications de la présente politique
+## 14. Modifications de la présente politique
 
 Nous pouvons mettre à jour la présente politique de temps à autre. Les modifications importantes seront annoncées dans l'application ou par e-mail. La date de « Dernière mise à jour » en haut de page reflète la révision la plus récente.
 
-## 14. Contact
+## 15. Contact
 
 Pour toute question relative à la confidentialité ou pour exercer vos droits, contactez : [privacy@nextfour.app](mailto:privacy@nextfour.app)
