@@ -1,9 +1,9 @@
 ---
 title: Terms & Conditions
-meta: "Last updated: 9 May 2026"
+meta: "Last updated: 10 October 2026"
 ---
 
-These Terms & Conditions ("Terms") govern your use of the NextFour mobile application and any related services (together, the "Service") provided by NextFour ("we", "us", "our"). By creating an account or using the Service, you agree to these Terms. If you do not agree, do not use the Service.
+These Terms & Conditions ("Terms") govern your use of the NextFour mobile application and any related services (together, the "Service") provided by NextFour Ltd, a company registered in England and Wales under company number 17355223, whose registered office is at 167-169 Great Portland Street, 5th Floor, London, W1W 5PF, United Kingdom ("NextFour", "we", "us", "our"). By creating an account or using the Service, you agree to these Terms. If you do not agree, do not use the Service.
 
 ## 1. Eligibility
 
@@ -14,7 +14,7 @@ You must be at least 13 years old to use the Service. If you are under the age o
 - You are responsible for keeping your account credentials secure.
 - You must provide accurate information when creating your account.
 - You are responsible for all activity carried out under your account.
-- You may delete your account at any time from inside the app (Settings → Account → Delete account) or by emailing [privacy@nextfour.app](mailto:privacy@nextfour.app).
+- You may delete your account at any time from inside the app (Profile → Account settings → Delete account) or by emailing [privacy@nextfour.app](mailto:privacy@nextfour.app).
 
 ## 3. Subscriptions and payments
 

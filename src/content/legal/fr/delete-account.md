@@ -1,6 +1,6 @@
 ---
 title: Suppression du compte et des données
-meta: "Dernière mise à jour : 7 mai 2026"
+meta: "Dernière mise à jour : 10 octobre 2026"
 ---
 
 Cette page explique comment supprimer définitivement votre compte NextFour et toutes les données personnelles associées. NextFour respecte votre droit à l'effacement au titre du Règlement général sur la protection des données du Royaume-Uni (UK GDPR).
@@ -8,7 +8,7 @@ Cette page explique comment supprimer définitivement votre compte NextFour et t
 ## Option 1: Suppression depuis l'application (recommandé)
 
 1. Ouvrez l'application NextFour et connectez-vous.
-2. Allez dans **Paramètres** → **Compte**.
+2. Touchez votre photo de profil pour ouvrir votre **Profil**, puis repérez **Account settings**.
 3. Appuyez sur **Supprimer le compte**.
 4. Confirmez l'action lorsque vous y êtes invité.
 

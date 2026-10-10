@@ -1,21 +1,26 @@
 ---
 title: Privacy Policy
-meta: "Last updated: 2 October 2026"
+meta: "Last updated: 10 October 2026"
 ---
 
-This Privacy Policy explains how NextFour ("we", "us", "our") collects, uses, stores, and shares your personal data when you use the NextFour mobile application and related services (the "Service"). NextFour is operated from the United Kingdom and complies with the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018.
+This Privacy Policy explains how NextFour ("we", "us", "our") collects, uses, stores, and shares your personal data when you use the NextFour mobile application and related services (the "Service"). The Service is provided by NextFour Ltd, a company registered in England and Wales, and we comply with the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018.
 
 ## 1. Who we are
 
-NextFour is a mobile application for racket sport clubs and players, enabling session management, court rotation, social features, and club administration. For any privacy-related enquiry, you can reach us at [privacy@nextfour.app](mailto:privacy@nextfour.app).
+NextFour is a mobile application for racket sport clubs and players, enabling session management, court rotation, social features, and club administration.
+
+NextFour Ltd is the controller of your personal data. We are registered in England and Wales under company number 17355223, and our registered office is 167-169 Great Portland Street, 5th Floor, London, W1W 5PF, United Kingdom.
+
+For any privacy-related enquiry, you can reach us at [privacy@nextfour.app](mailto:privacy@nextfour.app).
 
 ## 2. Data we collect
 
 We collect only the data needed to operate the Service:
 
 - **Account information**: name, nickname, email address, and (where you provide them) profile photo, gender, age band, and the sports you play with your skill level. Some older accounts also hold a date of birth.
-- **Authentication data**: when you sign in with Google or Apple, we receive your name, email address, and a unique identifier from the provider.
-- **Location**: the home area you choose by searching for a place. We store the place you pick (its coordinates and address details) so we can show sessions and clubs near you. The app does not use your device's GPS. We suggest choosing your town or area rather than your home address.
+- **Authentication data**: when you sign in with Google, Apple, or Facebook, we receive your name, email address, and a unique identifier from the provider.
+- **Location**: your home area, which you set by searching for a place or by tapping "Use my current location". We store the place (its coordinates and address details) so we can show sessions and clubs near you. If you search, we suggest choosing your town or area rather than your home address.
+- **Current location (optional)**: only if you tap "Use my current location", the app asks for your device's approximate location, never your precise location, and only while you are using the app. The app rounds the position on your device and we look up the town it falls in. We store that town, not your position.
 - **Club & session data**: clubs you belong to, sessions you join, check-ins, availability poll answers, match results, statistics, pairings, and queue position.
 - **Skill ratings**: we calculate a rating for each sport and format from your match results, to help balance games. Ratings are not shown publicly.
 - **Subscription status**: your subscription tier (Free, Performance, Pro, or Club) is managed by RevenueCat. We do not store payment card details.
@@ -23,7 +28,7 @@ We collect only the data needed to operate the Service:
 - **Advertising data**: the free tier shows ads from Google AdMob. AdMob receives your device's advertising identifier and IP address, and we pass it the sports you play so ads are relevant. Whether ads are personalised depends on the choice you make in the consent prompt, which you can change later (see section 3).
 - **Usage and diagnostic data**: app events (such as signing up or joining a session) through Firebase Analytics and our own event log, and crash reports through Firebase Crashlytics. Firebase data is not linked to your name; our own event log is linked to your account.
 
-The camera is used only when you take a profile or club photo or scan a kiosk QR code. We do not access your contacts, microphone, or device location.
+The camera is used only when you take a profile or club photo or scan a kiosk QR code. We do not access your contacts or microphone, and we access your device's location only as described above.
 
 ## 3. Lawful basis
 
@@ -44,17 +49,19 @@ We process personal data under the following UK GDPR lawful bases:
 - To show ads in the free tier.
 - To understand usage, diagnose bugs, and maintain the integrity of the Service.
 
+We use skill ratings to pick and balance games in a session. This is the only automated decision we make about you, and it has no legal or similarly significant effect on you.
+
 ## 5. Sharing & sub-processors
 
 We share data only with the sub-processors needed to run the Service:
 
 - **Supabase**: hosts our database, authentication, and file storage. Data is stored in EU regions where available.
 - **RevenueCat**: handles subscription state.
-- **Apple and Google**: authentication providers (only if you choose social sign-in).
+- **Apple, Google, and Meta (Facebook)**: authentication providers (only if you choose social sign-in).
 - **Google Firebase**: usage analytics, crash reports, app configuration, and push notifications (Firebase Cloud Messaging).
 - **Apple Push Notification Service**: push notifications on iOS.
 - **Google AdMob**: advertising in the free tier, as described in section 2.
-- **LocationIQ**: receives the place names you search for, to find locations.
+- **LocationIQ**: receives the place names you search for, or your rounded position if you use your current location, to find locations.
 - **OpenFreeMap**: provides map images; it receives your IP address and the map area you view.
 - **Resend**: sends our service emails.
 
@@ -78,7 +85,9 @@ If you run a club and want its listing corrected or removed, or you object to us
 
 ## 9. Data retention
 
-We retain your data while your account is active. When you delete your account, we delete or anonymise your personal data within 30 days, except where we are required to retain it by law (e.g. financial records). Data retained for legal reasons is restricted from further processing.
+We retain your data while your account is active. When you delete your account in the app, we delete or anonymise your personal data straight away. When you ask us by email, we do so within 30 days. Copies in our database backups are deleted as those backups expire, and are not used in the meantime.
+
+Anonymised match records, which can no longer be linked to you, may be kept indefinitely so that other players' statistics stay correct. Where the law requires us to keep data (e.g. financial records), we restrict it from further processing.
 
 ## 10. Your rights
 
@@ -104,7 +113,7 @@ NextFour is intended for users aged 13 and over. If you tell us you are under 18
 
 ## 13. International transfers
 
-Where data is transferred outside the UK or EEA (for example to US-based sub-processors), it is protected by the UK International Data Transfer Agreement, EU Standard Contractual Clauses, or an equivalent safeguard.
+Several of our sub-processors are based in the United States, including Google (Firebase, AdMob, and Google sign-in), Apple, Meta, RevenueCat, and Resend. Where data is transferred outside the UK or EEA, it is protected by a UK adequacy decision (such as the UK-US data bridge), the UK International Data Transfer Agreement, EU Standard Contractual Clauses, or an equivalent safeguard. You can ask us which safeguard applies to a provider, and for a copy of it, at [privacy@nextfour.app](mailto:privacy@nextfour.app).
 
 ## 14. Changes to this policy
 
@@ -113,3 +122,5 @@ We may update this policy from time to time. Material changes will be announced 
 ## 15. Contact
 
 For any privacy questions or to exercise your rights, contact: [privacy@nextfour.app](mailto:privacy@nextfour.app)
+
+By post: NextFour Ltd, 167-169 Great Portland Street, 5th Floor, London, W1W 5PF, United Kingdom.

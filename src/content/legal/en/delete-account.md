@@ -1,6 +1,6 @@
 ---
 title: Account & Data Deletion
-meta: "Last updated: 7 May 2026"
+meta: "Last updated: 10 October 2026"
 ---
 
 This page explains how to permanently delete your NextFour account and all associated personal data. NextFour respects your right to erasure under the UK General Data Protection Regulation (UK GDPR).
@@ -8,7 +8,7 @@ This page explains how to permanently delete your NextFour account and all assoc
 ## Option 1: Delete from inside the app (recommended)
 
 1. Open the NextFour app and sign in.
-2. Go to **Settings** → **Account**.
+2. Tap your profile picture to open your **Profile**, then find **Account settings**.
 3. Tap **Delete account**.
 4. Confirm the action when prompted.
 

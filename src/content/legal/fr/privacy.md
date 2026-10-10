@@ -1,21 +1,26 @@
 ---
 title: Politique de confidentialité
-meta: "Dernière mise à jour : 2 octobre 2026"
+meta: "Dernière mise à jour : 10 octobre 2026"
 ---
 
-La présente Politique de confidentialité explique comment NextFour (« nous », « notre ») collecte, utilise, conserve et partage vos données personnelles lorsque vous utilisez l'application mobile NextFour et les services associés (le « Service »). NextFour est exploité depuis le Royaume-Uni et se conforme au Règlement général sur la protection des données du Royaume-Uni (UK GDPR) ainsi qu'au Data Protection Act 2018.
+La présente Politique de confidentialité explique comment NextFour (« nous », « notre ») collecte, utilise, conserve et partage vos données personnelles lorsque vous utilisez l'application mobile NextFour et les services associés (le « Service »). Le Service est fourni par NextFour Ltd, société immatriculée en Angleterre et au pays de Galles, et nous nous conformons au Règlement général sur la protection des données du Royaume-Uni (UK GDPR) ainsi qu'au Data Protection Act 2018.
 
 ## 1. Qui sommes-nous
 
-NextFour est une application mobile destinée aux clubs et aux joueurs de sports de raquette, permettant la gestion des sessions, la rotation des terrains, des fonctionnalités sociales et l'administration des clubs. Pour toute question relative à la confidentialité, vous pouvez nous contacter à l'adresse [privacy@nextfour.app](mailto:privacy@nextfour.app).
+NextFour est une application mobile destinée aux clubs et aux joueurs de sports de raquette, permettant la gestion des sessions, la rotation des terrains, des fonctionnalités sociales et l'administration des clubs.
+
+NextFour Ltd est le responsable du traitement de vos données personnelles. Nous sommes immatriculés en Angleterre et au pays de Galles sous le numéro 17355223, et notre siège social se situe au 167-169 Great Portland Street, 5th Floor, Londres, W1W 5PF, Royaume-Uni.
+
+Pour toute question relative à la confidentialité, vous pouvez nous contacter à l'adresse [privacy@nextfour.app](mailto:privacy@nextfour.app).
 
 ## 2. Données que nous collectons
 
 Nous ne collectons que les données nécessaires au fonctionnement du Service :
 
 - **Informations de compte**: nom, surnom, adresse e-mail et, lorsque vous les fournissez, photo de profil, sexe, tranche d'âge, ainsi que les sports que vous pratiquez et votre niveau. Certains comptes plus anciens comportent aussi une date de naissance.
-- **Données d'authentification**: lorsque vous vous connectez avec Google ou Apple, nous recevons votre nom, votre adresse e-mail et un identifiant unique fourni par le prestataire.
-- **Localisation**: la zone que vous choisissez en recherchant un lieu. Nous conservons le lieu sélectionné (ses coordonnées et son adresse) afin de vous montrer les séances et les clubs proches de vous. L'application n'utilise pas le GPS de votre appareil. Nous vous conseillons de choisir votre ville ou votre quartier plutôt que votre adresse personnelle.
+- **Données d'authentification**: lorsque vous vous connectez avec Google, Apple ou Facebook, nous recevons votre nom, votre adresse e-mail et un identifiant unique fourni par le prestataire.
+- **Localisation**: votre zone, que vous définissez en recherchant un lieu ou en touchant « Use my current location ». Nous conservons le lieu (ses coordonnées et son adresse) afin de vous montrer les séances et les clubs proches de vous. Si vous faites une recherche, nous vous conseillons de choisir votre ville ou votre quartier plutôt que votre adresse personnelle.
+- **Position actuelle (facultatif)**: uniquement si vous touchez « Use my current location », l'application demande la position approximative de votre appareil, jamais votre position précise, et uniquement pendant que vous utilisez l'application. L'application arrondit la position sur votre appareil et nous recherchons la ville correspondante. Nous conservons cette ville, pas votre position.
 - **Données de club et de session**: clubs auxquels vous appartenez, sessions auxquelles vous participez, enregistrements, réponses aux sondages de disponibilité, résultats des matchs, statistiques, appariements et position dans la file d'attente.
 - **Classements de niveau**: nous calculons un classement par sport et par format à partir de vos résultats, afin d'équilibrer les matchs. Les classements ne sont pas affichés publiquement.
 - **Statut d'abonnement**: votre formule d'abonnement (Free, Performance, Pro ou Club) est gérée par RevenueCat. Nous ne conservons aucune coordonnée bancaire.
@@ -23,7 +28,7 @@ Nous ne collectons que les données nécessaires au fonctionnement du Service :
 - **Données publicitaires**: la formule gratuite affiche des publicités de Google AdMob. AdMob reçoit l'identifiant publicitaire de votre appareil et votre adresse IP, et nous lui transmettons les sports que vous pratiquez afin que les publicités soient pertinentes. La personnalisation des publicités dépend du choix que vous faites dans la demande de consentement, que vous pouvez modifier ensuite (voir la section 3).
 - **Données d'utilisation et de diagnostic**: événements de l'application (par exemple l'inscription ou la participation à une séance) via Firebase Analytics et notre propre journal d'événements, et rapports de plantage via Firebase Crashlytics. Les données Firebase ne sont pas liées à votre nom ; notre propre journal d'événements est lié à votre compte.
 
-L'appareil photo n'est utilisé que pour prendre une photo de profil ou de club, ou pour scanner le QR code d'une borne. Nous n'accédons ni à vos contacts, ni à votre microphone, ni à la localisation de votre appareil.
+L'appareil photo n'est utilisé que pour prendre une photo de profil ou de club, ou pour scanner le QR code d'une borne. Nous n'accédons ni à vos contacts ni à votre microphone, et nous n'accédons à la localisation de votre appareil que dans les conditions décrites ci-dessus.
 
 ## 3. Base légale
 
@@ -44,17 +49,19 @@ Nous traitons les données personnelles sur les bases légales suivantes du UK G
 - Pour afficher des publicités dans la formule gratuite.
 - Pour comprendre l'utilisation du Service, diagnostiquer les bogues et préserver l'intégrité du Service.
 
+Nous utilisons les classements de niveau pour choisir et équilibrer les matchs d'une séance. C'est la seule décision automatisée que nous prenons à votre sujet, et elle n'a aucun effet juridique ni aucun effet similaire significatif sur vous.
+
 ## 5. Partage et sous-traitants
 
 Nous ne partageons les données qu'avec les sous-traitants nécessaires au fonctionnement du Service :
 
 - **Supabase**: héberge notre base de données, l'authentification et le stockage des fichiers. Les données sont stockées dans des régions de l'UE lorsque cela est possible.
 - **RevenueCat**: gère l'état des abonnements.
-- **Apple et Google**: prestataires d'authentification (uniquement si vous choisissez la connexion via ces services).
+- **Apple, Google et Meta (Facebook)**: prestataires d'authentification (uniquement si vous choisissez la connexion via ces services).
 - **Google Firebase**: statistiques d'utilisation, rapports de plantage, configuration de l'application et notifications push (Firebase Cloud Messaging).
 - **Apple Push Notification Service**: notifications push sur iOS.
 - **Google AdMob**: publicité dans la formule gratuite, comme décrit à la section 2.
-- **LocationIQ**: reçoit les noms de lieux que vous recherchez, afin de trouver les adresses.
+- **LocationIQ**: reçoit les noms de lieux que vous recherchez, ou votre position arrondie si vous utilisez votre position actuelle, afin de trouver les adresses.
 - **OpenFreeMap**: fournit les cartes ; il reçoit votre adresse IP et la zone de carte que vous consultez.
 - **Resend**: envoie nos e-mails de service.
 
@@ -78,7 +85,9 @@ Si vous gérez un club et souhaitez que sa fiche soit corrigée ou supprimée, o
 
 ## 9. Conservation des données
 
-Nous conservons vos données tant que votre compte est actif. Lorsque vous supprimez votre compte, nous supprimons ou anonymisons vos données personnelles dans un délai de 30 jours, sauf lorsque la loi nous impose de les conserver (par exemple les registres financiers). Les données conservées pour des raisons légales font l'objet d'une limitation de traitement.
+Nous conservons vos données tant que votre compte est actif. Lorsque vous supprimez votre compte dans l'application, nous supprimons ou anonymisons immédiatement vos données personnelles. Lorsque vous nous le demandez par e-mail, nous le faisons dans un délai de 30 jours. Les copies figurant dans nos sauvegardes de base de données sont supprimées à l'expiration de ces sauvegardes et ne sont pas utilisées entre-temps.
+
+Les résultats de matchs anonymisés, qui ne peuvent plus être reliés à vous, peuvent être conservés sans limite de durée afin que les statistiques des autres joueurs restent exactes. Lorsque la loi nous impose de conserver des données (par exemple les registres financiers), elles font l'objet d'une limitation de traitement.
 
 ## 10. Vos droits
 
@@ -104,7 +113,7 @@ NextFour est destiné aux utilisateurs âgés de 13 ans et plus. Si vous nous in
 
 ## 13. Transferts internationaux
 
-Lorsque des données sont transférées en dehors du Royaume-Uni ou de l'EEE (par exemple vers des sous-traitants établis aux États-Unis), elles sont protégées par l'International Data Transfer Agreement du Royaume-Uni, les clauses contractuelles types de l'UE ou une garantie équivalente.
+Plusieurs de nos sous-traitants sont établis aux États-Unis, notamment Google (Firebase, AdMob et la connexion Google), Apple, Meta, RevenueCat et Resend. Lorsque des données sont transférées en dehors du Royaume-Uni ou de l'EEE, elles sont protégées par une décision d'adéquation du Royaume-Uni (comme le UK-US data bridge), l'International Data Transfer Agreement du Royaume-Uni, les clauses contractuelles types de l'UE ou une garantie équivalente. Vous pouvez nous demander quelle garantie s'applique à un prestataire, et en obtenir une copie, à l'adresse [privacy@nextfour.app](mailto:privacy@nextfour.app).
 
 ## 14. Modifications de la présente politique
 
@@ -113,3 +122,5 @@ Nous pouvons mettre à jour la présente politique de temps à autre. Les modifi
 ## 15. Contact
 
 Pour toute question relative à la confidentialité ou pour exercer vos droits, contactez : [privacy@nextfour.app](mailto:privacy@nextfour.app)
+
+Par courrier : NextFour Ltd, 167-169 Great Portland Street, 5th Floor, Londres, W1W 5PF, Royaume-Uni.

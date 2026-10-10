@@ -1,9 +1,9 @@
 ---
 title: Conditions générales
-meta: "Dernière mise à jour : 9 mai 2026"
+meta: "Dernière mise à jour : 10 octobre 2026"
 ---
 
-Les présentes Conditions générales (« Conditions ») régissent votre utilisation de l'application mobile NextFour et de tout service associé (ensemble, le « Service ») fourni par NextFour (« nous », « notre »). En créant un compte ou en utilisant le Service, vous acceptez les présentes Conditions. Si vous ne les acceptez pas, n'utilisez pas le Service.
+Les présentes Conditions générales (« Conditions ») régissent votre utilisation de l'application mobile NextFour et de tout service associé (ensemble, le « Service ») fourni par NextFour Ltd, société immatriculée en Angleterre et au pays de Galles sous le numéro 17355223, dont le siège social se situe au 167-169 Great Portland Street, 5th Floor, Londres, W1W 5PF, Royaume-Uni (« NextFour », « nous », « notre »). En créant un compte ou en utilisant le Service, vous acceptez les présentes Conditions. Si vous ne les acceptez pas, n'utilisez pas le Service.
 
 ## 1. Admissibilité
 
@@ -14,7 +14,7 @@ Vous devez être âgé d'au moins 13 ans pour utiliser le Service. Si vous n'ave
 - Vous êtes responsable de la sécurité de vos identifiants de compte.
 - Vous devez fournir des informations exactes lors de la création de votre compte.
 - Vous êtes responsable de toute activité réalisée sous votre compte.
-- Vous pouvez supprimer votre compte à tout moment depuis l'application (Paramètres → Compte → Supprimer le compte) ou en écrivant à [privacy@nextfour.app](mailto:privacy@nextfour.app).
+- Vous pouvez supprimer votre compte à tout moment depuis l'application (Profil → Account settings → Delete account) ou en écrivant à [privacy@nextfour.app](mailto:privacy@nextfour.app).
 
 ## 3. Abonnements et paiements
 
