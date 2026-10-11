@@ -16,6 +16,8 @@ const localeNames: Record<string, string> = { en: 'English', fr: 'Français' };
 
 type Card = { ico: string; title: string; body: string };
 type Step = { title: string; body: string };
+type Path = { label: string; sub: string };
+type Shot = { src: string; alt: string };
 type Strings = {
   title: string;
   description: string;
@@ -23,12 +25,30 @@ type Strings = {
   heroLine1: string;
   heroLine2: string;
   lead: string;
+  pathPlayers: Path;
+  pathHosts: Path;
+  heroBoard: Shot;
+  heroPhone: Shot;
   ctaPlay: string;
   ctaAppStore: string;
   note: string;
-  showcaseHead: string;
-  showcaseSub: string;
-  shots: { src: string; alt: string; caption: string }[];
+  players: {
+    kicker: string;
+    head: string;
+    body: string;
+    night: string;
+    calloutHead: string;
+    calloutBody: string;
+    shot: Shot;
+  };
+  hosts: {
+    kicker: string;
+    head: string;
+    body: string;
+    terminal: string;
+    help: string;
+    shot: Shot;
+  };
   featuresHead: string;
   featuresSub: string;
   cards: Card[];
@@ -44,31 +64,38 @@ type Strings = {
 
 const content: Record<string, Strings> = {
   en: {
-    title: 'NextFour: The racket sport club manager',
+    title: 'NextFour: Find a game, run your club night',
     description:
-      'NextFour runs your racket sports club night. Live courts, a digital pegboard, fair player picks, stats and your crew. Built for badminton, squash, tennis, padel and table tennis clubs.',
+      'NextFour is the app for racket sport club nights. Find badminton, squash, tennis, padel and table tennis sessions near you, or run your club night with live courts, a digital pegboard and fair picks.',
     ogDescription:
-      'Fair picks. Every night. Live courts, a digital pegboard, stats and your crew, all in one app.',
-    heroLine1: 'Fair picks.',
-    heroLine2: 'Every night.',
-    lead: 'The racket sport club manager. Live courts, a digital pegboard and your whole crew, in one app.',
+      'Find a game near you, or run your club night: live courts, a digital pegboard and fair picks, all in one app.',
+    heroLine1: 'Find a game.',
+    heroLine2: 'Run the night.',
+    lead: 'NextFour is the app for racket sport club nights. Players find sessions near them. Organisers run the courts, the queue and the picks from one phone.',
+    pathPlayers: { label: 'I want to play', sub: 'Find club nights near you' },
+    pathHosts: { label: 'I run a club night', sub: 'Courts, queue and picks, sorted' },
+    heroBoard: { src: '/screens/board-tablet.webp', alt: 'The live board on a tablet, with three courts in play' },
+    heroPhone: { src: '/screens/pick-nudge.webp', alt: 'A phone showing the “Your turn to pick” prompt' },
     ctaPlay: 'Get it on Google Play',
     ctaAppStore: 'Download on the App Store',
-    note: 'Free to get started. Built for badminton, squash, tennis, padel & table tennis clubs.',
-    showcaseHead: 'The board, mid-session.',
-    showcaseSub: 'Court one is playing, the rest of the room is queued, and nobody is arguing about who’s next.',
-    shots: [
-      {
-        src: '/screens/courts.png',
-        alt: 'The live courts board showing two teams on Court 1',
-        caption: 'Every court at a glance: who is on, who is next, and who has been waiting.',
-      },
-      {
-        src: '/screens/stats.png',
-        alt: 'A player stats screen showing win rate and recent match scores',
-        caption: 'Scores and win rates build up on their own. Nobody keeps a paper tally.',
-      },
-    ],
+    note: 'Free to get started. Built for badminton, squash, tennis, padel & table tennis.',
+    players: {
+      kicker: 'For players',
+      head: 'Find your next game.',
+      body: 'Search club nights and sessions near you by sport, on a list or a map. See the day, the time and the venue before you turn up, and follow the ones you like.',
+      night: 'On the night, check in from your phone, see who’s on and who’s next and, on pegboard nights, get a nudge when it’s your turn to pick.',
+      calloutHead: 'Your club might already be here.',
+      calloutBody: 'We list club nights that aren’t on NextFour yet. If yours is one of them, show your organiser: they can claim it and run the night from the app.',
+      shot: { src: '/screens/map.webp', alt: 'The Discover map with session pins across south London' },
+    },
+    hosts: {
+      kicker: 'For organisers',
+      head: 'Run the whole night from one phone.',
+      body: 'The pegboard your club already knows, made digital. Players peg on, the next picker gets a nudge and chooses three players to join them on the free court. No whiteboard, no arguments about who’s next.',
+      terminal: 'Got a spare tablet? Terminal mode turns it into a courtside board where players check themselves in.',
+      help: 'Want a hand setting up your first night? Email',
+      shot: { src: '/screens/pick-sheet.webp', alt: 'The picker choosing three players for their court' },
+    },
     featuresHead: 'Everything your club night needs',
     featuresSub: 'Stop juggling whiteboards and group chats. Run the whole session from your phone.',
     cards: [
@@ -93,31 +120,38 @@ const content: Record<string, Strings> = {
     copyright: '© 2026 NextFour. All rights reserved.',
   },
   fr: {
-    title: 'NextFour : Le gestionnaire de club de sports de raquette',
+    title: 'NextFour : Trouvez un match, gérez votre soirée de club',
     description:
-      'NextFour gère votre soirée de club de sports de raquette. Terrains en direct, tableau numérique, sélections de joueurs équitables, statistiques et votre équipe. Conçu pour les clubs de badminton, squash, tennis, padel et tennis de table.',
+      'NextFour est l’application des soirées de club de sports de raquette. Trouvez des sessions de badminton, squash, tennis, padel et tennis de table près de chez vous, ou gérez votre soirée de club avec des terrains en direct, un tableau numérique et des sélections équitables.',
     ogDescription:
-      'Des sélections équitables. Chaque soir. Terrains en direct, un tableau numérique, des statistiques et votre équipe, dans une seule application.',
-    heroLine1: 'Sélections équitables.',
-    heroLine2: 'Chaque soir.',
-    lead: 'Le gestionnaire de club de sports de raquette. Terrains en direct, un tableau numérique et toute votre équipe, dans une seule application.',
+      'Trouvez un match près de chez vous, ou gérez votre soirée de club : terrains en direct, tableau numérique et sélections équitables, dans une seule application.',
+    heroLine1: 'Trouvez un match.',
+    heroLine2: 'Gérez la soirée.',
+    lead: 'NextFour est l’application des soirées de club de sports de raquette. Les joueurs trouvent des sessions près de chez eux. Les organisateurs gèrent les terrains, la file et les sélections depuis un seul téléphone.',
+    pathPlayers: { label: 'Je veux jouer', sub: 'Des soirées de club près de chez vous' },
+    pathHosts: { label: 'J’organise une soirée', sub: 'Terrains, file et sélections, réglés' },
+    heroBoard: { src: '/screens/board-tablet.webp', alt: 'Le tableau en direct sur une tablette, avec trois terrains en jeu' },
+    heroPhone: { src: '/screens/pick-nudge.webp', alt: 'Un téléphone affichant l’invite « À vous de choisir »' },
     ctaPlay: 'Disponible sur Google Play',
     ctaAppStore: 'Télécharger dans l’App Store',
-    note: 'Gratuit pour commencer. Conçu pour les clubs de badminton, squash, tennis, padel et tennis de table.',
-    showcaseHead: 'Le tableau, en pleine soirée.',
-    showcaseSub: 'Le terrain 1 joue, le reste de la salle attend son tour, et personne ne débat de qui passe ensuite.',
-    shots: [
-      {
-        src: '/screens/courts.png',
-        alt: 'Le tableau des terrains en direct montrant deux équipes sur le terrain 1',
-        caption: 'Tous les terrains d’un coup d’œil : qui joue, qui suit, et qui attend depuis longtemps.',
-      },
-      {
-        src: '/screens/stats.png',
-        alt: 'Un écran de statistiques montrant le taux de victoire et les scores récents',
-        caption: 'Les scores et les taux de victoire s’accumulent tout seuls. Plus de feuille de papier.',
-      },
-    ],
+    note: 'Gratuit pour commencer. Conçu pour le badminton, le squash, le tennis, le padel et le tennis de table.',
+    players: {
+      kicker: 'Pour les joueurs',
+      head: 'Trouvez votre prochain match.',
+      body: 'Cherchez les soirées de club et les sessions près de chez vous par sport, en liste ou sur une carte. Voyez le jour, l’heure et le lieu avant de venir, et suivez celles qui vous plaisent.',
+      night: 'Le soir venu, enregistrez-vous depuis votre téléphone, voyez qui joue et qui suit et, les soirs de tableau, recevez une notification quand c’est à vous de choisir.',
+      calloutHead: 'Votre club y est peut-être déjà.',
+      calloutBody: 'Nous répertorions des soirées de club qui ne sont pas encore sur NextFour. Si la vôtre en fait partie, montrez-la à la personne qui l’organise : elle peut la revendiquer et gérer la soirée depuis l’application.',
+      shot: { src: '/screens/map.webp', alt: 'La carte Découvrir avec des sessions dans le sud de Londres' },
+    },
+    hosts: {
+      kicker: 'Pour les organisateurs',
+      head: 'Gérez toute la soirée depuis un seul téléphone.',
+      body: 'Le tableau que votre club connaît déjà, en version numérique. Les joueurs s’inscrivent dans la file, le prochain à choisir reçoit une notification et choisit trois joueurs pour le terrain libre. Plus de tableau blanc, plus de disputes sur qui passe ensuite.',
+      terminal: 'Une tablette en trop ? Le mode Terminal en fait un tableau au bord du terrain où les joueurs s’enregistrent eux-mêmes.',
+      help: 'Besoin d’aide pour votre première soirée ? Écrivez à',
+      shot: { src: '/screens/pick-sheet.webp', alt: 'Le joueur qui choisit trois joueurs pour son terrain' },
+    },
     featuresHead: 'Tout ce qu’il faut pour votre soirée de club',
     featuresSub: 'Fini les tableaux blancs et les discussions de groupe. Gérez toute la session depuis votre téléphone.',
     cards: [
@@ -160,30 +194,35 @@ const alternates = [
   lang={lang}
 >
   <Fragment slot="head">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&family=Nunito+Sans:wght@400;600;700&display=swap" />
     {alternates.map((alt) => (
       <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
     ))}
   </Fragment>
 
   <style is:global>
+    /* Brand kit: the same navy, card and lime as the app and the social
+       posts, so a visitor arriving from either recognises the page. */
     :root {
-      color-scheme: light dark;
-      --accent: #ff5a5a;
-      --accent-dark: #e23d3d;
-      --ink: #1a1a1a;
-      --muted: #666;
-      --bg: #fff;
-      --card: rgba(127,127,127,0.06);
-      --border: rgba(127,127,127,0.25);
-    }
-    @media (prefers-color-scheme: dark) {
-      :root { --ink: #eee; --muted: #9a9a9a; --bg: #111; --card: rgba(255,255,255,0.04); --border: rgba(255,255,255,0.12); }
+      color-scheme: dark;
+      --accent: #c8f135;
+      --accent-dark: #b4dc22;
+      --on-accent: #0f1923;
+      --ink: #f2f5f7;
+      --muted: #9aa7b5;
+      --bg: #0f1923;
+      --card: #192230;
+      --card-2: #232f40;
+      --border: #2a3a4a;
+      --head: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       margin: 0;
       line-height: 1.6;
       color: var(--ink);
@@ -191,90 +230,144 @@ const alternates = [
       -webkit-font-smoothing: antialiased;
     }
     a { color: var(--accent); }
-    .wrap { max-width: 960px; margin: 0 auto; padding: 0 1.25rem; }
+    h1, h2, h3 { font-family: var(--head); }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 1.25rem; }
+    img { max-width: 100%; }
 
-    /* ---------- Language switcher ---------- */
-    .langbar { display: flex; justify-content: flex-end; gap: 0.85rem; padding-top: 1.25rem; font-size: 0.85rem; }
-    .langbar a { color: #c9c9d1; text-decoration: none; opacity: 0.85; }
-    .langbar a[aria-current="true"] { color: #fff; font-weight: 700; opacity: 1; }
-
-    /* ---------- Hero (always dark, brand-consistent) ---------- */
-    .hero {
-      background: radial-gradient(120% 120% at 80% 0%, #1b1c22 0%, #0c0c0f 55%);
-      color: #fff;
-      padding: 0 0 4rem;
-      text-align: left;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-    .hero .wrap.body { padding-top: 3.25rem; }
+    /* ---------- Top bar ---------- */
+    .topbar { display: flex; justify-content: space-between; align-items: center; padding-top: 1.25rem; }
     .brand {
+      font-family: var(--head);
       font-weight: 800;
       letter-spacing: 0.35em;
       font-size: 0.85rem;
-      color: #fff;
+      color: var(--ink);
       text-transform: uppercase;
-      margin-bottom: 1.75rem;
+    }
+    .langbar { display: flex; gap: 0.85rem; font-size: 0.85rem; }
+    .langbar a { color: var(--muted); text-decoration: none; }
+    .langbar a[aria-current="true"] { color: var(--ink); font-weight: 700; }
+
+    /* ---------- Hero ---------- */
+    .hero {
+      background: radial-gradient(110% 90% at 85% 10%, #1b2a3a 0%, var(--bg) 60%);
+      padding: 0 0 4.5rem;
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 2.5rem;
+      align-items: center;
+      padding-top: 3.5rem;
     }
     .hero h1 {
-      font-size: clamp(2.4rem, 6vw, 3.8rem);
-      line-height: 1.05;
-      margin: 0 0 1rem;
-      font-weight: 800;
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      line-height: 1.02;
+      margin: 0 0 1.1rem;
+      font-weight: 900;
       letter-spacing: -0.02em;
     }
     .hero h1 .accent { color: var(--accent); }
     .hero p.lead {
-      font-size: clamp(1.05rem, 2.4vw, 1.35rem);
-      color: #c9c9d1;
-      max-width: 36ch;
-      margin: 0 0 2.25rem;
+      font-size: clamp(1.05rem, 2.2vw, 1.2rem);
+      color: var(--muted);
+      max-width: 42ch;
+      margin: 0 0 1.75rem;
     }
-    .cta-row { display: flex; flex-wrap: wrap; gap: 0.85rem; align-items: center; }
+    .paths { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.75rem; max-width: 30rem; }
+    .path {
+      display: block;
+      padding: 0.95rem 1.1rem;
+      border-radius: 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--ink);
+      text-decoration: none;
+      transition: border-color .15s ease, transform .08s ease;
+    }
+    .path:hover { border-color: var(--accent); }
+    .path:active { transform: translateY(1px); }
+    .path strong { display: block; font-size: 1rem; }
+    .path strong::after { content: ' \2192'; color: var(--accent); }
+    .path span { color: var(--muted); font-size: 0.88rem; }
+
+    .cta-row { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
     .btn {
       display: inline-flex; align-items: center; gap: 0.5rem;
-      font-weight: 600; font-size: 0.98rem;
-      padding: 0.8rem 1.35rem; border-radius: 10px;
-      text-decoration: none; transition: transform .08s ease, opacity .2s ease;
+      font-weight: 700; font-size: 0.95rem;
+      padding: 0.75rem 1.25rem; border-radius: 10px;
+      text-decoration: none; transition: transform .08s ease, background .2s ease;
     }
     .btn:active { transform: translateY(1px); }
-    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary { background: var(--accent); color: var(--on-accent); }
     .btn-primary:hover { background: var(--accent-dark); }
-    .btn-ghost { background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.18); }
-    .btn-ghost:hover { background: rgba(255,255,255,0.14); }
-    .hero .note { color: #8b8b95; font-size: 0.85rem; margin: 1.4rem 0 0; }
+    .btn-ghost { background: var(--card); color: var(--ink); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: var(--card-2); }
+    .hero .note { color: var(--muted); font-size: 0.85rem; margin: 1.25rem 0 0; }
 
-    /* ---------- Showcase ---------- */
-    section.showcase { padding: 4rem 0 1rem; }
-    .shots {
-      display: grid;
-      /* Two up on desktop, stacked on phones. Screenshots are 1170x2532, so
-         they are capped rather than allowed to run the full column height. */
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 2.5rem;
-      max-width: 720px;
-      margin: 0 auto;
-    }
-    .shots figure { margin: 0; text-align: center; }
-    .shots img {
-      display: block;
-      width: 100%;
-      max-width: 300px;
-      height: auto;
-      margin: 0 auto 1rem;
+    /* ---------- Device frames ---------- */
+    .devices { position: relative; padding-bottom: 3rem; }
+    .tablet {
+      border: 10px solid #05080c;
       border-radius: 22px;
-      border: 1px solid rgba(255,255,255,0.12);
-      box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+      background: #05080c;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+      overflow: hidden;
     }
-    .shots figcaption {
-      color: #8b8b95;
-      font-size: 0.92rem;
-      line-height: 1.5;
-      max-width: 34ch;
-      margin: 0 auto;
+    .tablet img { display: block; width: 100%; height: auto; border-radius: 10px; }
+    .phone {
+      width: 100%;
+      max-width: 270px;
+      border: 8px solid #05080c;
+      border-radius: 34px;
+      background: #05080c;
+      box-shadow: 0 24px 50px rgba(0,0,0,0.55);
+      overflow: hidden;
     }
+    .phone img { display: block; width: 100%; height: auto; border-radius: 26px; }
+    .devices .phone {
+      position: absolute;
+      right: -0.5rem;
+      bottom: 0;
+      width: 36%;
+      outline: 1px solid var(--border);
+    }
+
+    /* ---------- Audience sections ---------- */
+    section.audience { padding: 5rem 0 2rem; scroll-margin-top: 1rem; }
+    .split {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+      gap: 3.5rem;
+      align-items: center;
+    }
+    .split.flip .shot { order: 2; }
+    .split .shot .phone { margin: 0 auto; }
+    .kicker {
+      display: inline-block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.6rem;
+    }
+    .split h2 { font-size: clamp(1.8rem, 4vw, 2.5rem); line-height: 1.1; margin: 0 0 1rem; font-weight: 900; }
+    .split p { color: var(--muted); margin: 0 0 1rem; font-size: 1.05rem; }
+    .callout {
+      margin-top: 1.5rem;
+      padding: 1.1rem 1.25rem;
+      border-radius: 14px;
+      background: var(--card);
+      border-left: 4px solid var(--accent);
+    }
+    .callout strong { display: block; color: var(--ink); margin-bottom: 0.25rem; }
+    .callout p { margin: 0; font-size: 0.98rem; }
 
     /* ---------- Features ---------- */
-    section.features { padding: 4rem 0 1rem; }
+    section.features { padding: 5rem 0 1rem; }
     .section-head { text-align: center; max-width: 40ch; margin: 0 auto 2.75rem; }
     .section-head h2 { font-size: clamp(1.6rem, 4vw, 2.1rem); margin: 0 0 0.6rem; letter-spacing: -0.01em; }
     .section-head p { color: var(--muted); margin: 0; }
@@ -285,7 +378,7 @@ const alternates = [
       padding: 1.4rem 1.4rem 1.5rem; background: var(--card);
     }
     .card .ico { font-size: 1.5rem; margin-bottom: 0.6rem; }
-    .card h3 { margin: 0 0 0.35rem; font-size: 1.1rem; }
+    .card h3 { margin: 0 0 0.35rem; font-size: 1.05rem; }
     .card p { margin: 0; color: var(--muted); font-size: 0.96rem; }
 
     /* ---------- How it works ---------- */
@@ -296,7 +389,7 @@ const alternates = [
       counter-increment: step; content: counter(step);
       position: absolute; left: 1.1rem; top: 1.2rem;
       width: 1.7rem; height: 1.7rem; border-radius: 50%;
-      background: var(--accent); color: #fff; font-weight: 700; font-size: 0.9rem;
+      background: var(--accent); color: var(--on-accent); font-weight: 800; font-size: 0.9rem;
       display: grid; place-items: center;
     }
     .steps li strong { display: block; margin-bottom: 0.2rem; }
@@ -306,6 +399,7 @@ const alternates = [
     section.closing { text-align: center; padding: 4rem 0 4.5rem; }
     section.closing h2 { font-size: clamp(1.6rem, 4vw, 2.2rem); margin: 0 0 0.5rem; }
     section.closing p { color: var(--muted); margin: 0 0 1.75rem; }
+    section.closing .cta-row { justify-content: center; }
 
     /* ---------- Footer ---------- */
     footer { border-top: 1px solid var(--border); padding: 2.5rem 0 3rem; }
@@ -317,11 +411,27 @@ const alternates = [
     footer .social a { color: var(--ink); opacity: 0.85; display: inline-flex; }
     footer .social a:hover { opacity: 1; }
     footer .social svg { width: 22px; height: 22px; fill: currentColor; }
+
+    /* ---------- Narrow screens ---------- */
+    @media (max-width: 820px) {
+      .hero-grid, .split { grid-template-columns: minmax(0, 1fr); gap: 2.5rem; }
+      .hero-grid { padding-top: 2.5rem; }
+      .split.flip .shot { order: 0; }
+      .split .shot .phone { max-width: 240px; }
+      .devices { max-width: 560px; margin: 0 auto; width: 100%; }
+    }
+    @media (max-width: 420px) {
+      .paths { grid-template-columns: minmax(0, 1fr); }
+    }
   </style>
 
   <!-- ============ HERO ============ -->
+  <!-- Two audiences, two doors: players find a game, organisers run the
+       night. The devices show one of each: the board a club sees on the
+       night, and the nudge a player gets on their phone. -->
   <header class="hero">
-    <div class="wrap">
+    <div class="wrap topbar">
+      <div class="brand">NextFour</div>
       <nav class="langbar" aria-label="Language">
         {locales.map((loc) => (
           <a
@@ -332,37 +442,66 @@ const alternates = [
         ))}
       </nav>
     </div>
-    <div class="wrap body">
-      <div class="brand">NextFour</div>
-      <h1>{s.heroLine1}<br /><span class="accent">{s.heroLine2}</span></h1>
-      <p class="lead">{s.lead}</p>
-      <div class="cta-row">
-        {PLAY_URL && <a class="btn btn-primary" href={PLAY_URL}>{s.ctaPlay}</a>}
-        {APP_STORE_URL && (
-          <a class="btn btn-ghost" href={APP_STORE_URL}>{s.ctaAppStore}</a>
-        )}
+    <div class="wrap hero-grid">
+      <div>
+        <h1>{s.heroLine1}<br /><span class="accent">{s.heroLine2}</span></h1>
+        <p class="lead">{s.lead}</p>
+        <div class="paths">
+          <a class="path" href="#players"><strong>{s.pathPlayers.label}</strong><span>{s.pathPlayers.sub}</span></a>
+          <a class="path" href="#organisers"><strong>{s.pathHosts.label}</strong><span>{s.pathHosts.sub}</span></a>
+        </div>
+        <div class="cta-row">
+          {PLAY_URL && <a class="btn btn-primary" href={PLAY_URL}>{s.ctaPlay}</a>}
+          {APP_STORE_URL && <a class="btn btn-ghost" href={APP_STORE_URL}>{s.ctaAppStore}</a>}
+        </div>
+        <p class="note">{s.note}</p>
       </div>
-      <p class="note">{s.note}</p>
+      <div class="devices">
+        <div class="tablet">
+          <img src={s.heroBoard.src} alt={s.heroBoard.alt} width="720" height="430" decoding="async" fetchpriority="high" />
+        </div>
+        <div class="phone">
+          <img src={s.heroPhone.src} alt={s.heroPhone.alt} width="540" height="1116" decoding="async" />
+        </div>
+      </div>
     </div>
   </header>
 
-  <!-- ============ SHOWCASE ============ -->
-  <!-- Directly under the hero on purpose: a club organiser being asked to
-       change how they run their night wants to see the thing before reading
-       six feature cards about it. -->
-  <section class="showcase">
-    <div class="wrap">
-      <div class="section-head">
-        <h2>{s.showcaseHead}</h2>
-        <p>{s.showcaseSub}</p>
+  <!-- ============ FOR PLAYERS ============ -->
+  <section class="audience" id="players">
+    <div class="wrap split">
+      <div class="shot">
+        <div class="phone">
+          <img src={s.players.shot.src} alt={s.players.shot.alt} width="508" height="1074" loading="lazy" decoding="async" />
+        </div>
       </div>
-      <div class="shots">
-        {s.shots.map((shot) => (
-          <figure>
-            <img src={shot.src} alt={shot.alt} width="1170" height="2532" loading="lazy" decoding="async" />
-            <figcaption>{shot.caption}</figcaption>
-          </figure>
-        ))}
+      <div>
+        <span class="kicker">{s.players.kicker}</span>
+        <h2>{s.players.head}</h2>
+        <p>{s.players.body}</p>
+        <p>{s.players.night}</p>
+        <div class="callout">
+          <strong>{s.players.calloutHead}</strong>
+          <p>{s.players.calloutBody}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOR ORGANISERS ============ -->
+  <section class="audience" id="organisers">
+    <div class="wrap split flip">
+      <div class="shot">
+        <div class="phone">
+          <img src={s.hosts.shot.src} alt={s.hosts.shot.alt} width="540" height="1116" loading="lazy" decoding="async" />
+        </div>
+      </div>
+      <div>
+        <span class="kicker">{s.hosts.kicker}</span>
+        <h2>{s.hosts.head}</h2>
+        <p>{s.hosts.body}</p>
+        <p>{s.hosts.terminal}</p>
+        <p>{s.hosts.help} <a href="mailto:clubs@nextfour.app?subject=NextFour%20club%20night">clubs@nextfour.app</a>.</p>
       </div>
     </div>
   </section>
@@ -406,10 +545,10 @@ const alternates = [
     <div class="wrap">
       <h2>{s.closingHead}</h2>
       <p>{s.closingSub}</p>
-      <div class="cta-row" style="justify-content:center;">
+      <div class="cta-row">
         {PLAY_URL && <a class="btn btn-primary" href={PLAY_URL}>{s.ctaPlay}</a>}
         {APP_STORE_URL && (
-          <a class="btn btn-ghost" href={APP_STORE_URL} style="background:var(--card);color:var(--ink);border-color:var(--border);">{s.ctaAppStore}</a>
+          <a class="btn btn-ghost" href={APP_STORE_URL}>{s.ctaAppStore}</a>
         )}
       </div>
     </div>
@@ -419,7 +558,7 @@ const alternates = [
   <footer>
     <div class="wrap">
       <div class="cols">
-        <div class="brand" style="letter-spacing:0.35em;color:var(--ink);margin:0;">NextFour</div>
+        <div class="brand">NextFour</div>
         <nav>
           <a href={getRelativeLocaleUrl(lang, 'support.html')}>{s.nav.support}</a>
           <a href={getRelativeLocaleUrl(lang, 'privacy.html')}>{s.nav.privacy}</a>
