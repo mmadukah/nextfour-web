@@ -17,17 +17,18 @@ import { fileURLToPath } from 'node:url';
 
 const publicDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'public');
 
-const ACCENT = '#ff5a5a';
-const MUTED = '#c9c9d1';
-const FONT = "'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif";
+const ACCENT = '#c8f135';
+const BG = '#0f1923';
+const MUTED = '#9aa7b5';
+const FONT = "Montserrat, 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 
 /** The hero's radial gradient, plus the pegboard motif used on the right. */
 function backdrop() {
   return `
     <defs>
       <radialGradient id="bg" cx="80%" cy="0%" r="120%">
-        <stop offset="0%" stop-color="#1b1c22" />
-        <stop offset="55%" stop-color="#0c0c0f" />
+        <stop offset="0%" stop-color="#1b2a3a" />
+        <stop offset="55%" stop-color="${BG}" />
       </radialGradient>
     </defs>
     <rect width="1200" height="630" fill="url(#bg)" />
@@ -88,7 +89,7 @@ function card({ line1, line2, lead }) {
 /** Square mark used for the favicon and the apple touch icon. */
 function icon(size) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 512 512">
-    <rect width="512" height="512" rx="112" fill="#0c0c0f" />
+    <rect width="512" height="512" rx="112" fill="${BG}" />
     <circle cx="176" cy="176" r="46" fill="#ffffff" opacity="0.22" />
     <circle cx="336" cy="176" r="46" fill="#ffffff" opacity="0.22" />
     <circle cx="176" cy="336" r="46" fill="#ffffff" opacity="0.22" />
@@ -110,11 +111,11 @@ async function png(svg, name) {
 await mkdir(publicDir, { recursive: true });
 
 await png(card({
-  line1: 'Fair picks.',
-  line2: 'Every night.',
+  line1: 'Find a game.',
+  line2: 'Run the night.',
   lead: [
-    'The racket sport club manager.',
-    'Live courts, a digital pegboard and your whole crew.',
+    'The app for racket sport club nights.',
+    'Find sessions near you, or run your own.',
   ],
 }), 'og.png');
 
