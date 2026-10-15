@@ -1,0 +1,60 @@
+---
+// The landing page's QR code points here: https://nextfour.app/get.html
+//
+// A desktop visitor scans it with their phone, and the phone goes straight on
+// to its own store. Anything we can't place (a desktop that follows the link,
+// an unusual browser) gets both store buttons instead, so the page never
+// strands anyone. Not an App Links path: nothing in the app handles /get.
+import Base from '../layouts/Base.astro';
+import { PLAY_URL, APP_STORE_URL } from '../store-links';
+---
+
+<Base
+  title="Get NextFour"
+  description="Download NextFour for Android or iPhone."
+  ogDescription="Find a game near you, or run your club night."
+>
+  <style slot="head">
+    :root { color-scheme: dark; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      background: #0f1923;
+      color: #f2f5f7;
+      display: flex;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    h1 { font-size: 1.6rem; margin: 0 0 0.5rem; }
+    p { color: #9aa7b5; margin: 0 0 1.5rem; }
+    .stores { display: flex; flex-direction: column; gap: 0.75rem; max-width: 18rem; margin: 0 auto; }
+    .stores a {
+      display: block; padding: 0.8rem 1.2rem; border-radius: 10px;
+      font-weight: 700; text-decoration: none;
+      background: #192230; color: #f2f5f7; border: 1px solid #2a3a4a;
+    }
+    .stores a.primary { background: #c8f135; color: #0f1923; border-color: #c8f135; }
+  </style>
+
+  <main>
+    <h1>Get NextFour</h1>
+    <p>Find a game near you, or run your club night.</p>
+    <div class="stores">
+      {PLAY_URL && <a class="primary" href={PLAY_URL}>Get it on Google Play</a>}
+      {APP_STORE_URL && <a href={APP_STORE_URL}>Download on the App Store</a>}
+    </div>
+  </main>
+
+  <script is:inline define:vars={{ PLAY_URL, APP_STORE_URL }}>
+    // iPadOS reports itself as a Mac, so a Mac with a touch screen is an iPad.
+    const ua = navigator.userAgent;
+    const isApple = /iPhone|iPad|iPod/.test(ua) ||
+      (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    const target = /Android/.test(ua) ? PLAY_URL : isApple ? APP_STORE_URL : null;
+    if (target) location.replace(target);
+  </script>
+</Base>

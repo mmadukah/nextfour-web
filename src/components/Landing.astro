@@ -14,10 +14,12 @@ const { lang } = Astro.props;
 const locales = ['en', 'fr'] as const;
 const localeNames: Record<string, string> = { en: 'English', fr: 'Français' };
 
-type Card = { ico: string; title: string; body: string };
 type Step = { title: string; body: string };
 type Path = { label: string; sub: string };
 type Shot = { src: string; alt: string };
+// One moment of the night, shown on the device it happens on.
+type Beat = { time: string; title: string; body: string; shot: Shot; device: 'tablet' | 'phone' };
+type Plan = { name: string; body: string };
 type Strings = {
   title: string;
   description: string;
@@ -32,6 +34,7 @@ type Strings = {
   ctaPlay: string;
   ctaAppStore: string;
   note: string;
+  qr: { head: string; body: string; alt: string };
   players: {
     kicker: string;
     head: string;
@@ -49,9 +52,8 @@ type Strings = {
     help: string;
     shot: Shot;
   };
-  featuresHead: string;
-  featuresSub: string;
-  cards: Card[];
+  story: { head: string; sub: string; beats: Beat[]; ending: string };
+  pricing: { head: string; sub: string; plans: Plan[]; note: string };
   stepsHead: string;
   stepsSub: string;
   steps: Step[];
@@ -79,6 +81,7 @@ const content: Record<string, Strings> = {
     ctaPlay: 'Get it on Google Play',
     ctaAppStore: 'Download on the App Store',
     note: 'Free to get started. Built for badminton, squash, tennis, padel & table tennis.',
+    qr: { head: 'On a computer?', body: 'Scan to get the app on your phone.', alt: 'QR code linking to the NextFour app' },
     players: {
       kicker: 'For players',
       head: 'Find your next game.',
@@ -96,16 +99,45 @@ const content: Record<string, Strings> = {
       help: 'Want a hand setting up your first night? Email',
       shot: { src: '/screens/pick-sheet.webp', alt: 'The picker choosing three players for their court' },
     },
-    featuresHead: 'Everything your club night needs',
-    featuresSub: 'Stop juggling whiteboards and group chats. Run the whole session from your phone.',
-    cards: [
-      { ico: '🎯', title: 'Fair, automatic picks', body: 'No more “who’s next?” arguments. Players rotate fairly through the queue so everyone gets a game.' },
-      { ico: '📋', title: 'A digital pegboard', body: 'The queue your club already knows, made smart. Peg on, pair partners and send the next four to a free court with a tap.' },
-      { ico: '⏱️', title: 'Live sessions', body: 'See every court at a glance: who’s on, who’s next and how long they’ve waited. Updates in real time for everyone.' },
-      { ico: '📊', title: 'Stats that matter', body: 'Games played, wins and who you play with most. Players build a history without anyone keeping score on paper.' },
-      { ico: '👥', title: 'Bring your crew', body: 'Add members and guests, see who’s in tonight, and grow your community session by session.' },
-      { ico: '📱', title: 'Terminal mode', body: 'Turn a spare tablet into a courtside kiosk. Players check themselves in while hosts run the night.' },
-    ],
+    story: {
+      head: '16 players. 4 courts. One pegboard.',
+      sub: 'This is a club night on NextFour.',
+      beats: [
+        {
+          time: '7:00pm',
+          title: 'Everyone checks in',
+          body: 'Players check in on their phones or at the courtside tablet, and join the queue in the order they arrived. Nobody has to guard a whiteboard.',
+          shot: { src: '/screens/loop-queue.webp', alt: 'The live board on a tablet, opening the waiting queue' },
+          device: 'tablet',
+        },
+        {
+          time: '7:05pm',
+          title: 'The next player picks',
+          body: 'A court comes free and whoever is at the front of the queue gets a nudge. They choose three players to join them, right from their phone.',
+          shot: { src: '/screens/loop-pick.webp', alt: 'A player choosing three others to join their court' },
+          device: 'phone',
+        },
+        {
+          time: '8:30pm',
+          title: 'Even games in one tap',
+          body: 'Smart pick builds a fair game from whoever is waiting, and you can always place players yourself.',
+          shot: { src: '/screens/loop-smart-pick.webp', alt: 'Smart pick filling a court on the tablet board' },
+          device: 'tablet',
+        },
+      ],
+      ending: '10:00pm. Everyone played, nobody argued about who was next, and the organiser got on court too.',
+    },
+    pricing: {
+      head: 'Free to play. Free to host.',
+      sub: 'Paid plans add more for the people who want it.',
+      plans: [
+        { name: 'Free', body: 'Find sessions, join and play. Host as many sessions as you like, with the digital pegboard.' },
+        { name: 'Player', body: 'Your full stats and match history, your best partners and toughest rivals, and no ads.' },
+        { name: 'Pro', body: 'For organisers: the live board on a tablet, skill-based picks, King of the Court, recurring sessions and deputies.' },
+        { name: 'Club', body: 'Everything in Pro, plus club admin, player grading and dedicated courtside terminals.' },
+      ],
+      note: 'You’ll see the prices in the app before you subscribe.',
+    },
     stepsHead: 'Up and running in minutes',
     stepsSub: 'Set up a session in seconds, share it, and let the board do the rest.',
     steps: [
@@ -114,7 +146,7 @@ const content: Record<string, Strings> = {
       { title: 'Let the board run the night', body: 'The queue fills courts fairly and live, so you can focus on playing.' },
     ],
     closingHead: 'Less faff at the door. More time on court.',
-    closingSub: 'Join the clubs running their nights with NextFour.',
+    closingSub: 'Be one of the first clubs to run their nights on NextFour.',
     nav: { support: 'Support', privacy: 'Privacy', terms: 'Terms', delete: 'Account & Data Deletion' },
     questions: 'Questions? Email',
     copyright: '© 2026 NextFour. All rights reserved.',
@@ -135,6 +167,7 @@ const content: Record<string, Strings> = {
     ctaPlay: 'Disponible sur Google Play',
     ctaAppStore: 'Télécharger dans l’App Store',
     note: 'Gratuit pour commencer. Conçu pour le badminton, le squash, le tennis, le padel et le tennis de table.',
+    qr: { head: 'Sur un ordinateur ?', body: 'Scannez pour installer l’application sur votre téléphone.', alt: 'QR code vers l’application NextFour' },
     players: {
       kicker: 'Pour les joueurs',
       head: 'Trouvez votre prochain match.',
@@ -152,16 +185,45 @@ const content: Record<string, Strings> = {
       help: 'Besoin d’aide pour votre première soirée ? Écrivez à',
       shot: { src: '/screens/pick-sheet.webp', alt: 'Le joueur qui choisit trois joueurs pour son terrain' },
     },
-    featuresHead: 'Tout ce qu’il faut pour votre soirée de club',
-    featuresSub: 'Fini les tableaux blancs et les discussions de groupe. Gérez toute la session depuis votre téléphone.',
-    cards: [
-      { ico: '🎯', title: 'Des sélections équitables et automatiques', body: 'Fini les disputes du « c’est à qui ? ». Les joueurs tournent équitablement dans la file pour que chacun joue.' },
-      { ico: '📋', title: 'Un tableau numérique', body: 'La file que votre club connaît déjà, en plus intelligente. Inscrivez-vous, associez les partenaires et envoyez les quatre suivants sur un terrain libre d’une simple touche.' },
-      { ico: '⏱️', title: 'Sessions en direct', body: 'Visualisez chaque terrain d’un coup d’œil : qui joue, qui est le prochain et depuis combien de temps il attend. Mises à jour en temps réel pour tout le monde.' },
-      { ico: '📊', title: 'Des statistiques qui comptent', body: 'Parties jouées, victoires et avec qui vous jouez le plus. Les joueurs se constituent un historique sans que personne ne tienne le score sur papier.' },
-      { ico: '👥', title: 'Rassemblez votre équipe', body: 'Ajoutez des membres et des invités, voyez qui est présent ce soir et développez votre communauté session après session.' },
-      { ico: '📱', title: 'Mode Terminal', body: 'Transformez une tablette en borne au bord du terrain. Les joueurs s’enregistrent eux-mêmes pendant que les hôtes gèrent la soirée.' },
-    ],
+    story: {
+      head: '16 joueurs. 4 terrains. Un tableau.',
+      sub: 'Voici une soirée de club avec NextFour.',
+      beats: [
+        {
+          time: '19h00',
+          title: 'Tout le monde s’enregistre',
+          body: 'Les joueurs s’enregistrent sur leur téléphone ou sur la tablette au bord du terrain, et rejoignent la file dans leur ordre d’arrivée. Plus besoin de surveiller un tableau blanc.',
+          shot: { src: '/screens/loop-queue.webp', alt: 'Le tableau en direct sur une tablette, avec la file d’attente' },
+          device: 'tablet',
+        },
+        {
+          time: '19h05',
+          title: 'Le suivant choisit',
+          body: 'Un terrain se libère et la personne en tête de file reçoit une notification. Elle choisit trois joueurs pour la rejoindre, directement depuis son téléphone.',
+          shot: { src: '/screens/loop-pick.webp', alt: 'Un joueur qui choisit trois autres joueurs pour son terrain' },
+          device: 'phone',
+        },
+        {
+          time: '20h30',
+          title: 'Des matchs équilibrés en une touche',
+          body: 'La sélection intelligente compose un match équitable parmi les joueurs en attente, et vous pouvez toujours placer les joueurs vous-même.',
+          shot: { src: '/screens/loop-smart-pick.webp', alt: 'La sélection intelligente qui remplit un terrain sur la tablette' },
+          device: 'tablet',
+        },
+      ],
+      ending: '22h00. Tout le monde a joué, personne ne s’est disputé pour savoir qui passait ensuite, et l’organisateur a joué aussi.',
+    },
+    pricing: {
+      head: 'Gratuit pour jouer. Gratuit pour organiser.',
+      sub: 'Les formules payantes en offrent plus à ceux qui le souhaitent.',
+      plans: [
+        { name: 'Gratuit', body: 'Trouvez des sessions, inscrivez-vous et jouez. Organisez autant de sessions que vous voulez, avec le tableau numérique.' },
+        { name: 'Joueur', body: 'Toutes vos statistiques et votre historique, vos meilleurs partenaires et vos rivaux les plus coriaces, sans publicité.' },
+        { name: 'Pro', body: 'Pour les organisateurs : le tableau en direct sur tablette, la sélection par niveau, le Roi du terrain, les sessions récurrentes et les adjoints.' },
+        { name: 'Club', body: 'Tout Pro, plus l’administration du club, le classement des joueurs et des terminaux dédiés au bord du terrain.' },
+      ],
+      note: 'Les prix s’affichent dans l’application avant tout abonnement.',
+    },
     stepsHead: 'Opérationnel en quelques minutes',
     stepsSub: 'Créez une session en quelques secondes, partagez-la et laissez le tableau faire le reste.',
     steps: [
@@ -170,7 +232,7 @@ const content: Record<string, Strings> = {
       { title: 'Laissez le tableau gérer la soirée', body: 'La file remplit les terrains équitablement et en direct, pour que vous puissiez vous concentrer sur le jeu.' },
     ],
     closingHead: 'Moins de tracas à l’entrée. Plus de temps sur le terrain.',
-    closingSub: 'Rejoignez les clubs qui gèrent leurs soirées avec NextFour.',
+    closingSub: 'Soyez parmi les premiers clubs à gérer leurs soirées avec NextFour.',
     nav: { support: 'Assistance', privacy: 'Confidentialité', terms: 'Conditions', delete: 'Suppression du compte et des données' },
     questions: 'Des questions ? Écrivez à',
     copyright: '© 2026 NextFour. Tous droits réservés.',
@@ -366,20 +428,60 @@ const alternates = [
     .callout strong { display: block; color: var(--ink); margin-bottom: 0.25rem; }
     .callout p { margin: 0; font-size: 0.98rem; }
 
-    /* ---------- Features ---------- */
-    section.features { padding: 5rem 0 1rem; }
     .section-head { text-align: center; max-width: 40ch; margin: 0 auto 2.75rem; }
     .section-head h2 { font-size: clamp(1.6rem, 4vw, 2.1rem); margin: 0 0 0.6rem; letter-spacing: -0.01em; }
     .section-head p { color: var(--muted); margin: 0; }
 
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
-    .card {
-      border: 1px solid var(--border); border-radius: 14px;
-      padding: 1.4rem 1.4rem 1.5rem; background: var(--card);
+    /* ---------- One night, start to finish ---------- */
+    section.story { padding: 5rem 0 1rem; border-top: 1px solid var(--border); }
+    .beat { margin-bottom: 4rem; }
+    /* A tablet board takes the wider column: it is unreadable small. */
+    .beat.wide { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
+    .beat .time {
+      font-family: var(--head);
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: var(--accent);
+      margin-bottom: 0.4rem;
     }
-    .card .ico { font-size: 1.5rem; margin-bottom: 0.6rem; }
-    .card h3 { margin: 0 0 0.35rem; font-size: 1.05rem; }
-    .card p { margin: 0; color: var(--muted); font-size: 0.96rem; }
+    .beat h3 { font-size: clamp(1.4rem, 3vw, 1.8rem); line-height: 1.15; margin: 0 0 0.75rem; font-weight: 900; }
+    .beat .shot .phone { max-width: 250px; }
+    .ending {
+      max-width: 36ch;
+      margin: 0 auto;
+      text-align: center;
+      font-family: var(--head);
+      font-weight: 800;
+      font-size: clamp(1.15rem, 2.6vw, 1.45rem);
+      line-height: 1.35;
+    }
+
+    /* ---------- Pricing ---------- */
+    section.pricing { padding: 5rem 0 1rem; }
+    .plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+    .plan {
+      border: 1px solid var(--border); border-radius: 14px;
+      padding: 1.3rem 1.3rem 1.4rem; background: var(--card);
+    }
+    .plan h3 { margin: 0 0 0.35rem; font-size: 1.05rem; }
+    .plan p { margin: 0; color: var(--muted); font-size: 0.96rem; }
+    .plan:first-child { border-color: var(--accent); }
+    .plans-note { text-align: center; color: var(--muted); font-size: 0.88rem; margin: 1.25rem 0 0; }
+
+    /* ---------- QR for desktop visitors ---------- */
+    /* Only on a wide screen with a mouse: on a phone the store buttons are
+       the way in, and a QR there would be one more thing to scroll past. */
+    .qr { display: none; }
+    @media (min-width: 821px) and (hover: hover) and (pointer: fine) {
+      .qr {
+        display: flex; align-items: center; gap: 0.9rem;
+        margin-top: 1.5rem; padding: 0.75rem; max-width: 22rem;
+        background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      }
+    }
+    .qr img { width: 88px; height: 88px; border-radius: 8px; flex: none; }
+    .qr strong { display: block; font-size: 0.95rem; }
+    .qr span { color: var(--muted); font-size: 0.88rem; }
 
     /* ---------- How it works ---------- */
     section.steps { padding: 3.5rem 0; }
@@ -414,7 +516,7 @@ const alternates = [
 
     /* ---------- Narrow screens ---------- */
     @media (max-width: 820px) {
-      .hero-grid, .split { grid-template-columns: minmax(0, 1fr); gap: 2.5rem; }
+      .hero-grid, .split, .beat.wide { grid-template-columns: minmax(0, 1fr); gap: 2.5rem; }
       .hero-grid { padding-top: 2.5rem; }
       .split.flip .shot { order: 0; }
       .split .shot .phone { max-width: 240px; }
@@ -455,6 +557,10 @@ const alternates = [
           {APP_STORE_URL && <a class="btn btn-ghost" href={APP_STORE_URL}>{s.ctaAppStore}</a>}
         </div>
         <p class="note">{s.note}</p>
+        <div class="qr">
+          <img src="/get-app-qr.svg" alt={s.qr.alt} width="88" height="88" />
+          <div><strong>{s.qr.head}</strong><span>{s.qr.body}</span></div>
+        </div>
       </div>
       <div class="devices">
         <div class="tablet">
@@ -506,22 +612,56 @@ const alternates = [
     </div>
   </section>
 
-  <!-- ============ FEATURES ============ -->
-  <section class="features">
+  <!-- ============ ONE NIGHT ============ -->
+  <!-- One club night told in three moments, each on the device it happens
+       on. The loops are the app's own host intro (racket-manager-app
+       assets/onboarding), so the site shows the real product moving. -->
+  <section class="story">
     <div class="wrap">
       <div class="section-head">
-        <h2>{s.featuresHead}</h2>
-        <p>{s.featuresSub}</p>
+        <h2>{s.story.head}</h2>
+        <p>{s.story.sub}</p>
       </div>
-      <div class="grid">
-        {s.cards.map((card) => (
-          <div class="card">
-            <div class="ico">{card.ico}</div>
-            <h3>{card.title}</h3>
-            <p>{card.body}</p>
+      {s.story.beats.map((beat, i) => (
+        <div class:list={['split', 'beat', { flip: i % 2 === 1, wide: beat.device === 'tablet' }]}>
+          <div class="shot">
+            {beat.device === 'tablet' ? (
+              <div class="tablet">
+                <img src={beat.shot.src} alt={beat.shot.alt} width="720" height="430" loading="lazy" decoding="async" />
+              </div>
+            ) : (
+              <div class="phone">
+                <img src={beat.shot.src} alt={beat.shot.alt} width="540" height="1116" loading="lazy" decoding="async" />
+              </div>
+            )}
+          </div>
+          <div>
+            <div class="time">{beat.time}</div>
+            <h3>{beat.title}</h3>
+            <p>{beat.body}</p>
+          </div>
+        </div>
+      ))}
+      <p class="ending">{s.story.ending}</p>
+    </div>
+  </section>
+
+  <!-- ============ PRICING ============ -->
+  <section class="pricing">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>{s.pricing.head}</h2>
+        <p>{s.pricing.sub}</p>
+      </div>
+      <div class="plans">
+        {s.pricing.plans.map((plan) => (
+          <div class="plan">
+            <h3>{plan.name}</h3>
+            <p>{plan.body}</p>
           </div>
         ))}
       </div>
+      <p class="plans-note">{s.pricing.note}</p>
     </div>
   </section>
 
