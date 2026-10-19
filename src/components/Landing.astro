@@ -470,12 +470,13 @@ const alternates = [
 
     /* ---------- QR for desktop visitors ---------- */
     /* Only on a wide screen with a mouse: on a phone the store buttons are
-       the way in, and a QR there would be one more thing to scroll past. */
+       the way in, and a QR there would be one more thing to scroll past.
+       It sits under the closing buttons, not in the hero, to keep the top clean. */
     .qr { display: none; }
     @media (min-width: 821px) and (hover: hover) and (pointer: fine) {
       .qr {
-        display: flex; align-items: center; gap: 0.9rem;
-        margin-top: 1.5rem; padding: 0.75rem; max-width: 22rem;
+        display: flex; align-items: center; gap: 0.9rem; text-align: left;
+        margin: 2rem auto 0; padding: 0.75rem; max-width: 22rem;
         background: var(--card); border: 1px solid var(--border); border-radius: 14px;
       }
     }
@@ -557,10 +558,6 @@ const alternates = [
           {APP_STORE_URL && <a class="btn btn-ghost" href={APP_STORE_URL}>{s.ctaAppStore}</a>}
         </div>
         <p class="note">{s.note}</p>
-        <div class="qr">
-          <img src="/get-app-qr.svg" alt={s.qr.alt} width="88" height="88" />
-          <div><strong>{s.qr.head}</strong><span>{s.qr.body}</span></div>
-        </div>
       </div>
       <div class="devices">
         <div class="tablet">
@@ -690,6 +687,10 @@ const alternates = [
         {APP_STORE_URL && (
           <a class="btn btn-ghost" href={APP_STORE_URL}>{s.ctaAppStore}</a>
         )}
+      </div>
+      <div class="qr">
+        <img src="/get-app-qr.svg" alt={s.qr.alt} width="88" height="88" />
+        <div><strong>{s.qr.head}</strong><span>{s.qr.body}</span></div>
       </div>
     </div>
   </section>
