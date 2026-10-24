@@ -256,15 +256,31 @@ const alternates = [
   lang={lang}
 >
   <Fragment slot="head">
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&family=Nunito+Sans:wght@400;600;700&display=swap" />
+    <link rel="preload" href="/fonts/montserrat-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/nunito-sans-latin.woff2" as="font" type="font/woff2" crossorigin />
     {alternates.map((alt) => (
       <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
     ))}
   </Fragment>
 
   <style is:global>
+    /* Fonts are self-hosted (latin subset, variable weight). Loading them
+       from Google would send every visitor's IP address to Google. */
+    @font-face {
+      font-family: 'Montserrat';
+      font-style: normal;
+      font-weight: 800 900;
+      font-display: swap;
+      src: url(/fonts/montserrat-latin.woff2) format('woff2');
+    }
+    @font-face {
+      font-family: 'Nunito Sans';
+      font-style: normal;
+      font-weight: 400 700;
+      font-display: swap;
+      src: url(/fonts/nunito-sans-latin.woff2) format('woff2');
+    }
+
     /* Brand kit: the same navy, card and lime as the app and the social
        posts, so a visitor arriving from either recognises the page. */
     :root {
