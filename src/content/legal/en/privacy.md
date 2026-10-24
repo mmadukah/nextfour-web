@@ -1,6 +1,6 @@
 ---
 title: Privacy Policy
-meta: "Last updated: 10 October 2026"
+meta: "Last updated: 24 October 2026"
 ---
 
 This Privacy Policy explains how NextFour ("we", "us", "our") collects, uses, stores, and shares your personal data when you use the NextFour mobile application and related services (the "Service"). The Service is provided by NextFour Ltd, a company registered in England and Wales, and we comply with the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018.
@@ -27,6 +27,7 @@ We collect only the data needed to operate the Service:
 - **Device information**: a push notification token, and for terminal/kiosk activations, a device name, device identifier, and last-seen timestamp.
 - **Advertising data**: the free tier shows ads from Google AdMob. AdMob receives your device's advertising identifier and IP address, and we pass it the sports you play so ads are relevant. Whether ads are personalised depends on the choice you make in the consent prompt, which you can change later (see section 3).
 - **Usage and diagnostic data**: app events (such as signing up or joining a session) through Firebase Analytics and our own event log, and crash reports through Firebase Crashlytics. Firebase data is not linked to your name; our own event log is linked to your account.
+- **Reports, blocks and agreement**: if you report a player, club or session, we keep your report and the reason you give, and email it to our moderators so they can review it. If you block a player, we keep the block so it stays in place. The person you report or block is not told. We also record when you agreed to our Terms and this Privacy Policy.
 
 The camera is used only when you take a profile or club photo or scan a kiosk QR code. We do not access your contacts or microphone, and we access your device's location only as described above.
 

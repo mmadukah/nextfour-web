@@ -1,6 +1,6 @@
 ---
 title: Politique de confidentialité
-meta: "Dernière mise à jour : 10 octobre 2026"
+meta: "Dernière mise à jour : 24 octobre 2026"
 ---
 
 La présente Politique de confidentialité explique comment NextFour (« nous », « notre ») collecte, utilise, conserve et partage vos données personnelles lorsque vous utilisez l'application mobile NextFour et les services associés (le « Service »). Le Service est fourni par NextFour Ltd, société immatriculée en Angleterre et au pays de Galles, et nous nous conformons au Règlement général sur la protection des données du Royaume-Uni (UK GDPR) ainsi qu'au Data Protection Act 2018.
@@ -27,6 +27,7 @@ Nous ne collectons que les données nécessaires au fonctionnement du Service :
 - **Informations sur l'appareil**: un jeton de notifications push et, pour les activations de terminaux/bornes, un nom d'appareil, un identifiant d'appareil et un horodatage de dernière connexion.
 - **Données publicitaires**: la formule gratuite affiche des publicités de Google AdMob. AdMob reçoit l'identifiant publicitaire de votre appareil et votre adresse IP, et nous lui transmettons les sports que vous pratiquez afin que les publicités soient pertinentes. La personnalisation des publicités dépend du choix que vous faites dans la demande de consentement, que vous pouvez modifier ensuite (voir la section 3).
 - **Données d'utilisation et de diagnostic**: événements de l'application (par exemple l'inscription ou la participation à une séance) via Firebase Analytics et notre propre journal d'événements, et rapports de plantage via Firebase Crashlytics. Les données Firebase ne sont pas liées à votre nom ; notre propre journal d'événements est lié à votre compte.
+- **Signalements, blocages et acceptation**: si vous signalez un joueur, un club ou une séance, nous conservons votre signalement et le motif indiqué, et l'envoyons par e-mail à nos modérateurs pour examen. Si vous bloquez un joueur, nous conservons le blocage pour qu'il reste en place. La personne signalée ou bloquée n'en est pas informée. Nous enregistrons aussi la date à laquelle vous avez accepté nos Conditions et la présente Politique de confidentialité.
 
 L'appareil photo n'est utilisé que pour prendre une photo de profil ou de club, ou pour scanner le QR code d'une borne. Nous n'accédons ni à vos contacts ni à votre microphone, et nous n'accédons à la localisation de votre appareil que dans les conditions décrites ci-dessus.
 
