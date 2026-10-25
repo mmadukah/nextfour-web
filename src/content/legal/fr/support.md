@@ -40,7 +40,7 @@ Besoin d'aide avec NextFour ? La plupart des questions trouvent leur réponse ci
 
 <dl class="faq">
   <dt>Qu'est-ce que les formules payantes débloquent ?</dt>
-  <dd>NextFour est gratuit pour les soirées de club essentielles. Les formules payantes débloquent des fonctionnalités supplémentaires telles que la sélection Pegboard et Par niveau, le mode Terminal (tablette près des terrains), et plus encore.</dd>
+  <dd>Organiser est gratuit : autant de sessions que vous voulez, avec la sélection Pegboard ou Manuelle et le tableau de session sur une tablette au bord du terrain. Pro ajoute la sélection Par niveau, le Roi du terrain, les binômes, les adjoints, l'annonce des noms à voix haute et l'enregistrement par QR code ou NFC. Club ajoute l'administration du club, le classement des joueurs et des terminaux Tableau de club dédiés. Voir <a href="/fr/how-it-works.html">Comment ça marche</a> pour la liste complète.</dd>
 
   <dt>Comment gérer ou annuler mon abonnement ?</dt>
   <dd>

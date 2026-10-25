@@ -20,7 +20,7 @@ Need a hand with NextFour? Most questions are answered below. If you're still st
   <dd>Sign in, tap to create a new session, set the date, courts and how you want players picked (Pegboard, Skill-based or Manual), then share it with your members.</dd>
 
   <dt>What is Pegboard mode?</dt>
-  <dd>It's the classic club pegboard, made digital. Players "peg on" when they arrive, the queue updates live, and courts fill fairly in the right order as games finish. Everyone can see who's next without crowding the board.</dd>
+  <dd>It's the classic club pegboard, made digital. Players "peg on" when they arrive, the queue updates live, and courts fill fairly in the right order as games finish. Everyone can see who's next without crowding the board. <a href="/how-it-works.html">How it works</a> sets out the exact rules.</dd>
 
   <dt>How do players check in / peg on?</dt>
   <dd>Players open the session and check in from their phone. You can also run NextFour on a tablet by the courts (Terminal mode) so players check themselves in there.</dd>
@@ -40,7 +40,7 @@ Need a hand with NextFour? Most questions are answered below. If you're still st
 
 <dl class="faq">
   <dt>What do the paid plans unlock?</dt>
-  <dd>NextFour is free to use for core club nights. Paid plans unlock additional features such as Pegboard and Skill-based picking, Terminal (courtside tablet) mode, and more.</dd>
+  <dd>Hosting is free: as many sessions as you like, with Pegboard or Manual picking and the Session Board on a courtside tablet. Pro adds Skill-based picking, King of the Court, player pairing, deputies, calling names aloud and QR or NFC check-in. Club adds club admin, player grading and dedicated Club Board terminals. See <a href="/how-it-works.html">How it works</a> for the full list.</dd>
 
   <dt>How do I manage or cancel my subscription?</dt>
   <dd>

@@ -14,6 +14,7 @@ The legal / prose pages live as Markdown in `src/content/legal/`:
 | `terms.md` | `/terms.html` |
 | `support.md` | `/support.html` |
 | `delete-account.md` | `/delete-account.html` |
+| `how-it-works.md` | `/how-it-works.html` |
 
 Each file starts with a small frontmatter block:
 

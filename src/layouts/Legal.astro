@@ -22,6 +22,7 @@ const ui: Record<string, { home: string; crumbs: Record<string, string> }> = {
   en: {
     home: 'Home',
     crumbs: {
+      'how-it-works': 'How it works',
       privacy: 'Privacy Policy',
       terms: 'Terms & Conditions',
       support: 'Support',
@@ -31,6 +32,7 @@ const ui: Record<string, { home: string; crumbs: Record<string, string> }> = {
   fr: {
     home: 'Accueil',
     crumbs: {
+      'how-it-works': 'Comment ça marche',
       privacy: 'Politique de confidentialité',
       terms: 'Conditions générales',
       support: 'Assistance',
@@ -39,7 +41,7 @@ const ui: Record<string, { home: string; crumbs: Record<string, string> }> = {
   },
 };
 const t = ui[lang] ?? ui.en;
-const crumbSlugs = ['privacy', 'terms', 'support', 'delete-account'];
+const crumbSlugs = ['how-it-works', 'privacy', 'terms', 'support', 'delete-account'];
 
 // hreflang alternates for the <head>, including x-default -> English.
 const alternates = [
