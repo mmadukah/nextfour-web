@@ -120,6 +120,8 @@ There is no offline mode yet.
 ## Attendance and planning
 
 - **Availability polls (free):** ask your players who can make the next session and see replies as they arrive. You can record answers yourself for people who tell you in person.
+- **Attendance reports (Pro):** see who came to each night, with their check-in time, games played and who was there for the first time. Over the last 4 weeks, 3 months, 12 months or all time, the report shows the number of nights, the average turnout, a chart of turnout by night and every player's nights and games. A regular who came to at least 3 nights but has missed the latest 3 is marked **Lapsed**, so you can get in touch. Export it as a spreadsheet (CSV), one row per player per night.
+- **Who counts as attending:** anyone checked in on the night, plus anyone who played a game, so a player who left early or a night entered afterwards is still counted. Only the organiser and deputies can see it.
 - Every game is kept with the session. On any paid plan, the session's match history lists them all and can be filtered to one night.
 - An organiser can run several sessions at the same time, such as two halls on one night.
 
@@ -131,7 +133,7 @@ NextFour doesn't take payments. You can show the price per person on a session, 
 
 - **Free:** find sessions, join and play. Host as many sessions as you like with pegboard or manual picking, the Session Board and availability polls.
 - **Player:** your full stats and match history, best partners and toughest rivals, and no ads.
-- **Pro:** skill-based picking, King of the Court, player pairing, deputies, calling names aloud, QR and NFC check-in, recurring sessions and invite-only sessions.
+- **Pro:** skill-based picking, King of the Court, player pairing, deputies, calling names aloud, QR and NFC check-in, recurring sessions, invite-only sessions and attendance reports.
 - **Club:** everything in Pro, plus club admin, player grading, club leaderboards and dedicated Club Board terminals.
 
 You'll see the prices in the app before you subscribe. Subscriptions are billed through the App Store or Google Play.

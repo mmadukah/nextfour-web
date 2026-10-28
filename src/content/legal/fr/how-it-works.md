@@ -120,6 +120,8 @@ Il n’y a pas encore de mode hors ligne.
 ## Présence et organisation
 
 - **Sondages de disponibilité (gratuit) :** demandez à vos joueurs qui peut venir à la prochaine session et voyez les réponses arriver. Vous pouvez saisir vous-même les réponses données de vive voix.
+- **Rapports de présence (Pro) :** voyez qui est venu à chaque soirée, avec l’heure d’enregistrement, le nombre de matchs joués et qui venait pour la première fois. Sur les 4 dernières semaines, 3 derniers mois, 12 derniers mois ou depuis le début, le rapport montre le nombre de soirées, la présence moyenne, un graphique de la présence par soirée, et les soirées et matchs de chaque joueur. Un habitué venu à au moins 3 soirées mais absent des 3 dernières est signalé **Perdu de vue**, pour que vous puissiez le recontacter. Exportez-le en tableur (CSV), une ligne par joueur et par soirée.
+- **Qui compte comme présent :** toute personne enregistrée ce soir-là, plus toute personne qui a joué un match, donc un joueur parti tôt ou une soirée saisie après coup est quand même compté. Seuls l’organisateur et ses adjoints peuvent le voir.
 - Chaque match est gardé avec la session. Avec n’importe quelle formule payante, l’historique de la session les liste tous et peut être filtré sur une soirée.
 - Un organisateur peut gérer plusieurs sessions en même temps, par exemple deux salles le même soir.
 
@@ -131,7 +133,7 @@ NextFour ne gère pas les paiements. Vous pouvez afficher le prix par personne d
 
 - **Gratuit :** trouvez des sessions, inscrivez-vous et jouez. Organisez autant de sessions que vous voulez avec la sélection Pegboard ou manuelle, le tableau de session et les sondages de disponibilité.
 - **Joueur :** toutes vos statistiques et votre historique, vos meilleurs partenaires et vos rivaux les plus coriaces, sans publicité.
-- **Pro :** la sélection par niveau, le Roi du terrain, les binômes, les adjoints, l’annonce des noms à voix haute, l’enregistrement par QR code et NFC, les sessions récurrentes et les sessions sur invitation.
+- **Pro :** la sélection par niveau, le Roi du terrain, les binômes, les adjoints, l’annonce des noms à voix haute, l’enregistrement par QR code et NFC, les sessions récurrentes, les sessions sur invitation et les rapports de présence.
 - **Club :** tout Pro, plus l’administration du club, le classement des joueurs, les classements du club et des terminaux Tableau de club dédiés.
 
 Les prix s’affichent dans l’application avant tout abonnement. Les abonnements sont facturés via l’App Store ou Google Play.
