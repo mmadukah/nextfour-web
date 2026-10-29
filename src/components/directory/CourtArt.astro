@@ -1,0 +1,21 @@
+---
+// A badminton court in outline, the lime net across it: the venue image slot
+// until venues have photos of their own (REDESIGN-BRIEF: never a generic
+// stock image). Drawn on whatever tint its container sets.
+interface Props { width?: number }
+const { width = 160 } = Astro.props;
+const line = { stroke: '#FFFFFF', 'stroke-opacity': '0.6', 'stroke-width': '1.2' };
+---
+
+<svg viewBox="0 0 160 120" width={width} height={width * 0.75} fill="none" aria-hidden="true">
+  <rect x="10" y="14" width="140" height="92" {...line}></rect>
+  <line x1="10" y1="21" x2="150" y2="21" {...line}></line>
+  <line x1="10" y1="99" x2="150" y2="99" {...line}></line>
+  <line x1="18" y1="14" x2="18" y2="106" {...line}></line>
+  <line x1="142" y1="14" x2="142" y2="106" {...line}></line>
+  <line x1="59" y1="14" x2="59" y2="106" {...line}></line>
+  <line x1="101" y1="14" x2="101" y2="106" {...line}></line>
+  <line x1="10" y1="60" x2="59" y2="60" {...line}></line>
+  <line x1="101" y1="60" x2="150" y2="60" {...line}></line>
+  <line x1="80" y1="8" x2="80" y2="112" stroke="#C8F135" stroke-width="2.4"></line>
+</svg>

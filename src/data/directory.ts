@@ -450,3 +450,42 @@ export function photoIndex(id: string): number {
 export function clubPhoto(id: string): { src: string; position: string } {
   return PHOTOS[photoIndex(id)];
 }
+
+// ---------------------------------------------------------------------------
+// Club details page
+// ---------------------------------------------------------------------------
+
+const POSTCODE = /\b([A-Z]{1,2}\d[A-Z\d]?)\s*(\d[A-Z]{2})\b/i;
+
+/**
+ * The venue's address as lines for an <address>: the venue name dropped when
+ * the address repeats it, and the postcode in capitals ("BS31 1HE", never
+ * "Bs31 1he", which some sources send).
+ */
+export function addressLines(venue: RawVenue): string[] {
+  const parts = (venue.address ?? '').split(',').map((p) => p.trim()).filter(Boolean);
+  const lines = parts.filter((p, i) => !(i === 0 && p.toLowerCase() === venue.name.toLowerCase()))
+    .filter((p) => !/^(UK|United Kingdom|England|Wales|Scotland|Northern Ireland)$/i.test(p));
+  return lines.map((p) => p.replace(POSTCODE, (_, out: string, inn: string) => `${out.toUpperCase()} ${inn.toUpperCase()}`));
+}
+
+/** A steady tint for the club's court illustration, from its id (the mockups' palette). */
+const TINTS = ['#1F4D3A', '#2C5873', '#7A4A2A', '#4B3F72', '#5E5B22'];
+export function clubTint(id: string): string {
+  const value = parseInt(id.replace(/-/g, '').slice(-8), 16);
+  return TINTS[Number.isNaN(value) ? 0 : value % TINTS.length];
+}
+
+/** The fact strip's time: the one time every night shares, or "Varies". */
+export function clubTimeText(club: Club): string {
+  const times = [...new Set(club.nights.map(timeRange))];
+  return times.length === 1 ? times[0] : 'Varies';
+}
+
+/** The fact strip's days, short: "Mondays", "Tue and Thu". */
+export function clubDaysShort(club: Club): string {
+  const days = [...new Set(club.nights.flatMap((n) => n.days))].sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7));
+  if (days.length === 0) return 'One-off';
+  if (days.length === 1) return `${DAY_NAMES[days[0]]}s`;
+  return listText(days.map((d) => SHORT_DAYS[d]));
+}

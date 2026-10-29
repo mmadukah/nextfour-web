@@ -59,7 +59,7 @@ const ld = [breadcrumbLd, ...jsonLd];
       --ink: #12261C; --muted: #50605A; --body: #33443B; --eyebrow: #3B6B2E; --link-hover: #3B6B2E;
       --sel-bg: #12261C; --sel-fg: #C8F135; --chip-bg: #12261C; --chip-fg: #F3F5EF; --hl-bg: #C8F135; --hl-fg: #12261C;
       --seg-on: #3B6B2E; --seg-off: #D3DACF; --tag-bg: #E9F7C2; --tag-fg: #2C4A12; --tag2-bg: #ECEFEA; --tag2-fg: #50605A;
-      --warn-bg: #FDE6E1; --warn-fg: #9A3324;
+      --alert-bg: #FDE6E1; --alert-fg: #9A3324; --warn-bg: #FFF4D6; --warn-fg: #6A4A00;
       --btn-bg: #12261C; --btn-fg: #F3F5EF; --logo-bg: #12261C; --logo-fg: #C8F135; --empty-day: #5D6B64;
       --cta-bg: #12261C; --cta-head: #C8F135; --cta-body: #D5DDD3; --cta-btn-bg: #C8F135; --cta-btn-fg: #12261C; --cta-btn2: #F3F5EF;
       --font: 'Archivo', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -73,7 +73,7 @@ const ld = [breadcrumbLd, ...jsonLd];
         --ink: #EEF2F5; --muted: #9EABB8; --body: #C6CFD8; --eyebrow: #C8F135; --link-hover: #C8F135;
         --sel-bg: #C8F135; --sel-fg: #0F1720; --chip-bg: #2C3947; --chip-fg: #EEF2F5; --hl-bg: #C8F135; --hl-fg: #0F1720;
         --seg-on: #A8D84A; --seg-off: #34404D; --tag-bg: #26340F; --tag-fg: #D4F27A; --tag2-bg: #232D38; --tag2-fg: #9EABB8;
-        --warn-bg: #3A1F1C; --warn-fg: #FFB4A8;
+        --alert-bg: #3A1F1C; --alert-fg: #FFB4A8; --warn-bg: #3A2F12; --warn-fg: #F2D589;
         --btn-bg: #C8F135; --btn-fg: #0F1720; --logo-bg: #C8F135; --logo-fg: #0F1720; --empty-day: #7F8C99;
         --cta-bg: #C8F135; --cta-head: #0F1720; --cta-body: #2A3A1A; --cta-btn-bg: #0F1720; --cta-btn-fg: #C8F135; --cta-btn2: #0F1720;
       }
@@ -84,7 +84,7 @@ const ld = [breadcrumbLd, ...jsonLd];
       --ink: #EEF2F5; --muted: #9EABB8; --body: #C6CFD8; --eyebrow: #C8F135; --link-hover: #C8F135;
       --sel-bg: #C8F135; --sel-fg: #0F1720; --chip-bg: #2C3947; --chip-fg: #EEF2F5; --hl-bg: #C8F135; --hl-fg: #0F1720;
       --seg-on: #A8D84A; --seg-off: #34404D; --tag-bg: #26340F; --tag-fg: #D4F27A; --tag2-bg: #232D38; --tag2-fg: #9EABB8;
-      --warn-bg: #3A1F1C; --warn-fg: #FFB4A8;
+      --alert-bg: #3A1F1C; --alert-fg: #FFB4A8; --warn-bg: #3A2F12; --warn-fg: #F2D589;
       --btn-bg: #C8F135; --btn-fg: #0F1720; --logo-bg: #C8F135; --logo-fg: #0F1720; --empty-day: #7F8C99;
       --cta-bg: #C8F135; --cta-head: #0F1720; --cta-body: #2A3A1A; --cta-btn-bg: #0F1720; --cta-btn-fg: #C8F135; --cta-btn2: #0F1720;
     }
@@ -132,7 +132,7 @@ const ld = [breadcrumbLd, ...jsonLd];
     .tag { font-size: 13px; font-weight: 600; padding: 5px 10px; border-radius: 999px; background: var(--tag2-bg); color: var(--tag2-fg); white-space: nowrap; }
     .tag.ok { background: var(--tag-bg); color: var(--tag-fg); }
     .tag.lime { background: var(--hl-bg); color: var(--hl-fg); }
-    .tag.warn { background: var(--warn-bg); color: var(--warn-fg); }
+    .tag.alert { background: var(--alert-bg); color: var(--alert-fg); }
 
     .btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 20px;

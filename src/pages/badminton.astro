@@ -370,7 +370,7 @@ const LEVELS = [['', 'Any level'], ['1', 'Beginner'], ['2', 'Intermediate'], ['3
             <div class="cc-tags">
               ${dist != null ? `<span class="tag">${dist < 1 ? 'Under 1' : Math.round(dist)} km away</span>` : ''}
               ${r.x ? '<span class="tag lime">Runs on NextFour</span>' : ''}
-              ${r.o ? '' : '<span class="tag warn">Not taking new players</span>'}
+              ${r.o ? '' : '<span class="tag alert">Not taking new players</span>'}
               ${r.t ? '<span class="tag ok">Visitor terms listed</span>' : '<span class="tag">No visitor info yet</span>'}
             </div>
           </div>

@@ -29,7 +29,7 @@ const membersOnly = detail && clubTakesNewPlayers && !n.takingNewPlayers;
   {(extras.length > 0 || membersOnly) && (
     <span class="nl-extra">
       {extras.join(' · ')}
-      {membersOnly && <span class="tag warn">Members only</span>}
+      {membersOnly && <span class="tag alert">Members only</span>}
     </span>
   )}
 </li>

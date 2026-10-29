@@ -29,7 +29,7 @@ const days = [...new Set(rows.map((r) => r.day).filter((d) => d != null))];
       </div>
       <div class="cc-tags">
         {club.claimed && <span class="tag lime">Runs on NextFour</span>}
-        {!club.takingNewPlayers && <span class="tag warn">Not taking new players</span>}
+        {!club.takingNewPlayers && <span class="tag alert">Not taking new players</span>}
         {club.visitorPolicy ? <span class="tag ok">Visitor terms listed</span> : <span class="tag">No visitor info yet</span>}
       </div>
     </div>
