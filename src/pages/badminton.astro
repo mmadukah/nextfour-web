@@ -108,6 +108,7 @@ const crumbs = [
   <p id="status" aria-live="polite"></p>
   <ul id="results"></ul>
 
+  <div id="browse">
   {nations.map((n) => (
     <>
       <h2>Badminton in {n.name}</h2>
@@ -129,6 +130,7 @@ const crumbs = [
       </ul>
     </>
   )}
+  </div>
 
   <script>
     type Row = { n: string; u: string; a: string; v: string; lat: number; lng: number; d: number[]; l: [number, number]; o: number; x: number };
@@ -142,6 +144,9 @@ const crumbs = [
     const open = document.getElementById('open') as HTMLInputElement;
     const status = document.getElementById('status')!;
     const results = document.getElementById('results')!;
+    // The area lists are for browsing; a search hides them (they stay in the
+    // HTML, so crawlers still follow every link).
+    const browse = document.getElementById('browse')!;
 
     let rows: Row[] | null = null;
     let districts: [string, number, number, string][] | null = null;
@@ -226,6 +231,7 @@ const crumbs = [
     async function run() {
       const all = await index();
       const text = q.value.trim();
+      browse.hidden = Boolean(text || origin);
       if (!text && !origin) { status.textContent = ''; results.innerHTML = ''; return; }
       const where = origin ?? (text ? await place(text) : null);
       if (where) {
