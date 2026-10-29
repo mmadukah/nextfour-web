@@ -354,3 +354,99 @@ export function nextDate(day: number, from: Date): string {
   d.setUTCDate(d.getUTCDate() + ((day - d.getUTCDay() + 7) % 7));
   return d.toISOString().slice(0, 10);
 }
+
+// ---------------------------------------------------------------------------
+// Pieces for the page design
+// ---------------------------------------------------------------------------
+
+export const SHORT_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+/** Monday first, as UK clubs list their week. */
+export const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
+
+/** One line per night and weekday: a Tuesday-and-Thursday session is two rows. */
+export interface NightRow {
+  night: Night;
+  /** 0 Sunday .. 6 Saturday, or the weekday a one-off falls on. */
+  day: number | null;
+  label: string;
+}
+
+export function nightRows(club: Club): NightRow[] {
+  return club.nights.flatMap((n) => {
+    if (n.days.length) return n.days.map((d) => ({ night: n, day: d, label: DAY_NAMES[d] }));
+    if (!n.date) return [{ night: n, day: null, label: 'One-off' }];
+    const date = new Date(`${n.date}T12:00:00`);
+    const label = date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+    return [{ night: n, day: date.getDay(), label }];
+  });
+}
+
+/** Rows a day at a time, in week order from Monday; one-offs last. */
+export function sortedRows(club: Club): NightRow[] {
+  const rank = (r: NightRow) => (r.night.days.length && r.day != null ? (r.day + 6) % 7 : 7);
+  return nightRows(club).sort((a, b) => rank(a) - rank(b) || a.night.start.localeCompare(b.night.start));
+}
+
+/** Nights on each weekday across [clubs], indexed 0 Sunday .. 6 Saturday. */
+export function nightsPerDay(clubs: Club[]): number[] {
+  const counts = [0, 0, 0, 0, 0, 0, 0];
+  for (const c of clubs) for (const r of nightRows(c)) if (r.day != null) counts[r.day]++;
+  return counts;
+}
+
+/** "2h 30m", or null when the club publishes no finish time. */
+export function durationText(n: Night): string | null {
+  if (!n.end) return null;
+  const mins = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));
+  let d = mins(n.end) - mins(n.start);
+  if (d <= 0) d += 24 * 60;
+  const h = Math.floor(d / 60);
+  const m = d % 60;
+  return h ? `${h}h${m ? ` ${m}m` : ''}` : `${m}m`;
+}
+
+/** "19:15 – 21:45", or "from 19:15". */
+export function timeRange(n: Night): string {
+  return n.end ? `${n.start} – ${n.end}` : `from ${n.start}`;
+}
+
+/**
+ * The level range on three bars, Beginner, Intermediate, Advanced: upper
+ * intermediate counts as intermediate, professional as advanced.
+ */
+export function levelBars(n: Night): [number, number] {
+  const bar = (rank: number) => (rank <= 1 ? 1 : rank <= 3 ? 2 : 3);
+  return [bar(n.levelRange[0]), bar(n.levelRange[1])];
+}
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+/** "19 Sep 2026" (en-GB's own short month is "Sept"). */
+export function shortDate(d: Date | null): string | null {
+  return d ? `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}` : null;
+}
+
+/** The newest "last checked" date among [clubs]. */
+export function newestCheck(clubs: Club[]): Date | null {
+  const t = clubs.reduce((m, c) => Math.max(m, c.lastChecked?.getTime() ?? 0), 0);
+  return t ? new Date(t) : null;
+}
+
+/**
+ * The club's card photo: the same picture the app shows for that club, picked
+ * from its id exactly as racket-manager-app's backgroundVariantIndex does
+ * (lib/shared/utils/sport_background.dart), in the same order. `position` is
+ * the app's crop alignment as CSS object-position.
+ */
+export const PHOTOS = [
+  { src: '/photos/badminton-grip.webp', position: '50% 50%' },
+  { src: '/photos/badminton-shuttle.webp', position: '50% 25%' },
+  { src: '/photos/badminton-jump.webp', position: '50% 50%' },
+  { src: '/photos/badminton-strings.webp', position: '50% 80%' },
+];
+export function photoIndex(id: string): number {
+  const value = parseInt(id.replace(/-/g, '').slice(-8), 16);
+  return Number.isNaN(value) ? 0 : value % PHOTOS.length;
+}
+export function clubPhoto(id: string): { src: string; position: string } {
+  return PHOTOS[photoIndex(id)];
+}

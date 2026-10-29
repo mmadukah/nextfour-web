@@ -2,12 +2,13 @@
 // One page per council area with at least two published clubs:
 // /badminton/<area>.html, written for "badminton in <town>" searches.
 //
-// One static list, never paginated. The day filter runs in the browser and
-// only hides cards, so every club is in the HTML for crawlers.
+// One static list, never paginated. The night picker runs in the browser and
+// only hides cards and rows, so every club is in the HTML for crawlers.
 import Directory from '../../layouts/Directory.astro';
+import ClubCard from '../../components/directory/ClubCard.astro';
 import {
-  getDirectory, nearbyAreas, weeklyNights, dayText, timeText, checkedText,
-  DAY_NAMES, type Area,
+  getDirectory, nearbyAreas, weeklyNights, nightsPerDay, newestCheck, shortDate, checkedText,
+  SHORT_DAYS, WEEK_ORDER, type Area,
 } from '../../data/directory';
 
 export async function getStaticPaths() {
@@ -21,12 +22,11 @@ export async function getStaticPaths() {
 const { area } = Astro.props as { area: Area };
 const dir = await getDirectory();
 const nights = weeklyNights(area.clubs);
+const perDay = nightsPerDay(area.clubs);
 const nearby = nearbyAreas(dir, area);
 const site = Astro.site!;
-const newest = area.clubs.map((c) => c.lastChecked?.getTime() ?? 0).reduce((a, b) => Math.max(a, b), 0);
-const checked = newest ? checkedText(new Date(newest)) : null;
-const playsOn = new Set(area.clubs.flatMap((c) => c.nights.flatMap((n) => n.days)));
-const weekOrder = [1, 2, 3, 4, 5, 6, 0];
+const newest = newestCheck(area.clubs);
+const checked = checkedText(newest);
 
 const title = `Badminton in ${area.name}: ${area.clubs.length} clubs and club nights | NextFour`;
 const description =
@@ -51,75 +51,101 @@ const crumbs = [
   { name: 'Badminton', href: '/badminton.html' },
   { name: area.name, href: area.url },
 ];
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
 ---
 
 <Directory title={title} description={description} crumbs={crumbs} jsonLd={[listLd]}>
   <style>
-    .days { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0; }
+    .picker { margin-top: 32px; }
+    .picker-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+    .picker-top h2 { margin: 0; font-family: var(--body); font-weight: 800; font-size: 1.02rem; letter-spacing: 0; }
+    .any { padding: 8px 18px; font-size: 0.9rem; }
+    .any[aria-pressed='true'] { background: var(--pick); color: var(--panel-btn); border-color: var(--pick); }
+    .days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
     .days button {
-      font: inherit; font-weight: 700; font-size: 0.9rem; cursor: pointer;
-      background: var(--card); color: var(--ink); border: 1px solid var(--border);
-      border-radius: 999px; padding: 6px 14px;
+      font: inherit; color: var(--ink); background: var(--card); cursor: pointer;
+      border: 1px solid var(--border); border-radius: 12px; padding: 12px 4px 10px; text-align: center;
+      display: grid; gap: 2px; justify-items: center;
     }
-    .days button[aria-pressed='true'] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
-    .clubs { display: grid; gap: 12px; }
-    .club h3 { font-family: var(--head); font-weight: 800; font-size: 1.1rem; margin: 0 0 4px; }
-    .club h3 a { color: var(--ink); text-decoration: none; }
-    .club h3 a:hover { color: var(--accent); }
-    .club .venue { color: var(--muted); font-size: 0.92rem; margin: 0 0 8px; }
-    .club ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; }
-    .club li { font-size: 0.95rem; display: grid; grid-template-columns: 6.5rem 1fr; gap: 0 10px; }
-    .club .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-    .near { display: flex; flex-wrap: wrap; gap: 8px 16px; }
-    .near a { font-weight: 700; }
-    .empty { display: none; }
+    .days button b { font-size: 0.78rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+    .days button strong { font-family: var(--head); font-weight: 900; font-size: 1.5rem; line-height: 1.1; }
+    .days button small { font-size: 0.74rem; color: var(--muted); }
+    .days button:hover:not(:disabled) { border-color: var(--accent-ink); }
+    .days button[aria-pressed='true'] { background: var(--pick); color: var(--on-pick); border-color: var(--pick); }
+    .days button[aria-pressed='true'] small { color: inherit; opacity: 0.75; }
+    .days button:disabled { cursor: default; background: var(--row); color: var(--muted); opacity: 0.7; }
+    .list-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .list-head h2 { margin-bottom: 16px; }
+    .clubs { display: grid; gap: 14px; }
+    #empty { display: none; }
+    @media (max-width: 640px) {
+      .days { gap: 5px; }
+      .days button { padding: 9px 2px 8px; border-radius: 10px; }
+      .days button strong { font-size: 1.2rem; }
+      .days button small { display: none; }
+    }
   </style>
 
-  <h1>Badminton in {area.name}</h1>
-  <p class="lead">
-    {area.clubs.length} badminton clubs run {nights} club nights a week in {area.name}.
-    Every club below lists its nights, times, venue and level{checked ? `, checked as recently as ${checked}` : ''}.
-  </p>
+  <section class="hero">
+    <div>
+      <p class="eyebrow">Badminton club nights</p>
+      <h1>{area.name}</h1>
+      <p class="lead">
+        Where to play badminton in {area.name} this week. Every club below shows its nights, times, venue and playing level.
+      </p>
+    </div>
+    <div class="stats">
+      <div><span>Clubs</span><b>{area.clubs.length}</b></div>
+      <div><span>Nights a week</span><b>{nights}</b></div>
+      {newest && <div><span>Checked</span><b class="text">{shortDate(newest)}</b></div>}
+    </div>
+  </section>
 
-  <div class="days" role="group" aria-label="Show clubs that play on">
-    <button type="button" data-day="" aria-pressed="true">Any day</button>
-    {weekOrder.filter((d) => playsOn.has(d)).map((d) => (
-      <button type="button" data-day={d} aria-pressed="false">{DAY_NAMES[d]}</button>
-    ))}
+  <section class="card picker" aria-label="Pick a night">
+    <div class="picker-top">
+      <h2>Pick a night</h2>
+      <button type="button" class="btn any" data-day="" aria-pressed="true">Any day</button>
+    </div>
+    <div class="days">
+      {WEEK_ORDER.map((d) => (
+        <button type="button" data-day={d} aria-pressed="false" disabled={perDay[d] === 0}
+          aria-label={`${SHORT_DAYS[d]}: ${plural(perDay[d], 'night')}`}>
+          <b>{SHORT_DAYS[d]}</b>
+          <strong>{perDay[d]}</strong>
+          <small>{perDay[d] === 1 ? 'night' : 'nights'}</small>
+        </button>
+      ))}
+    </div>
+  </section>
+
+  <div class="list-head">
+    <h2 id="count">{plural(area.clubs.length, 'club')}, {plural(nights, 'night')} a week</h2>
+    <span class="muted small">Sorted by club name</span>
   </div>
-
   <div class="clubs">
-    {area.clubs.map((c) => (
-      <article class="card club" data-days={[...new Set(c.nights.flatMap((n) => n.days))].join(',')}>
-        <h3><a href={c.url}>{c.name}</a></h3>
-        <p class="venue">{c.venue.name}</p>
-        <ul>
-          {c.nights.map((n) => <li><b>{dayText(n)}</b><span>{timeText(n)}<span class="muted">, {n.levels}</span></span></li>)}
-        </ul>
-        <div class="tags">
-          {c.claimed && <span class="chip lime">Runs on NextFour</span>}
-          {!c.takingNewPlayers && <span class="chip warn">Not taking new players</span>}
-          {c.visitorPolicy && <span class="chip">Visitor terms listed</span>}
-        </div>
-      </article>
-    ))}
+    {area.clubs.map((c) => <ClubCard club={c} />)}
   </div>
-  <p class="empty muted" id="empty">No club here plays on that day. Try another day or a nearby area.</p>
+  <p class="muted" id="empty">No club here plays that night. Try another night or a nearby area.</p>
+  <p class="note">
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6M12 7.5v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    Level bars run Beginner, Intermediate, Advanced. Each club page says when its details were last checked.
+  </p>
 
   {nearby.length > 0 && (
     <>
       <h2>Badminton near {area.name}</h2>
-      <p class="near">{nearby.map((a) => <a href={a.url}>{a.name}</a>)}</p>
+      <nav class="links" aria-label="Nearby areas">
+        {nearby.map((a) => <a href={a.url}>{a.name}</a>)}
+      </nav>
     </>
   )}
 
-  <h2>Find a club night anywhere</h2>
-  <p class="muted">Search every club by postcode, town or name on the <a href="/badminton.html">badminton club finder</a>, or get the NextFour app to see who's going and join in.</p>
-
-  <script>
-    const buttons = document.querySelectorAll<HTMLButtonElement>('.days button');
-    const cards = document.querySelectorAll<HTMLElement>('.club');
-    const empty = document.getElementById('empty')!;
+  <script define:vars={{ total: area.clubs.length, nights }}>
+    const buttons = document.querySelectorAll('button[data-day]');
+    const cards = document.querySelectorAll('.club');
+    const count = document.getElementById('count');
+    const empty = document.getElementById('empty');
+    const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
     buttons.forEach((b) => b.addEventListener('click', () => {
       buttons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
       const day = b.dataset.day ?? '';
@@ -127,8 +153,13 @@ const crumbs = [
       cards.forEach((c) => {
         const on = day === '' || (c.dataset.days ?? '').split(',').includes(day);
         c.hidden = !on;
-        if (on) shown++;
+        if (!on) return;
+        shown++;
+        c.querySelectorAll('.line').forEach((l) => { l.hidden = day !== '' && l.dataset.day !== day; });
       });
+      count.textContent = day === ''
+        ? `${plural(total, 'club')}, ${plural(nights, 'night')} a week`
+        : `${plural(shown, 'club')} playing that night`;
       empty.style.display = shown ? 'none' : 'block';
     }));
   </script>

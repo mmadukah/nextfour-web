@@ -1,0 +1,43 @@
+---
+// The closing panel on every directory page: the app, and the finder.
+interface Props {
+  heading?: string;
+  text?: string;
+}
+const {
+  heading = "See who's going before you go.",
+  text = 'Get the NextFour app to join a club night, or search every club by postcode, town or name.',
+} = Astro.props;
+---
+
+<section class="cta">
+  <div>
+    <h2>{heading}</h2>
+    <p>{text}</p>
+  </div>
+  <div class="actions">
+    <a class="btn go" href="/get.html">Get the app</a>
+    <a class="btn ghost" href="/badminton.html">Search all clubs</a>
+  </div>
+</section>
+
+<style>
+  .cta {
+    margin-top: 56px; background: var(--panel); color: var(--panel-ink); border-radius: 22px;
+    padding: 40px 36px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px;
+    border: 0;
+  }
+  .cta > div:first-child { flex: 1 1 380px; }
+  h2 {
+    margin: 0 0 10px; color: var(--panel-head); font-family: var(--head); font-weight: 900;
+    font-size: clamp(1.7rem, 4.4vw, 2.5rem); line-height: 1.08; letter-spacing: -0.03em;
+  }
+  p { margin: 0; color: var(--panel-muted); max-width: 30rem; }
+  .actions { display: flex; flex-direction: column; gap: 12px; }
+  .go { background: var(--panel-btn); color: var(--panel-btn-ink); border-color: var(--panel-btn); }
+  .ghost { background: transparent; color: var(--panel-ink); border-color: var(--panel-muted); }
+  @media (max-width: 640px) {
+    .cta { padding: 28px 22px; }
+    .actions { width: 100%; }
+  }
+</style>

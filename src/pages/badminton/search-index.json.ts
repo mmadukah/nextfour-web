@@ -2,7 +2,7 @@
 // browser. The same facts the pages show, cut down to what a result needs;
 // prices and visitor terms stay on the club pages.
 import type { APIRoute } from 'astro';
-import { getDirectory } from '../../data/directory';
+import { getDirectory, photoIndex } from '../../data/directory';
 
 export const GET: APIRoute = async () => {
   const dir = await getDirectory();
@@ -18,6 +18,9 @@ export const GET: APIRoute = async () => {
     l: [Math.min(...c.nights.map((x) => x.levelRange[0])), Math.max(...c.nights.map((x) => x.levelRange[1]))],
     o: c.takingNewPlayers ? 1 : 0,
     x: c.claimed ? 1 : 0,
+    // Visitor terms listed; the card photo, as an index into PHOTOS.
+    t: c.visitorPolicy ? 1 : 0,
+    p: photoIndex(c.id),
   }));
   return new Response(JSON.stringify(rows), {
     headers: { 'Content-Type': 'application/json' },

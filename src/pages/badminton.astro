@@ -7,7 +7,7 @@
 // prompt. Below the finder, every area is a plain link, so crawlers reach
 // every page without running any script.
 import Directory from '../layouts/Directory.astro';
-import { getDirectory, weeklyNights } from '../data/directory';
+import { getDirectory, weeklyNights, PHOTOS } from '../data/directory';
 
 const dir = await getDirectory();
 const withPage = dir.areas.filter((a) => a.hasPage);
@@ -38,57 +38,68 @@ const crumbs = [
 
 <Directory title={title} description={description} crumbs={crumbs} jsonLd={[siteLd]}>
   <style>
-    form.find { display: grid; gap: 10px; margin: 20px 0 8px; }
+    .search { margin-top: 32px; display: grid; gap: 12px; }
     .row { display: flex; flex-wrap: wrap; gap: 10px; }
     .row > * { flex: 1 1 160px; }
     input[type='search'], select {
-      font: inherit; color: var(--ink); background: var(--card);
-      border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; min-width: 0;
+      font: inherit; color: var(--ink); background: var(--row);
+      border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; min-width: 0;
     }
     input[type='search'] { flex: 3 1 260px; font-size: 1.05rem; }
-    input[type='search']:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
-    .btn { cursor: pointer; font: inherit; font-weight: 800; }
+    input[type='search']:focus, select:focus { outline: 2px solid var(--accent-ink); outline-offset: 1px; }
     .row > #near { flex: 0 0 auto; white-space: nowrap; }
     label.check { display: flex; align-items: center; gap: 8px; color: var(--muted); flex: 0 1 auto; }
-    #status { color: var(--muted); min-height: 1.5em; margin: 6px 0 12px; }
+    #status { font-family: var(--head); font-weight: 800; font-size: 1.25rem; margin: 32px 0 14px; letter-spacing: -0.01em; }
+    #status:empty { display: none; }
+    #results { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
     /* Result cards are written by the script below, so these rules are
        global: Astro's scoped selectors never match innerHTML. */
-    #results { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
-    :global(#results .hit) { position: relative; display: grid; gap: 6px; transition: border-color 0.15s; }
-    :global(#results .hit:hover) { border-color: var(--accent); }
+    :global(#results .hit) {
+      position: relative; display: grid; grid-template-columns: 112px 1fr; overflow: hidden;
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    }
+    :global(#results .hit:hover) { border-color: var(--accent-ink); }
+    :global(#results .hit img) { width: 100%; height: 100%; min-height: 104px; object-fit: cover; display: block; }
+    :global(#results .hit-body) { padding: 14px 16px; display: grid; gap: 6px; min-width: 0; }
     :global(#results .hit-top) { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
     :global(#results .hit-name) {
-      font-family: var(--head); font-weight: 800; font-size: 1.1rem; line-height: 1.3;
-      color: var(--ink); text-decoration: none;
+      font-family: var(--head); font-weight: 800; font-size: 1.05rem; line-height: 1.3; color: var(--ink); text-decoration: none;
     }
     /* The name is the only link; this stretches it over the whole card. */
-    :global(#results .hit-name::after) { content: ''; position: absolute; inset: 0; border-radius: inherit; }
-    :global(#results .hit:hover .hit-name) { color: var(--accent); }
+    :global(#results .hit-name::after) { content: ''; position: absolute; inset: 0; }
+    :global(#results .hit:hover .hit-name) { text-decoration: underline; }
     :global(#results .hit-name:focus-visible) { outline: none; }
-    :global(#results .hit:has(.hit-name:focus-visible)) { outline: 2px solid var(--accent); outline-offset: 2px; }
-    :global(#results .hit-dist) {
-      flex: none; font-size: 0.85rem; font-weight: 700; color: var(--muted);
-      border: 1px solid var(--border); border-radius: 999px; padding: 2px 10px;
-    }
-    :global(#results .hit-venue) { margin: 0; color: var(--muted); font-size: 0.95rem; }
+    :global(#results .hit:has(.hit-name:focus-visible)) { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
+    :global(#results .hit-dist) { flex: none; font-size: 0.82rem; font-weight: 800; color: var(--muted); }
+    :global(#results .hit-venue) { margin: 0; color: var(--muted); font-size: 0.92rem; }
     :global(#results .hit-tags) { display: flex; flex-wrap: wrap; gap: 6px; }
-    .areas { columns: 3 200px; column-gap: 24px; padding: 0; margin: 0; list-style: none; }
-    .areas li { break-inside: avoid; margin: 0 0 6px; }
-    .areas a { text-decoration: none; font-weight: 700; }
-    .areas a:hover { text-decoration: underline; }
-    .areas .muted { font-size: 0.85rem; }
+    :global(#results .hit-day) {
+      background: var(--strong); color: var(--on-strong); border-radius: 6px; font-weight: 800; font-size: 0.75rem; padding: 2px 8px;
+    }
+    @media (max-width: 640px) {
+      :global(#results .hit) { grid-template-columns: 84px 1fr; }
+    }
   </style>
 
-  <h1>Find badminton near you</h1>
-  <p class="lead">
-    {dir.clubs.length} badminton clubs and {nights} club nights a week across the UK, each with its days,
-    times, venue and level. Search by postcode, town or club name.
-  </p>
+  <section class="hero">
+    <div>
+      <p class="eyebrow">Badminton club finder</p>
+      <h1 class="long">Find badminton near you</h1>
+      <p class="lead">
+        Every club night in our UK directory with its days, times, venue and playing level. Search by postcode, town or club name.
+      </p>
+    </div>
+    <div class="stats">
+      <div><span>Clubs</span><b>{dir.clubs.length}</b></div>
+      <div><span>Nights a week</span><b>{nights}</b></div>
+      <div><span>Areas</span><b>{dir.areas.length}</b></div>
+    </div>
+  </section>
 
-  <form class="find" id="find" role="search" onsubmit="return false">
+  <form class="card search" id="find" role="search" onsubmit="return false">
     <div class="row">
       <input type="search" id="q" name="q" placeholder="Postcode, town or club name" aria-label="Postcode, town or club name" autocomplete="postal-code" />
-      <button type="button" class="btn" id="near">Near me</button>
+      <button type="button" class="btn dark" id="near">Near me</button>
     </div>
     <div class="row">
       <select id="day" aria-label="Day">
@@ -107,34 +118,30 @@ const crumbs = [
     </div>
   </form>
   <p id="status" aria-live="polite"></p>
-  <ul id="results"></ul>
+  <ul id="results" data-photos={JSON.stringify(PHOTOS)}></ul>
 
   <div id="browse">
-  {nations.map((n) => (
-    <>
-      <h2>Badminton in {n.name}</h2>
-      <ul class="areas">
-        {n.areas.map((a) => (
-          <li><a href={a.url}>{a.name}</a> <span class="muted">{a.clubs.length} clubs</span></li>
-        ))}
-      </ul>
-    </>
-  ))}
+    {nations.map((n) => (
+      <>
+        <h2>Badminton in {n.name}</h2>
+        <nav class="links" aria-label={`Areas in ${n.name}`}>
+          {n.areas.map((a) => <a href={a.url}><span>{a.name}<small>{a.clubs.length} clubs</small></span></a>)}
+        </nav>
+      </>
+    ))}
 
-  {single.length > 0 && (
-    <>
-      <h2>More clubs</h2>
-      <ul class="areas">
-        {single.map((c) => (
-          <li><a href={c.url}>{c.name}</a> <span class="muted">{c.areaName}</span></li>
-        ))}
-      </ul>
-    </>
-  )}
+    {single.length > 0 && (
+      <>
+        <h2>More clubs</h2>
+        <nav class="links" aria-label="More clubs">
+          {single.map((c) => <a href={c.url}><span>{c.name}<small>{c.areaName}</small></span></a>)}
+        </nav>
+      </>
+    )}
   </div>
 
   <script>
-    type Row = { n: string; u: string; a: string; v: string; lat: number; lng: number; d: number[]; l: [number, number]; o: number; x: number };
+    type Row = { n: string; u: string; a: string; v: string; lat: number; lng: number; d: number[]; l: [number, number]; o: number; x: number; t: number; p: number };
     const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const POSTCODE = /^([A-Z]{1,2}\d[A-Z\d]?)(\s*\d[A-Z]{2})?$/i;
     const RADIUS_KM = 25;
@@ -145,6 +152,7 @@ const crumbs = [
     const open = document.getElementById('open') as HTMLInputElement;
     const status = document.getElementById('status')!;
     const results = document.getElementById('results')!;
+    const photos: { src: string; position: string }[] = JSON.parse(results.dataset.photos ?? '[]');
     // The area lists are for browsing; a search hides them (they stay in the
     // HTML, so crawlers still follow every link).
     const browse = document.getElementById('browse')!;
@@ -214,19 +222,26 @@ const crumbs = [
 
     function render(list: { r: Row; dist?: number }[], heading: string) {
       status.textContent = heading;
-      results.innerHTML = list.slice(0, 40).map(({ r, dist }) => `
-        <li class="card hit">
-          <div class="hit-top">
-            <a class="hit-name" href="${esc(r.u)}">${esc(r.n)}</a>
-            ${dist != null ? `<span class="hit-dist">${dist < 1 ? 'under 1' : Math.round(dist)} km</span>` : ''}
+      results.innerHTML = list.slice(0, 40).map(({ r, dist }) => {
+        const photo = photos[r.p] ?? photos[0];
+        return `
+        <li class="hit">
+          <img src="${photo.src}" alt="" loading="lazy" style="object-position: ${photo.position}" />
+          <div class="hit-body">
+            <div class="hit-top">
+              <a class="hit-name" href="${esc(r.u)}">${esc(r.n)}</a>
+              ${dist != null ? `<span class="hit-dist">${dist < 1 ? 'under 1' : Math.round(dist)} km</span>` : ''}
+            </div>
+            <p class="hit-venue">${esc(r.v)}, ${esc(r.a)}</p>
+            <div class="hit-tags">
+              ${[1, 2, 3, 4, 5, 6, 0].filter((d) => r.d.includes(d)).map((d) => `<span class="hit-day">${DAYS[d]}</span>`).join('')}
+              ${r.x ? '<span class="tag lime">Runs on NextFour</span>' : ''}
+              ${r.o ? '' : '<span class="tag warn">Not taking new players</span>'}
+              ${r.t ? '<span class="tag ok">Visitor terms listed</span>' : ''}
+            </div>
           </div>
-          <p class="hit-venue">${esc(r.v)}, ${esc(r.a)}</p>
-          <div class="hit-tags">
-            ${[1, 2, 3, 4, 5, 6, 0].filter((d) => r.d.includes(d)).map((d) => `<span class="chip">${DAYS[d]}</span>`).join('')}
-            ${r.o ? '' : '<span class="chip warn">Not taking new players</span>'}
-            ${r.x ? '<span class="chip lime">Runs on NextFour</span>' : ''}
-          </div>
-        </li>`).join('');
+        </li>`;
+      }).join('');
     }
 
     async function run() {

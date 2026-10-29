@@ -1,0 +1,64 @@
+---
+// A club on an area page: its photo (the one the app shows for it), name and
+// venue, every night it plays, and the way to its own page.
+import NightLine from './NightLine.astro';
+import { clubPhoto, sortedRows, type Club } from '../../data/directory';
+
+interface Props { club: Club }
+const { club } = Astro.props;
+const photo = clubPhoto(club.id);
+const rows = sortedRows(club);
+const days = [...new Set(rows.map((r) => r.day).filter((d) => d != null))];
+---
+
+<article class="club" data-days={days.join(',')}>
+  <img class="photo" src={photo.src} alt="" loading="lazy" decoding="async" width="720" height="480" style={`object-position: ${photo.position}`} />
+  <div class="body">
+    <div class="top">
+      <div>
+        <h3><a href={club.url}>{club.name}</a></h3>
+        <p class="venue">
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          {club.venue.name}
+        </p>
+      </div>
+      <div class="tags">
+        {club.claimed && <span class="tag lime">Runs on NextFour</span>}
+        {!club.takingNewPlayers && <span class="tag warn">Not taking new players</span>}
+        {club.visitorPolicy ? <span class="tag ok">Visitor terms listed</span> : <span class="tag">No visitor info yet</span>}
+      </div>
+    </div>
+    <div class="lines">
+      {rows.map((row) => <NightLine row={row} clubVenue={club.venue.name} />)}
+    </div>
+    <span class="more" aria-hidden="true">Club details and visitor info <span>→</span></span>
+  </div>
+</article>
+
+<style>
+  .club {
+    display: grid; grid-template-columns: 180px 1fr; background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; overflow: hidden; position: relative;
+  }
+  .club:hover { border-color: var(--accent-ink); }
+  .club[hidden] { display: none; }
+  .photo { width: 100%; height: 100%; min-height: 150px; object-fit: cover; display: block; }
+  .body { padding: 18px 20px; display: grid; gap: 12px; align-content: start; min-width: 0; }
+  .top { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+  h3 { margin: 0; font-family: var(--head); font-weight: 800; font-size: 1.15rem; line-height: 1.25; letter-spacing: -0.01em; }
+  h3 a { color: var(--ink); text-decoration: none; }
+  /* The name is the card's one link; this stretches it over the card. */
+  h3 a::after { content: ''; position: absolute; inset: 0; }
+  .club:hover h3 a { text-decoration: underline; }
+  .venue { margin: 4px 0 0; color: var(--muted); font-size: 0.92rem; display: flex; align-items: center; gap: 6px; }
+  .tags { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+  .lines { display: grid; gap: 8px; }
+  .more { font-weight: 800; font-size: 0.9rem; text-decoration: underline; }
+  .more span { display: inline-block; margin-left: 4px; text-decoration: none; }
+  @media (max-width: 640px) {
+    .club { grid-template-columns: 1fr; }
+    .photo { height: 130px; min-height: 0; }
+    .top { flex-direction: column; }
+    .tags { justify-content: flex-start; }
+  }
+</style>

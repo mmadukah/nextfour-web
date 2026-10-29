@@ -1,0 +1,51 @@
+---
+// One night on one weekday: the day, the time and how long, the level, and
+// where it is when that differs from the club's usual venue.
+import LevelBars from './LevelBars.astro';
+import { durationText, timeRange, levelBars, type NightRow } from '../../data/directory';
+
+interface Props {
+  row: NightRow;
+  /** The club's usual venue; a night elsewhere names its own. */
+  clubVenue: string;
+  /** Price and membership notes, on the club page. */
+  detail?: boolean;
+  clubTakesNewPlayers?: boolean;
+}
+const { row, clubVenue, detail = false, clubTakesNewPlayers = true } = Astro.props;
+const n = row.night;
+const duration = durationText(n);
+const extras = [n.venue.name !== clubVenue ? n.venue.name : null, detail ? n.price : null].filter(Boolean);
+const membersOnly = detail && clubTakesNewPlayers && !n.takingNewPlayers;
+---
+
+<div class="line" data-day={row.day ?? ''}>
+  <span class="day">{row.label}</span>
+  <span class="time"><b>{timeRange(n)}</b>{duration && <small>{duration}</small>}</span>
+  <LevelBars range={levelBars(n)} label={n.levels} />
+  {(extras.length > 0 || membersOnly) && (
+    <span class="extra">
+      {extras.join(' · ')}
+      {membersOnly && <span class="tag warn">Members only</span>}
+    </span>
+  )}
+</div>
+
+<style>
+  .line {
+    display: grid; grid-template-columns: 112px minmax(150px, 1fr) minmax(0, 1.2fr); align-items: center;
+    gap: 6px 16px; background: var(--row); border-radius: 10px; padding: 9px 12px;
+  }
+  .line[hidden] { display: none; }
+  .day {
+    background: var(--strong); color: var(--on-strong); border-radius: 7px; text-align: center;
+    font-weight: 800; font-size: 0.88rem; padding: 4px 8px; white-space: nowrap;
+  }
+  .time b { font-family: var(--head); font-weight: 800; font-size: 1rem; white-space: nowrap; }
+  .time small { color: var(--muted); font-size: 0.8rem; margin-left: 6px; white-space: nowrap; }
+  .extra { grid-column: 2 / -1; color: var(--muted); font-size: 0.85rem; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  @media (max-width: 640px) {
+    .line { grid-template-columns: auto 1fr; }
+    .line > :global(.level), .extra { grid-column: 1 / -1; }
+  }
+</style>
