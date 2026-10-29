@@ -431,26 +431,6 @@ export function newestCheck(clubs: Club[]): Date | null {
   return t ? new Date(t) : null;
 }
 
-/**
- * The club's card photo: the same picture the app shows for that club, picked
- * from its id exactly as racket-manager-app's backgroundVariantIndex does
- * (lib/shared/utils/sport_background.dart), in the same order. `position` is
- * the app's crop alignment as CSS object-position.
- */
-export const PHOTOS = [
-  { src: '/photos/badminton-grip.webp', position: '50% 50%' },
-  { src: '/photos/badminton-shuttle.webp', position: '50% 25%' },
-  { src: '/photos/badminton-jump.webp', position: '50% 50%' },
-  { src: '/photos/badminton-strings.webp', position: '50% 80%' },
-];
-export function photoIndex(id: string): number {
-  const value = parseInt(id.replace(/-/g, '').slice(-8), 16);
-  return Number.isNaN(value) ? 0 : value % PHOTOS.length;
-}
-export function clubPhoto(id: string): { src: string; position: string } {
-  return PHOTOS[photoIndex(id)];
-}
-
 // ---------------------------------------------------------------------------
 // Club details page
 // ---------------------------------------------------------------------------
@@ -469,11 +449,18 @@ export function addressLines(venue: RawVenue): string[] {
   return lines.map((p) => p.replace(POSTCODE, (_, out: string, inn: string) => `${out.toUpperCase()} ${inn.toUpperCase()}`));
 }
 
-/** A steady tint for the club's court illustration, from its id (the mockups' palette). */
-const TINTS = ['#1F4D3A', '#2C5873', '#7A4A2A', '#4B3F72', '#5E5B22'];
-export function clubTint(id: string): string {
+/**
+ * A steady tint for the club's court illustration, from its id (the mockups'
+ * palette). The finder's script gets the index and the list, so its cards
+ * match the area pages'.
+ */
+export const TINTS = ['#1F4D3A', '#2C5873', '#7A4A2A', '#4B3F72', '#5E5B22'];
+export function tintIndex(id: string): number {
   const value = parseInt(id.replace(/-/g, '').slice(-8), 16);
-  return TINTS[Number.isNaN(value) ? 0 : value % TINTS.length];
+  return Number.isNaN(value) ? 0 : value % TINTS.length;
+}
+export function clubTint(id: string): string {
+  return TINTS[tintIndex(id)];
 }
 
 /** The fact strip's time: the one time every night shares, or "Varies". */

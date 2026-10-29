@@ -1,22 +1,22 @@
 ---
-// A club on an area page: the venue image slot (the photo the app shows for
-// the club, until venues have their own), name, venue and tags, one row per
+// A club on an area page: the venue image slot (a court on the club's tint,
+// until venues have photos of their own), name, venue and tags, one row per
 // session, and the way to its own page. The finder's search results build
 // this same markup in its script; keep the two in step. Styles:
 // src/styles/club-card.css.
 import NightLine from './NightLine.astro';
-import { clubPhoto, sortedRows, type Club } from '../../data/directory';
+import CourtArt from './CourtArt.astro';
+import { clubTint, sortedRows, type Club } from '../../data/directory';
 
 interface Props { club: Club }
 const { club } = Astro.props;
-const photo = clubPhoto(club.id);
 const rows = sortedRows(club);
 const days = [...new Set(rows.map((r) => r.day).filter((d) => d != null))];
 ---
 
 <article class="club-card" data-days={days.join(',')}>
-  <div class="cc-slot">
-    <img src={photo.src} alt="" loading="lazy" decoding="async" width="720" height="480" style={`object-position: ${photo.position}`} />
+  <div class="cc-slot" style={`background: ${clubTint(club.id)}`}>
+    <CourtArt />
   </div>
   <div class="cc-body">
     <div class="cc-top">

@@ -2,7 +2,7 @@
 // browser. The same facts the pages show, cut down to what a result needs;
 // prices and visitor terms stay on the club pages.
 import type { APIRoute } from 'astro';
-import { getDirectory, photoIndex, sortedRows, timeRange, durationText, levelBars } from '../../data/directory';
+import { getDirectory, tintIndex, sortedRows, timeRange, durationText, levelBars } from '../../data/directory';
 
 export const GET: APIRoute = async () => {
   const dir = await getDirectory();
@@ -18,9 +18,9 @@ export const GET: APIRoute = async () => {
     l: [Math.min(...c.nights.map((x) => x.levelRange[0])), Math.max(...c.nights.map((x) => x.levelRange[1]))],
     o: c.takingNewPlayers ? 1 : 0,
     x: c.claimed ? 1 : 0,
-    // Visitor terms listed; the card photo, as an index into PHOTOS.
+    // Visitor terms listed; the card's court tint, as an index into TINTS.
     t: c.visitorPolicy ? 1 : 0,
-    p: photoIndex(c.id),
+    p: tintIndex(c.id),
     // The card's session rows, as the area pages draw them: day number (null
     // for an undated one-off), day label, time, duration, level bars, level
     // words, and the venue when it is not the club's usual one.

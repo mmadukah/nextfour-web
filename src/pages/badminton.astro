@@ -9,7 +9,7 @@
 // the other countries once the script runs.
 import Directory from '../layouts/Directory.astro';
 import AppCta from '../components/directory/AppCta.astro';
-import { getDirectory, weeklyNights, PHOTOS, type Area } from '../data/directory';
+import { getDirectory, weeklyNights, TINTS as COURT_TINTS, type Area } from '../data/directory';
 
 const dir = await getDirectory();
 const withPage = dir.areas.filter((a) => a.hasPage);
@@ -197,7 +197,7 @@ const LEVELS = [['', 'Any level'], ['1', 'Beginner'], ['2', 'Intermediate'], ['3
   </section>
 
   <p id="status" aria-live="polite"></p>
-  <ul id="results" data-photos={JSON.stringify(PHOTOS)} data-build={build}></ul>
+  <ul id="results" data-tints={JSON.stringify(COURT_TINTS)} data-build={build}></ul>
 
   <div id="browse">
     <section class="busy" aria-labelledby="busy-h">
@@ -272,7 +272,7 @@ const LEVELS = [['', 'Any level'], ['1', 'Beginner'], ['2', 'Intermediate'], ['3
     const open = document.getElementById('open') as HTMLButtonElement;
     const status = document.getElementById('status')!;
     const results = document.getElementById('results')!;
-    const photos: { src: string; position: string }[] = JSON.parse(results.dataset.photos ?? '[]');
+    const tints: string[] = JSON.parse(results.dataset.tints ?? '[]');
     // The area lists are for browsing; a search hides them (they stay in the
     // HTML, so crawlers still follow every link).
     const browse = document.getElementById('browse')!;
@@ -342,6 +342,14 @@ const LEVELS = [['', 'Any level'], ['1', 'Beginner'], ['2', 'Intermediate'], ['3
     }
 
     const PIN = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg>';
+    // The court, as CourtArt.astro draws it.
+    const COURT_LINE = 'stroke="#FFFFFF" stroke-opacity="0.6" stroke-width="1.2"';
+    const COURT = `<svg viewBox="0 0 160 120" width="160" height="120" fill="none" aria-hidden="true">
+      <rect x="10" y="14" width="140" height="92" ${COURT_LINE}></rect>
+      ${[[10, 21, 150, 21], [10, 99, 150, 99], [18, 14, 18, 106], [142, 14, 142, 106], [59, 14, 59, 106], [101, 14, 101, 106], [10, 60, 59, 60], [101, 60, 150, 60]]
+        .map(([x1, y1, x2, y2]) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" ${COURT_LINE}></line>`).join('')}
+      <line x1="80" y1="8" x2="80" y2="112" stroke="#C8F135" stroke-width="2.4"></line>
+    </svg>`;
     const ARROW = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>';
 
     /** One session row, as NightLine.astro draws it; a picked night dims the others. */
@@ -358,9 +366,8 @@ const LEVELS = [['', 'Any level'], ['1', 'Beginner'], ['2', 'Intermediate'], ['3
 
     /** A club, as ClubCard.astro draws it, with its distance from the search. */
     function card(r: Row, dist?: number) {
-      const photo = photos[r.p] ?? photos[0];
       return `<li><article class="club-card">
-        <div class="cc-slot"><img src="${photo.src}" alt="" loading="lazy" style="object-position: ${photo.position}" /></div>
+        <div class="cc-slot" style="background: ${tints[r.p] ?? tints[0]}">${COURT}</div>
         <div class="cc-body">
           <div class="cc-top">
             <div class="cc-who">

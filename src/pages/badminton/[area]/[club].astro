@@ -10,6 +10,7 @@ import Directory from '../../../layouts/Directory.astro';
 import AppCta from '../../../components/directory/AppCta.astro';
 import NightLine from '../../../components/directory/NightLine.astro';
 import CourtArt from '../../../components/directory/CourtArt.astro';
+import VenueMap from '../../../components/directory/VenueMap.astro';
 import {
   getDirectory, clubDaysText, checkedText, shortDate, townOf, nearbyClubs, nextDate, sortedRows,
   addressLines, clubTint, clubTimeText, clubDaysShort, DAY_NAMES, SHORT_DAYS, WEEK_ORDER, type Club,
@@ -53,9 +54,6 @@ const summary = [
 const rows = sortedRows(club);
 const playDays = new Set(rows.map((r) => r.day).filter((d) => d != null));
 const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${club.venue.lat},${club.venue.lng}`;
-// OpenStreetMap's own embed: no key, and it loads only when scrolled to.
-const { lat, lng } = club.venue;
-const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.012},${lat - 0.007},${lng + 0.012},${lat + 0.007}&layer=mapnik&marker=${lat},${lng}`;
 const [website, ...otherLinks] = club.links;
 const prices = [...new Set(club.nights.map((n) => n.price).filter(Boolean))];
 const costsPublished = Boolean(club.visitorPolicy || club.fees || prices.length);
@@ -182,7 +180,6 @@ const crumbs = [
     .tiles .none dd { font-weight: 700; color: var(--muted); }
     .venue { padding: 0; overflow: hidden; display: flex; flex-wrap: wrap; }
     .map { flex: 1 1 260px; min-height: 240px; position: relative; background: var(--row); }
-    .map iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
     .venue-text { flex: 999 1 280px; min-width: 0; padding: 24px; display: flex; flex-direction: column; gap: 14px; }
     .venue-text h2 { margin: 0; }
     address { font-style: normal; font-size: 16px; line-height: 1.6; }
@@ -327,7 +324,7 @@ const crumbs = [
 
       <section class="box venue" aria-labelledby="venue-h">
         <div class="map">
-          <iframe src={mapUrl} title={`Map of ${club.venue.name}`} loading="lazy" referrerpolicy="no-referrer"></iframe>
+          <VenueMap lat={club.venue.lat} lng={club.venue.lng} name={club.venue.name} />
         </div>
         <div class="venue-text">
           <h2 id="venue-h">{venues.length === 1 ? 'Venue' : 'Venues'}</h2>

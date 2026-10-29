@@ -1,0 +1,60 @@
+---
+// The venue map on a club page, in the site's colours. Leaflet draws
+// OpenStreetMap's tiles, which a CSS filter tints per theme (--map-tiles),
+// with the design's lime pin. Leaflet (cdnjs) loads only when the map scrolls
+// into view; without script the panel stays a plain tint, and the address and
+// directions beside it still work.
+interface Props { lat: number; lng: number; name: string }
+const { lat, lng, name } = Astro.props;
+---
+
+<div class="venue-map" data-lat={lat} data-lng={lng} role="img" aria-label={`Map of ${name}`}></div>
+
+<style is:global>
+  .venue-map { position: absolute; inset: 0; background: var(--row); }
+  :root { --map-tiles: grayscale(1) sepia(0.18) hue-rotate(55deg) saturate(0.9) brightness(1.07) contrast(0.86); }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) { --map-tiles: invert(1) grayscale(1) brightness(0.78) contrast(0.95) sepia(0.45) hue-rotate(180deg) saturate(1.5); }
+  }
+  :root[data-theme='dark'] { --map-tiles: invert(1) grayscale(1) brightness(0.78) contrast(0.95) sepia(0.45) hue-rotate(180deg) saturate(1.5); }
+  .venue-map .leaflet-tile-pane { filter: var(--map-tiles); }
+  .venue-map.leaflet-container { background: var(--row); font-family: var(--font); }
+  .venue-map .leaflet-bar { border: 1px solid var(--line-strong); box-shadow: none; }
+  .venue-map .leaflet-bar a { background: var(--surface); color: var(--ink); border-bottom-color: var(--line); }
+  .venue-map .leaflet-bar a:hover { background: var(--row); color: var(--ink); }
+  .venue-map .leaflet-control-attribution { background: var(--surface); color: var(--muted); opacity: 0.9; font-size: 10px; }
+  .venue-map .leaflet-control-attribution a { color: var(--muted); }
+  .venue-pin { background: none; border: 0; }
+</style>
+
+<script is:inline>
+  (() => {
+    const el = document.querySelector('.venue-map');
+    if (!el || !('IntersectionObserver' in window)) return;
+    const BASE = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/';
+    const PIN = '<svg width="36" height="36" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z" fill="#C8F135" stroke="#12261C" stroke-width="1.5"></path><circle cx="12" cy="10" r="2.5" fill="#12261C"></circle></svg>';
+    const load = () => {
+      const css = document.createElement('link');
+      css.rel = 'stylesheet';
+      css.href = BASE + 'leaflet.min.css';
+      document.head.appendChild(css);
+      const js = document.createElement('script');
+      js.src = BASE + 'leaflet.min.js';
+      js.onload = () => {
+        const L = window.L;
+        const at = [Number(el.dataset.lat), Number(el.dataset.lng)];
+        const map = L.map(el, { scrollWheelZoom: false, dragging: !L.Browser.mobile, tap: false }).setView(at, 15);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        }).addTo(map);
+        L.marker(at, { icon: L.divIcon({ className: 'venue-pin', html: PIN, iconSize: [36, 36], iconAnchor: [18, 34] }), keyboard: false }).addTo(map);
+      };
+      document.head.appendChild(js);
+    };
+    const seen = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { seen.disconnect(); load(); }
+    }, { rootMargin: '200px' });
+    seen.observe(el);
+  })();
+</script>
