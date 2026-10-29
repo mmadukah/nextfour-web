@@ -1,8 +1,8 @@
 ---
 // One row of sessions that share a time, level and venue: a 7-day strip of
-// the days they run (a dated one-off shows its date instead), the time and
-// how long, the level, and a pin line when the venue is not the club's usual
-// one. A night filter dims rows that don't include that day (.dim) and lights
+// the days they run (or the row's label instead: a one-off's date, or the
+// day name on the club page), the time and how long, the level, and a pin
+// line when the venue is not the club's usual one. A night filter dims rows that don't include that day (.dim) and lights
 // its cell (.hl). Styles: src/styles/club-card.css, shared with the finder's
 // results, which build the same markup in its script.
 import LevelBars from './LevelBars.astro';
@@ -25,8 +25,8 @@ const membersOnly = detail && clubTakesNewPlayers && !n.takingNewPlayers;
 ---
 
 <li class="night-line" data-days={row.days.join(',')}>
-  {row.oneOff
-    ? <span class="nl-day">{row.oneOff}</span>
+  {row.label
+    ? <span class="nl-day">{row.label}</span>
     : (
       <span class="day-strip" role="img" aria-label={daysPlural(row.days)}>
         {WEEK_ORDER.map((d) => <span class:list={['ds-cell', { on: row.days.includes(d) }]} data-d={d} aria-hidden="true">{DAY_LETTERS[d]}</span>)}

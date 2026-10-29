@@ -489,8 +489,12 @@ export function clubDaysShort(club: Club): string {
 export interface GroupRow {
   /** 0 Sunday .. 6 Saturday, Monday first; a dated one-off has its weekday. */
   days: number[];
-  /** A one-off's date ("Sat 8 Nov"); null for weekly rows. */
-  oneOff: string | null;
+  /**
+   * Text in place of the day strip: a one-off's date ("Sat 8 Nov"), or the
+   * day name on the club page's one-row-per-day list (dayRows). Null shows
+   * the strip.
+   */
+  label: string | null;
   night: Night;
 }
 
@@ -503,13 +507,13 @@ export function groupedRows(club: Club): GroupRow[] {
   for (const r of nightRows(club)) {
     const n = r.night;
     if (n.days.length === 0) {
-      rows.push({ days: r.day == null ? [] : [r.day], oneOff: r.label, night: n });
+      rows.push({ days: r.day == null ? [] : [r.day], label: r.label, night: n });
       continue;
     }
     const key = [n.start, n.end ?? '', n.levels, n.venue.name, n.price ?? '', n.takingNewPlayers].join('|');
     let row = byKey.get(key);
     if (!row) {
-      row = { days: [], oneOff: null, night: n };
+      row = { days: [], label: null, night: n };
       byKey.set(key, row);
       rows.push(row);
     }
@@ -517,8 +521,16 @@ export function groupedRows(club: Club): GroupRow[] {
   }
   for (const row of rows) row.days.sort((a, b) => mondayFirst(a) - mondayFirst(b));
   // By first day, then start time; one-offs after the weekly rows.
-  const rank = (row: GroupRow) => (row.oneOff || row.days.length === 0 ? 7 : mondayFirst(row.days[0]));
+  const rank = (row: GroupRow) => (row.label || row.days.length === 0 ? 7 : mondayFirst(row.days[0]));
   return rows.sort((a, b) => rank(a) - rank(b) || a.night.start.localeCompare(b.night.start));
+}
+
+/**
+ * One row per session and day, each named ("Monday"), in week order: the club
+ * page keeps this list rather than the grouped day strips.
+ */
+export function dayRows(club: Club): GroupRow[] {
+  return sortedRows(club).map((r) => ({ days: r.day == null ? [] : [r.day], label: r.label, night: r.night }));
 }
 
 /** "Mondays and Wednesdays": the day strip's text alternative. */

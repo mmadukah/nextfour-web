@@ -24,7 +24,7 @@
 }
 .night-line.dim { opacity: 0.45; }
 .nl-day {
-  flex: 0 0 auto; min-width: 104px; font-weight: 800; font-size: 15px; padding: 4px 10px; border-radius: 8px;
+  flex: 0 0 auto; min-width: 116px; font-weight: 800; font-size: 15px; padding: 4px 10px; border-radius: 8px;
   text-align: center; background: var(--chip-bg); color: var(--chip-fg); white-space: nowrap;
 }
 .night-line.hl .nl-day { background: var(--hl-bg); color: var(--hl-fg); }

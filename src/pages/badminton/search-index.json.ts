@@ -26,7 +26,7 @@ export const GET: APIRoute = async () => {
     // time, duration, level bars, level words, and the venue when it is not
     // the club's usual one.
     s: groupedRows(c).map((r) => [
-      r.days, r.oneOff, daysPlural(r.days), timeRange(r.night), durationText(r.night), levelBars(r.night), r.night.levels,
+      r.days, r.label, daysPlural(r.days), timeRange(r.night), durationText(r.night), levelBars(r.night), r.night.levels,
       r.night.venue.name !== c.venue.name ? r.night.venue.name : null,
     ]),
     k: sessionCountText(c),
