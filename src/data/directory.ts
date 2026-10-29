@@ -126,6 +126,9 @@ export interface DropIn {
   bookingUrl: string | null;
   /** The feed gave a level; otherwise the card shows no level bar. */
   levelKnown: boolean;
+  /** Who runs it ("Everyone Active"). */
+  operator: string | null;
+  lastChecked: Date | null;
   night: Night;
 }
 
@@ -147,7 +150,29 @@ export interface DropInVenue {
   areaName: string;
   /** In-page anchor on the area page. */
   anchor: string;
+  /** Its venue's page. */
+  venueUrl: string;
   sessions: DropIn[];
+}
+
+/**
+ * A venue page ("Badminton at Eclipse Leisure Centre"): every drop-in at one
+ * leisure centre, with the clubs that play in the same hall. One page per
+ * venue, not per session, so each page has enough on it to be worth finding.
+ */
+export interface Venue {
+  id: string;
+  name: string;
+  slug: string;
+  url: string;
+  areaSlug: string;
+  areaName: string;
+  venue: RawVenue;
+  operators: string[];
+  sessions: DropIn[];
+  /** Clubs whose nights are at this venue. */
+  clubs: Club[];
+  lastChecked: Date | null;
 }
 
 export interface Area {
@@ -157,6 +182,7 @@ export interface Area {
   url: string;
   clubs: Club[];
   dropIns: DropInVenue[];
+  venues: Venue[];
   /** Mean position of its listings, for "nearby areas". */
   lat: number;
   lng: number;
@@ -167,6 +193,7 @@ export interface Directory {
   generatedAt: Date;
   clubs: Club[];
   dropIns: DropInVenue[];
+  venues: Venue[];
   areas: Area[];
   /** Operators whose feed data the site shows, for the CC BY attribution. */
   operators: string[];
@@ -341,6 +368,7 @@ function shape(raw: RawDirectory): Directory {
       club.slug = s;
       club.url = `/badminton/${slug}/${s}.html`;
     }
+    const venues = venuesOf(dropIns, slug, name);
     const points = [...clubs.map((c) => c.venue), ...dropIns.map((d) => d.venue)];
     areas.push({
       slug,
@@ -349,6 +377,7 @@ function shape(raw: RawDirectory): Directory {
       url: `/badminton/${slug}.html`,
       clubs,
       dropIns,
+      venues,
       lat: points.reduce((t, p) => t + p.lat, 0) / points.length,
       lng: points.reduce((t, p) => t + p.lng, 0) / points.length,
       hasPage: clubs.length + dropIns.length >= MIN_LISTINGS_FOR_AREA_PAGE,
@@ -357,8 +386,46 @@ function shape(raw: RawDirectory): Directory {
   areas.sort((a, b) => a.name.localeCompare(b.name));
   const clubs = areas.flatMap((a) => a.clubs).sort((a, b) => a.name.localeCompare(b.name));
   const dropIns = areas.flatMap((a) => a.dropIns);
+  const venues = areas.flatMap((a) => a.venues);
+  for (const v of venues) v.clubs = clubs.filter((c) => c.nights.some((n) => sameVenue(n.venue, v.venue)));
   const operators = [...new Set(dropIns.flatMap((d) => d.operators))].sort();
-  return { generatedAt: new Date(raw.generated_at), clubs, dropIns, areas, operators };
+  return { generatedAt: new Date(raw.generated_at), clubs, dropIns, venues, areas, operators };
+}
+
+/** An area's drop-in listings gathered into venue pages, slugs unique in the area. */
+function venuesOf(dropIns: DropInVenue[], areaSlug: string, areaName: string): Venue[] {
+  const byKey = new Map<string, Venue>();
+  for (const d of dropIns) {
+    const key = `${d.venueName.toLowerCase()}|${d.venue.lat}|${d.venue.lng}`;
+    let v = byKey.get(key);
+    if (!v) {
+      v = { id: d.id, name: d.venueName, slug: '', url: '', areaSlug, areaName, venue: d.venue, operators: [], sessions: [], clubs: [], lastChecked: null };
+      byKey.set(key, v);
+    }
+    v.sessions.push(...d.sessions);
+    for (const o of d.operators) if (!v.operators.includes(o)) v.operators.push(o);
+    d.venueUrl = key;
+  }
+  const used = new Set<string>();
+  for (const [key, v] of byKey) {
+    let s = slugify(v.name) || 'venue';
+    for (let n = 2; used.has(s); n++) s = `${slugify(v.name)}-${n}`;
+    used.add(s);
+    v.slug = s;
+    v.url = `/badminton/${areaSlug}/venues/${s}.html`;
+    const checked = v.sessions.map((x) => x.lastChecked?.getTime() ?? 0);
+    v.lastChecked = Math.max(...checked) ? new Date(Math.max(...checked)) : null;
+    for (const d of dropIns) if (d.venueUrl === key) d.venueUrl = v.url;
+  }
+  return [...byKey.values()];
+}
+
+/** "White Oak L C" and "White Oak Leisure Centre" are one hall; so is anywhere within 100 m. */
+const venueWords = (name: string) => name.toLowerCase()
+  .replace(/\b(leisure|sports?|centre|center|lc|l c|complex|the)\b/g, '').replace(/[^a-z0-9]/g, '');
+function sameVenue(a: RawVenue, b: RawVenue): boolean {
+  const km = distanceKm(a.lat, a.lng, b.lat, b.lng);
+  return km < 0.1 || (km < 2 && venueWords(a.name) !== '' && venueWords(a.name) === venueWords(b.name));
 }
 
 /** "Everyone Active (UK)" reads as "Everyone Active". */
@@ -371,6 +438,11 @@ function dropInTitle(raw: string): string {
   return raw.replace(/\s+(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\w*\s+\d{1,2}:?\d{2}\s*$/i, '').trim() || raw.trim();
 }
 
+/** "White Oak Lc" and "Chilterns Lifestyle Centr", as the feeds shorten them, written out. */
+function venueName(raw: string): string {
+  return raw.trim().replace(/\s+L\s?C$/i, ' Leisure Centre').replace(/\bCentr$/i, 'Centre');
+}
+
 /** Badminton drop-ins grouped by venue, one card each. */
 function dropInVenues(raw: RawDropIn[]): DropInVenue[] {
   const byVenue = new Map<string, DropInVenue>();
@@ -380,7 +452,7 @@ function dropInVenues(raw: RawDropIn[]): DropInVenue[] {
     const key = `${s.venue.name}|${s.venue.lat}|${s.venue.lng}|${title.toLowerCase()}`;
     let v = byVenue.get(key);
     if (!v) {
-      v = { id: s.id, name: title, venueName: s.venue.name.trim(), operators: [], venue: s.venue, areaSlug: '', areaName: '', anchor: '', sessions: [] };
+      v = { id: s.id, name: title, venueName: venueName(s.venue.name), operators: [], venue: s.venue, areaSlug: '', areaName: '', anchor: '', venueUrl: '', sessions: [] };
       byVenue.set(key, v);
     }
     const operator = operatorName(s.operator);
@@ -391,6 +463,8 @@ function dropInVenues(raw: RawDropIn[]): DropInVenue[] {
       claimed: s.claimed,
       bookingUrl: s.booking_url && /^https?:\/\//i.test(s.booking_url) ? s.booking_url : null,
       levelKnown: s.levels.length > 0,
+      operator,
+      lastChecked: s.last_checked ? new Date(s.last_checked) : null,
       night: {
         id: s.id,
         days: s.recurring ? (s.days ?? []) : [],
@@ -465,6 +539,16 @@ export function nearbyAreas(dir: Directory, area: { lat: number; lng: number; sl
     .sort((x, y) => x.km - y.km)
     .slice(0, count)
     .map((x) => x.a);
+}
+
+/** The nearest other venues and clubs, for the venue page. */
+export function nearbyPlaces(dir: Directory, venue: Venue, count = 4): ({ venue: Venue; km: number } | { club: Club; km: number })[] {
+  const from = venue.venue;
+  const here = new Set(venue.clubs.map((c) => c.id));
+  return [
+    ...dir.venues.filter((v) => v.url !== venue.url).map((v) => ({ venue: v, km: distanceKm(from.lat, from.lng, v.venue.lat, v.venue.lng) })),
+    ...dir.clubs.filter((c) => !here.has(c.id)).map((c) => ({ club: c, km: distanceKm(from.lat, from.lng, c.venue.lat, c.venue.lng) })),
+  ].sort((x, y) => x.km - y.km).slice(0, count);
 }
 
 /** The nearest other clubs, for the club page. */

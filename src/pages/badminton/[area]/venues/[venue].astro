@@ -1,0 +1,386 @@
+---
+// One page per venue with drop-in sessions: /badminton/<area>/venues/<venue>.html
+// (REDESIGN-BRIEF, "Venue page"). Every drop-in at the leisure centre, by
+// day, with the operator's booking link, and the clubs that play in the same
+// hall. One page per venue rather than per session: a session alone is a
+// time and a price, too thin a page to be worth finding.
+import Directory from '../../../../layouts/Directory.astro';
+import AppFeaturesCompact from '../../../../components/directory/AppFeaturesCompact.astro';
+import CourtArt from '../../../../components/directory/CourtArt.astro';
+import VenueMap from '../../../../components/directory/VenueMap.astro';
+import {
+  getDirectory, nearbyPlaces, townOf, nextDate, addressLines, clubTint, clubDaysShort, fitTitle, fitDescription, checkedText,
+  durationText, timeRange, listText, DAY_NAMES, DAY_LETTERS, WEEK_ORDER, type Venue, type DropIn,
+} from '../../../../data/directory';
+
+export async function getStaticPaths() {
+  const dir = await getDirectory();
+  return dir.venues.map((venue) => ({
+    params: { area: venue.areaSlug, venue: venue.slug },
+    props: { venue },
+  }));
+}
+
+const { venue } = Astro.props as { venue: Venue };
+const dir = await getDirectory();
+const area = dir.areas.find((a) => a.slug === venue.areaSlug)!;
+const town = townOf(venue.venue, venue.areaName);
+const site = Astro.site!;
+const pageUrl = new URL(venue.url, site).href;
+const nearby = nearbyPlaces(dir, venue);
+
+// A row per session per day it runs, grouped by day from Monday; one-offs
+// after the week, under their date.
+interface Row { key: string; day: number | null; label: string; chip: string | null; s: DropIn }
+const rows: Row[] = venue.sessions.flatMap((s) => {
+  const n = s.night;
+  if (n.days.length) return n.days.map((d) => ({ key: `w${(d + 6) % 7}`, day: d, label: DAY_NAMES[d], chip: null, s }));
+  const date = n.date ? new Date(`${n.date}T12:00:00`) : null;
+  return [{
+    key: `d${n.date ?? ''}`,
+    day: date?.getDay() ?? null,
+    label: date ? date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) : 'One-off',
+    chip: date ? date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) : 'One-off',
+    s,
+  }];
+});
+rows.sort((a, b) => a.key.localeCompare(b.key) || a.s.night.start.localeCompare(b.s.night.start));
+const groups = [...rows.reduce((m, r) => m.set(r.key, [...(m.get(r.key) ?? []), r]), new Map<string, Row[]>()).values()]
+  .map((rs) => ({ label: `${rs[0].label}${rs.length > 1 ? ` · ${rs.length} sessions` : ''}`, rows: rs }));
+
+const prices = venue.sessions.map((s) => s.night.price).filter((p): p is string => Boolean(p));
+const lowest = prices.length ? prices.reduce((a, b) => (parseFloat(b.replace(/[^0-9.]/g, '')) < parseFloat(a.replace(/[^0-9.]/g, '')) ? b : a)) : null;
+const fromPrice = lowest?.replace(' a session', '') ?? null;
+const weekly = rows.length;
+const clubs = venue.clubs;
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+
+const summary = `${plural(weekly, 'drop-in session', 'drop-in sessions')}${rows.every((r) => r.chip == null) ? ' a week' : ''}`
+  + `${fromPrice ? ` from ${fromPrice}` : ''}`
+  + `${clubs.length ? `, and ${plural(clubs.length, 'club plays here', 'clubs play here')}` : ''}.`;
+const ops = listText(venue.operators);
+const checked = checkedText(venue.lastChecked);
+const sourceNote = `Session times at ${venue.name} from ${ops || 'the operator'}, published as open data under CC BY 4.0${checked ? `, checked ${checked}` : ''}.`;
+
+const title = fitTitle([
+  `Badminton at ${venue.name}, ${town} | Drop-in times and prices`,
+  `Badminton at ${venue.name}, ${town}: drop-in times`,
+  `Badminton at ${venue.name}, ${town}`,
+  `Badminton at ${venue.name}`,
+]);
+const description = fitDescription([
+  `Drop-in badminton at ${venue.name}, ${town}: ${summary.replace(/^\d+ drop-in sessions?/, (m) => m.replace('drop-in ', ''))}`,
+  ops ? `Run by ${ops}.` : '',
+  'Times, prices and booking.',
+]);
+
+const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${venue.venue.lat},${venue.venue.lng}`;
+const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${venue.venue.lat},${venue.venue.lng}`;
+const showClaim = venue.sessions.some((s) => !s.claimed);
+// The times a club plays here, not at its other venues: "Tuesday 19:30, Friday 20:00".
+const clubWhen = (c: Venue['clubs'][number]) => c.nights
+  .filter((n) => n.days.length)
+  .flatMap((n) => n.days.map((d) => ({ d, t: n.start })))
+  .sort((a, b) => (a.d + 6) % 7 - (b.d + 6) % 7 || a.t.localeCompare(b.t))
+  .map(({ d, t }) => `${DAY_NAMES[d]} ${t}`).join(', ') || clubDaysShort(c);
+const venueDays = (v: Venue) => {
+  const days = [...new Set(v.sessions.flatMap((s) => s.night.days))].sort((a, b) => (a + 6) % 7 - (b + 6) % 7);
+  return days.length === 1 ? `${DAY_NAMES[days[0]]}s` : days.length ? listText(days.map((d) => DAY_NAMES[d].slice(0, 3))) : 'One-off';
+};
+
+// schema.org: the venue, and each weekly drop-in as an event series with its
+// next date and price (the site rebuilds nightly, so it stays true).
+const today = new Date();
+const placeLd = {
+  '@type': 'SportsActivityLocation',
+  '@id': `${pageUrl}#venue`,
+  name: venue.name,
+  url: pageUrl,
+  ...(venue.venue.address ? { address: venue.venue.address } : {}),
+  geo: { '@type': 'GeoCoordinates', latitude: venue.venue.lat, longitude: venue.venue.lng },
+};
+const eventsLd = venue.sessions.flatMap((s) => s.night.days.map((d) => ({
+  '@context': 'https://schema.org',
+  '@type': 'SportsEvent',
+  name: `${s.title} at ${venue.name}`,
+  sport: 'Badminton',
+  startDate: `${nextDate(d, today)}T${s.night.start}`,
+  ...(s.night.end ? { endDate: `${nextDate(d, today)}T${s.night.end}` } : {}),
+  eventStatus: 'https://schema.org/EventScheduled',
+  eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+  eventSchedule: {
+    '@type': 'Schedule', repeatFrequency: 'P1W', byDay: `https://schema.org/${DAY_NAMES[d]}`,
+    startTime: s.night.start, ...(s.night.end ? { endTime: s.night.end } : {}), scheduleTimezone: 'Europe/London',
+  },
+  location: placeLd,
+  ...(s.operator ? { organizer: { '@type': 'Organization', name: s.operator } } : {}),
+  ...(s.night.price ? {
+    offers: {
+      '@type': 'Offer', price: s.night.price.replace(/[^0-9.]/g, ''), priceCurrency: 'GBP',
+      ...(s.bookingUrl ? { url: s.bookingUrl } : {}), availability: 'https://schema.org/InStock',
+    },
+  } : {}),
+  url: pageUrl,
+})));
+
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Badminton', href: '/badminton.html' },
+  ...(area.hasPage ? [{ name: area.name, href: area.url }] : []),
+  { name: venue.name, href: venue.url },
+];
+const OUT = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"></path></svg>';
+const ARROW = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>';
+---
+
+<Directory title={title} description={description} crumbs={crumbs} jsonLd={[{ '@context': 'https://schema.org', ...placeLd }, ...eventsLd]} cta={false} footerNote={sourceNote}>
+  <style>
+    .hero { align-items: stretch; padding-bottom: 36px; }
+    .hero > .lead-col { display: flex; flex-direction: column; gap: 18px; flex: 999 1 560px; min-width: 0; }
+    .eyebrow { margin: 0; }
+    h1 { font-size: clamp(36px, 5.4vw, 60px); line-height: 1.02; font-stretch: 112%; letter-spacing: -0.03em; }
+    .pin { margin: 0; display: flex; align-items: flex-start; gap: 8px; color: var(--muted); }
+    .pin svg { flex: 0 0 auto; margin-top: 3px; }
+    .summary { margin: 0; max-width: 600px; font-size: 19px; color: var(--body); }
+    .tally {
+      margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      border: 1px solid var(--line); border-radius: 16px; background: var(--surface); overflow: hidden;
+    }
+    .tally > div { padding: 16px 18px; box-shadow: 1px 0 0 var(--line), 0 1px 0 var(--line); }
+    .tally dt { font-size: 13px; color: var(--muted); }
+    .tally dd { margin: 4px 0 0; font-size: 32px; font-weight: 800; font-stretch: 112%; line-height: 1; font-variant-numeric: tabular-nums; }
+    .art {
+      flex: 1 1 320px; min-height: 260px; border-radius: 20px; overflow: hidden; position: relative;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .art span {
+      position: absolute; left: 14px; bottom: 14px; font-size: 12px; font-weight: 600; color: #FFFFFF;
+      background: rgba(0, 0, 0, 0.4); padding: 4px 9px; border-radius: 6px;
+    }
+
+    .box { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: clamp(18px, 3vw, 28px); margin-bottom: 24px; }
+    .box h2 { margin: 0; font-size: 24px; font-weight: 800; font-stretch: 106%; }
+    .box-top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; margin-bottom: 8px; }
+    .box-top p { margin: 0; font-size: 14px; color: var(--muted); }
+    .groups { display: flex; flex-direction: column; gap: 20px; margin-top: 12px; }
+    .groups h3 { margin: 0 0 8px; font-size: 15px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+    .rows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+    .row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding: 14px 16px; border-radius: 14px; background: var(--row); }
+    .chip {
+      flex: 0 0 auto; height: 28px; padding: 0 10px; border-radius: 6px; display: flex; align-items: center;
+      font-size: 13px; font-weight: 800; background: var(--chip-bg); color: var(--chip-fg); white-space: nowrap;
+    }
+    .what { flex: 1 1 210px; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    .what-top { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+    .what b { font-size: 17px; font-weight: 800; }
+    .what small { font-size: 14px; color: var(--muted); }
+    .runs { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--tag-bg); color: var(--tag-fg); }
+    .when { flex: 1 1 150px; display: flex; align-items: baseline; gap: 8px; font-variant-numeric: tabular-nums; }
+    .when b { font-size: 17px; font-weight: 700; white-space: nowrap; }
+    .when small, .cost small { font-size: 13px; color: var(--muted); white-space: nowrap; }
+    .cost { flex: 1 1 130px; display: flex; align-items: baseline; gap: 6px; font-variant-numeric: tabular-nums; }
+    .cost b { font-size: 17px; font-weight: 800; }
+    .go { flex: 1 0 auto; display: flex; justify-content: flex-end; }
+    .book, .join {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; min-width: 112px;
+      padding: 0 18px; border-radius: 999px; text-decoration: none; font-weight: 800;
+    }
+    .book { border: 1.5px solid var(--ink); }
+    .join { background: var(--hl-bg); color: var(--hl-fg); }
+    .join:hover { color: var(--hl-fg); opacity: 0.92; }
+    .small { margin: 18px 0 0; font-size: 13px; color: var(--muted); }
+
+    .clubs { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+    .clubs a {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; min-height: 44px; padding: 14px 16px;
+      border-radius: 14px; background: var(--row); text-decoration: none;
+    }
+    .clubs .name { flex: 999 1 240px; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    .clubs b { font-size: 17px; font-weight: 800; }
+    .clubs small { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .state { font-size: 13px; font-weight: 600; padding: 5px 10px; border-radius: 999px; background: var(--tag2-bg); color: var(--tag2-fg); }
+    .state.alert { background: var(--alert-bg); color: var(--alert-fg); }
+
+    .venue { padding: 0; overflow: hidden; display: flex; flex-wrap: wrap; }
+    .map { flex: 1 1 300px; min-height: 240px; position: relative; background: var(--row); }
+    .venue-text { flex: 999 1 300px; min-width: 0; padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+    address { font-style: normal; font-size: 16px; line-height: 1.6; }
+    address strong { display: block; font-size: 18px; }
+    .outs { display: flex; flex-wrap: wrap; gap: 10px; }
+    .out {
+      display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 999px;
+      border: 1.5px solid var(--line-strong); text-decoration: none; font-weight: 700;
+    }
+    .out.strong { border-color: var(--ink); }
+
+    .run {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px;
+      padding: 18px 22px; border-radius: 16px; border: 1.5px dashed var(--line-strong); margin-bottom: 32px;
+    }
+    .run > div { flex: 999 1 380px; min-width: 0; }
+    .run h2 { margin: 0; font-size: 17px; font-weight: 800; }
+    .run p { margin: 4px 0 0; font-size: 15px; color: var(--body); }
+    .run a { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-weight: 800; }
+
+    .near { padding: 8px 0 40px; }
+    .near-top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; margin-bottom: 16px; }
+    .near-top h2 { margin: 0; font-size: 24px; font-weight: 800; font-stretch: 106%; }
+    .near-top a { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-weight: 700; font-size: 15px; }
+    .nearby { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+    .nearby a {
+      display: flex; flex-direction: column; gap: 10px; height: 100%; box-sizing: border-box; padding: 16px; border-radius: 14px;
+      background: var(--surface); border: 1px solid var(--line); text-decoration: none;
+    }
+    .nearby .kind { font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+    .nearby b { font-weight: 700; line-height: 1.3; }
+    .nearby .meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: auto; }
+    .nearby small { font-size: 13px; color: var(--muted); }
+    .dist { flex: 0 0 auto; font-size: 12px; font-weight: 800; padding: 3px 9px; border-radius: 999px; background: var(--tag-bg); color: var(--tag-fg); }
+
+    /* Phone: day strip; title and operator; time and price; Book on its own line. */
+    @media (max-width: 560px) {
+      .what { flex-basis: 100%; }
+      .when, .cost { flex: 0 1 auto; }
+      .go { flex-basis: 100%; }
+    }
+  </style>
+
+  <section class="hero">
+    <div class="lead-col">
+      <p class="eyebrow">Badminton venue · {venue.areaName}</p>
+      <h1>Badminton at {venue.name}</h1>
+      <p class="pin">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg>
+        <span>{addressLines(venue.venue).join(', ')}</span>
+      </p>
+      <p class="summary">{summary}</p>
+      <dl class="tally">
+        <div><dt>Drop-ins</dt><dd>{weekly}</dd></div>
+        {clubs.length > 0 && <div><dt>Clubs</dt><dd>{clubs.length}</dd></div>}
+        {fromPrice && <div><dt>From</dt><dd>{fromPrice}</dd></div>}
+      </dl>
+    </div>
+    <div class="art" style={`background: ${clubTint(venue.id)}`}>
+      <CourtArt width={240} />
+      <span>{venue.name}</span>
+    </div>
+  </section>
+
+  <section class="box" aria-labelledby="dropin-h">
+    <div class="box-top">
+      <h2 id="dropin-h">Drop-in sessions</h2>
+      <p>Pay per session. Book with the operator.</p>
+    </div>
+    <div class="groups">
+      {groups.map((g) => (
+        <div>
+          <h3>{g.label}</h3>
+          <ul class="rows">
+            {g.rows.map((r) => {
+              const n = r.s.night;
+              const duration = durationText(n);
+              return (
+                <li class="row">
+                  {r.chip
+                    ? <span class="chip">{r.chip}</span>
+                    : (
+                      <span class="day-strip" role="img" aria-label={`${DAY_NAMES[r.day!]}s`}>
+                        {WEEK_ORDER.map((d) => <span class:list={['ds-cell', { on: d === r.day }]} aria-hidden="true">{DAY_LETTERS[d]}</span>)}
+                      </span>
+                    )}
+                  <span class="what">
+                    <span class="what-top">
+                      <b>{r.s.title}</b>
+                      {r.s.claimed && <span class="runs">Runs on NextFour</span>}
+                    </span>
+                    {r.s.operator && <small>Run by {r.s.operator}</small>}
+                  </span>
+                  <span class="when"><b>{timeRange(n)}</b>{duration && <small>{duration}</small>}</span>
+                  {n.price && <span class="cost"><b>{n.price.replace(' a session', '')}</b><small>per session</small></span>}
+                  <span class="go">
+                    {r.s.claimed
+                      ? <a class="join" href="/get.html?src=venue">Join in the app</a>
+                      : r.s.bookingUrl && (
+                        <a class="book" href={r.s.bookingUrl} target="_blank" rel="noopener nofollow"
+                          aria-label={`Book ${r.s.title} on ${r.label}${r.s.operator ? ` with ${r.s.operator}` : ''} (opens in a new tab)`}>
+                          Book <Fragment set:html={OUT} />
+                        </a>
+                      )}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
+    </div>
+    <p class="small">Booking opens the operator's own site in a new tab. Nothing is booked or paid for on NextFour.</p>
+  </section>
+
+  {clubs.length > 0 && (
+    <section class="box" aria-labelledby="clubs-h">
+      <h2 id="clubs-h">Clubs that play here</h2>
+      <ul class="clubs">
+        {clubs.map((c) => (
+          <li>
+            <a href={c.url}>
+              <span class="name"><b>{c.name}</b><small>{clubWhen(c)}</small></span>
+              <span class:list={['state', { alert: !c.takingNewPlayers }]}>{c.takingNewPlayers ? 'Taking new players' : 'Not taking new players'}</span>
+              <Fragment set:html={ARROW} />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <section class="box venue" aria-labelledby="map-h">
+    <div class="map"><VenueMap lat={venue.venue.lat} lng={venue.venue.lng} name={venue.name} /></div>
+    <div class="venue-text">
+      <h2 id="map-h">Getting there</h2>
+      <address>
+        <strong>{venue.name}</strong>
+        {addressLines(venue.venue).map((line, i) => <>{i > 0 && <br />}{line}</>)}
+      </address>
+      <div class="outs">
+        <a class="out" href={mapsUrl} target="_blank" rel="noopener">Open in Maps <Fragment set:html={OUT} /></a>
+        <a class="out strong" href={directionsUrl} target="_blank" rel="noopener">Directions <Fragment set:html={OUT} /></a>
+      </div>
+    </div>
+  </section>
+
+  {showClaim && (
+    <section class="run" aria-labelledby="run-h">
+      <div>
+        <h2 id="run-h">Run one of these sessions?</h2>
+        <p>Claim it in the NextFour app to take sign-ups and run the night with a digital pegboard.</p>
+      </div>
+      <a href="/get.html?src=claim">Claim a session <Fragment set:html={ARROW} /></a>
+    </section>
+  )}
+
+  {nearby.length > 0 && (
+    <section class="near" aria-labelledby="near-h">
+      <div class="near-top">
+        <h2 id="near-h">Other places to play near {town}</h2>
+        {area.hasPage && <a href={area.url}>All badminton in {area.name} <Fragment set:html={ARROW} /></a>}
+      </div>
+      <ul class="nearby">
+        {nearby.map((p) => (
+          <li>
+            <a href={'venue' in p ? p.venue.url : p.club.url}>
+              <span class="kind">{'venue' in p ? 'Drop-in venue' : 'Club'}</span>
+              <b>{'venue' in p ? p.venue.name : p.club.name}</b>
+              <span class="meta">
+                <small>{'venue' in p ? venueDays(p.venue) : clubDaysShort(p.club)}</small>
+                <span class="dist">{p.km < 1 ? 'Under 1' : Math.round(p.km)} km</span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <AppFeaturesCompact src="venue" />
+</Directory>

@@ -32,17 +32,15 @@ export const GET: APIRoute = async () => {
     ]),
     k: sessionCountText(c),
   }));
-  const areas = new Map(dir.areas.map((a) => [a.slug, a]));
   const dropIns = dir.dropIns.map((v) => {
-    const area = areas.get(v.areaSlug);
     const rowsOf = dropInRows(v);
     return {
       y: 'd',
       n: v.name,
       w: v.venueName,
       p: tintIndex(v.id),
-      // The card on its area page; a venue in an area without one has no link.
-      u: area?.hasPage ? `${area.url}#${v.anchor}` : null,
+      // Its venue's page: every venue has one, whether or not its area does.
+      u: v.venueUrl,
       a: v.areaName,
       v: v.operators.join(' and '),
       lat: Math.round(v.venue.lat * 1000) / 1000,

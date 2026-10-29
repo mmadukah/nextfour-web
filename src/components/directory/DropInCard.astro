@@ -4,7 +4,8 @@
 // as the clubs so the list reads as one family. What tells it apart is the
 // building icon, the tags, the price and the button, never a bright panel:
 // the panel takes the clubs' rotating tints. The finder's results build the
-// same markup in its script; keep the two in step.
+// same markup in its script; keep the two in step. The title links to the
+// venue's page, which has the booking links and the clubs in the same hall.
 import LevelBars from './LevelBars.astro';
 import {
   dropInRows, durationText, timeRange, daysPlural, levelBars, clubTint, DAY_LETTERS, WEEK_ORDER, type DropInVenue,
@@ -25,7 +26,7 @@ const getHref = '/get.html?src=dropin';
   <div class="cc-body">
     <div class="cc-top">
       <div class="cc-who">
-        <h3 class="cc-name">{venue.name}</h3>
+        <h3 class="cc-name"><a href={venue.venueUrl}>{venue.name}</a></h3>
         <p class="cc-venue">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg>
           {venue.venueName}, {venue.areaName}

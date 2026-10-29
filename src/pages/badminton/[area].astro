@@ -97,7 +97,7 @@ const dropInLd = area.dropIns.flatMap((v) => v.sessions.flatMap((s) => s.night.d
       ...(s.bookingUrl ? { url: s.bookingUrl } : {}), availability: 'https://schema.org/InStock',
     },
   } : {}),
-  url: new URL(`${area.url}#${v.anchor}`, site).href,
+  url: new URL(v.venueUrl, site).href,
 }))));
 
 const crumbs = [

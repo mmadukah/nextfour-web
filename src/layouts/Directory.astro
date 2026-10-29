@@ -40,9 +40,11 @@ interface Props {
   languages?: { lang: string; label: string; href: string }[];
   /** A shorter line for link previews (Base's og:description). */
   ogDescription?: string;
+  /** A line of the page's own above the directory notes: a venue page's data source. */
+  footerNote?: string;
 }
 const {
-  title, description, crumbs, jsonLd = [], cta = true, current, lang = 'en', footer = 'directory', languages = [], ogDescription, bare = false,
+  title, description, crumbs, jsonLd = [], cta = true, current, lang = 'en', footer = 'directory', languages = [], ogDescription, bare = false, footerNote,
 } = Astro.props;
 
 const WORDS = {
@@ -264,6 +266,7 @@ const ld = crumbs.length > 1 ? [breadcrumbLd, ...jsonLd] : jsonLd;
   <SiteFooter lang={lang} languages={languages}>
     {footer === 'directory' && (
       <>
+        {footerNote && <p>{footerNote}</p>}
         <p>
           Club times come from published information and every page says when it was last checked.
           Spotted something wrong? Email <a href="mailto:clubs@nextfour.app">clubs@nextfour.app</a>.
