@@ -44,7 +44,7 @@ const {
 const WORDS = {
   en: {
     home: 'NextFour home', main: 'Main', crumbs: 'Breadcrumb', foot: 'Footer', language: 'Language',
-    find: 'Find badminton', how: 'How it works', get: 'Get the app',
+    homeLink: 'Home', find: 'Find badminton', how: 'How it works', get: 'Get the app',
     links: [['Home', '/'], ['Badminton clubs', '/badminton.html'], ['How it works', '/how-it-works.html'],
       ['Privacy', '/privacy.html'], ['Terms', '/terms.html'], ['Support', '/support.html']],
     deletion: ['Account and data deletion', '/delete-account.html'],
@@ -52,7 +52,7 @@ const WORDS = {
   fr: {
     home: 'Accueil NextFour', main: 'Principal', crumbs: 'Fil d’Ariane', foot: 'Pied de page', language: 'Langue',
     // Short, so the header stays on one line on a phone.
-    find: 'Trouver un club', how: 'Comment ça marche', get: 'Télécharger',
+    homeLink: 'Accueil', find: 'Trouver un club', how: 'Comment ça marche', get: 'Télécharger',
     links: [['Accueil', '/fr/'], ['Clubs de badminton', '/badminton.html'], ['Comment ça marche', '/fr/how-it-works.html'],
       ['Politique de confidentialité', '/fr/privacy.html'], ['Conditions générales', '/fr/terms.html'], ['Assistance', '/fr/support.html']],
     deletion: ['Suppression du compte et des données', '/fr/delete-account.html'],
@@ -243,6 +243,8 @@ const ld = [breadcrumbLd, ...jsonLd];
         <span class="word">NextFour</span>
       </a>
       <nav aria-label={WORDS.main}>
+        <!-- Phones keep one text link: the logo already goes home there. -->
+        <a class="hide-sm" href={lang === 'fr' ? '/fr/' : '/'}>{WORDS.homeLink}</a>
         <a href="/badminton.html" aria-current={current === 'finder' ? 'page' : undefined}>{WORDS.find}</a>
         <a class="hide-sm" href={lang === 'fr' ? '/fr/how-it-works.html' : '/how-it-works.html'} aria-current={current === 'how' ? 'page' : undefined}>{WORDS.how}</a>
         <ThemeToggle />
