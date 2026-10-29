@@ -4,17 +4,29 @@
 // Search runs in the browser over /badminton/search-index.json. A postcode is
 // placed with /postcode-districts.json (shipped with the site, OGL), so it
 // never leaves the visitor's device; "Near me" uses the browser's location
-// prompt. Below the finder, every area is a plain link, so crawlers reach
-// every page without running any script.
+// prompt. Below the finder, every area and club is a plain link, so crawlers
+// reach every page without running any script: the country tabs only hide
+// the other countries once the script runs.
 import Directory from '../layouts/Directory.astro';
-import { getDirectory, weeklyNights, PHOTOS } from '../data/directory';
+import AppCta from '../components/directory/AppCta.astro';
+import { getDirectory, weeklyNights, PHOTOS, type Area } from '../data/directory';
 
 const dir = await getDirectory();
 const withPage = dir.areas.filter((a) => a.hasPage);
-const single = dir.areas.filter((a) => !a.hasPage).flatMap((a) => a.clubs);
+const single = dir.areas.filter((a) => !a.hasPage).flatMap((a) => a.clubs).sort((a, b) => a.name.localeCompare(b.name));
+const byLetter = (areas: Area[]) => {
+  const groups = new Map<string, Area[]>();
+  for (const a of areas) {
+    const letter = a.name[0].toUpperCase();
+    groups.set(letter, [...(groups.get(letter) ?? []), a]);
+  }
+  return [...groups].map(([letter, list]) => ({ letter, areas: list }));
+};
 const nations = ['England', 'Scotland', 'Wales', 'Northern Ireland']
-  .map((n) => ({ name: n, areas: withPage.filter((a) => a.nation === n) }))
-  .filter((n) => n.areas.length > 0);
+  .map((n) => ({ name: n, groups: byLetter(withPage.filter((a) => a.nation === n)) }))
+  .filter((n) => n.groups.length > 0);
+const busiest = [...withPage].sort((a, b) => b.clubs.length - a.clubs.length || a.name.localeCompare(b.name)).slice(0, 4);
+const TINTS = ['#1F4D3A', '#2C5873', '#7A4A2A', '#4B3F72'];
 const nights = weeklyNights(dir.clubs);
 const site = Astro.site!;
 
@@ -34,111 +46,233 @@ const crumbs = [
   { name: 'Home', href: '/' },
   { name: 'Badminton', href: '/badminton.html' },
 ];
+const NIGHTS = [['', 'Any night'], ['1', 'Mon'], ['2', 'Tue'], ['3', 'Wed'], ['4', 'Thu'], ['5', 'Fri'], ['6', 'Sat'], ['0', 'Sun']];
+const LEVELS = [['', 'Any level'], ['1', 'Beginner'], ['2', 'Intermediate'], ['3', 'Upper intermediate'], ['4', 'Advanced']];
 ---
 
-<Directory title={title} description={description} crumbs={crumbs} jsonLd={[siteLd]}>
+<Directory title={title} description={description} crumbs={crumbs} jsonLd={[siteLd]} cta={false} finder>
   <style>
-    .search { margin-top: 32px; display: grid; gap: 12px; }
-    .row { display: flex; flex-wrap: wrap; gap: 10px; }
-    .row > * { flex: 1 1 160px; }
-    input[type='search'], select {
-      font: inherit; color: var(--ink); background: var(--row);
-      border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; min-width: 0;
+    .top { padding: 28px 0 32px; }
+    h1 { max-width: 820px; font-size: clamp(40px, 6.5vw, 76px); line-height: 0.98; font-stretch: 116%; }
+    .intro { max-width: 620px; }
+    form { margin-top: 32px; display: flex; flex-direction: column; gap: 20px; }
+    .query { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+    .field { flex: 999 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+    .field label { font-size: 14px; font-weight: 700; }
+    .box {
+      display: flex; align-items: center; gap: 10px; height: 56px; padding: 0 16px; border-radius: 14px;
+      border: 1.5px solid var(--line-strong); background: var(--bg);
     }
-    input[type='search'] { flex: 3 1 260px; font-size: 1.05rem; }
-    input[type='search']:focus, select:focus { outline: 2px solid var(--accent-ink); outline-offset: 1px; }
-    .row > #near { flex: 0 0 auto; white-space: nowrap; }
-    label.check { display: flex; align-items: center; gap: 8px; color: var(--muted); flex: 0 1 auto; }
-    #status { font-family: var(--head); font-weight: 800; font-size: 1.25rem; margin: 32px 0 14px; letter-spacing: -0.01em; }
+    .box:focus-within { border-color: var(--eyebrow); }
+    .box svg { color: var(--muted); flex: 0 0 auto; }
+    .box input {
+      flex: 1 1 auto; min-width: 0; border: 0; outline: none; background: transparent; color: var(--ink);
+      font-size: 17px; height: 100%;
+    }
+    .go { flex: 1 1 auto; display: flex; gap: 10px; }
+    .go button {
+      flex: 1 1 auto; height: 56px; border-radius: 14px; font-size: 15px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap;
+    }
+    #near { padding: 0 18px; border: 1.5px solid var(--line-strong); background: var(--surface); color: var(--ink); }
+    #search { padding: 0 28px; border: 0; background: var(--hl-bg); color: var(--hl-fg); font-size: 16px; font-weight: 800; }
+    .filters { display: flex; flex-wrap: wrap; gap: 20px 32px; padding-top: 18px; border-top: 1px solid var(--line); }
+    fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+    fieldset.nights { flex: 999 1 460px; }
+    fieldset.levels { flex: 1 1 360px; }
+    legend { font-size: 14px; font-weight: 700; margin-bottom: 10px; padding: 0; }
+    .pills { display: flex; flex-wrap: wrap; gap: 6px; }
+    .pill {
+      min-height: 44px; min-width: 52px; padding: 0 14px; border-radius: 999px; font-size: 14px; font-weight: 700; cursor: pointer;
+      border: 1.5px solid var(--line-strong); background: var(--surface); color: var(--ink);
+    }
+    .pill[aria-pressed='true'] { border-color: var(--sel-bg); background: var(--sel-bg); color: var(--sel-fg); }
+    .switch-row { flex: 1 1 100%; display: flex; align-items: center; gap: 12px; }
+    .switch-row label { font-size: 15px; font-weight: 600; cursor: pointer; }
+    #open {
+      width: 52px; height: 32px; border-radius: 999px; border: 0; padding: 3px; cursor: pointer;
+      background: var(--seg-off); display: flex; justify-content: flex-start; flex: none;
+    }
+    #open span { width: 26px; height: 26px; border-radius: 999px; background: var(--surface); transition: transform 0.15s; }
+    #open[aria-pressed='true'] { background: var(--seg-on); }
+    #open[aria-pressed='true'] span { transform: translateX(20px); }
+
+    #status { margin: 8px 0 16px; font-size: 22px; font-weight: 800; font-stretch: 106%; }
     #status:empty { display: none; }
-    #results { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+    #results { list-style: none; padding: 0; margin: 0 0 48px; display: flex; flex-direction: column; gap: 12px; }
+    #results:empty { display: none; }
     /* Result cards are written by the script below, so these rules are
        global: Astro's scoped selectors never match innerHTML. */
     :global(#results .hit) {
-      position: relative; display: grid; grid-template-columns: 112px 1fr; overflow: hidden;
-      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      display: flex; flex-wrap: wrap; overflow: hidden; background: var(--surface); border: 1px solid var(--line); border-radius: 18px;
     }
-    :global(#results .hit:hover) { border-color: var(--accent-ink); }
-    :global(#results .hit img) { width: 100%; height: 100%; min-height: 104px; object-fit: cover; display: block; }
-    :global(#results .hit-body) { padding: 14px 16px; display: grid; gap: 6px; min-width: 0; }
-    :global(#results .hit-top) { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-    :global(#results .hit-name) {
-      font-family: var(--head); font-weight: 800; font-size: 1.05rem; line-height: 1.3; color: var(--ink); text-decoration: none;
-    }
-    /* The name is the only link; this stretches it over the whole card. */
-    :global(#results .hit-name::after) { content: ''; position: absolute; inset: 0; }
-    :global(#results .hit:hover .hit-name) { text-decoration: underline; }
-    :global(#results .hit-name:focus-visible) { outline: none; }
-    :global(#results .hit:has(.hit-name:focus-visible)) { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
-    :global(#results .hit-dist) { flex: none; font-size: 0.82rem; font-weight: 800; color: var(--muted); }
-    :global(#results .hit-venue) { margin: 0; color: var(--muted); font-size: 0.92rem; }
+    :global(#results .hit-img) { flex: 1 0 140px; max-width: 100%; min-height: 120px; position: relative; background: var(--row); }
+    :global(#results .hit-img img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    :global(#results .hit-body) { flex: 999 1 380px; min-width: 0; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; }
+    :global(#results .hit-top) { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 16px; }
+    :global(#results .hit-name) { font-size: 19px; font-weight: 800; font-stretch: 104%; line-height: 1.25; text-decoration: none; }
+    :global(#results .hit-dist) { font-size: 14px; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+    :global(#results .hit-venue) { margin: 0; color: var(--muted); font-size: 15px; }
     :global(#results .hit-tags) { display: flex; flex-wrap: wrap; gap: 6px; }
     :global(#results .hit-day) {
-      background: var(--strong); color: var(--on-strong); border-radius: 6px; font-weight: 800; font-size: 0.75rem; padding: 2px 8px;
+      font-weight: 800; font-size: 13px; padding: 4px 10px; border-radius: 8px; background: var(--chip-bg); color: var(--chip-fg);
     }
-    @media (max-width: 640px) {
-      :global(#results .hit) { grid-template-columns: 84px 1fr; }
+
+    section.busy { padding: 16px 0 40px; }
+    .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+    .tiles a {
+      display: flex; flex-direction: column; gap: 22px; padding: 20px; border-radius: 18px; color: #FFFFFF;
+      text-decoration: none; min-height: 120px;
+    }
+    .tiles a:hover { color: #FFFFFF; filter: brightness(1.08); }
+    .tiles .name { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; font-size: 18px; font-weight: 700; line-height: 1.2; }
+    .tiles .n { display: flex; align-items: baseline; gap: 8px; }
+    .tiles .n b { font-size: 44px; font-weight: 800; font-stretch: 112%; line-height: 1; color: #C8F135; }
+    .tiles .n span { font-size: 15px; opacity: 0.9; }
+
+    section.browse, section.more { padding: 32px 0 40px; border-top: 1px solid var(--line); }
+    .browse-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); }
+    .tabs button {
+      min-height: 40px; padding: 0 18px; border-radius: 999px; border: 0; font-size: 15px; font-weight: 700; cursor: pointer;
+      background: transparent; color: var(--ink);
+    }
+    .tabs button[aria-pressed='true'] { background: var(--sel-bg); color: var(--sel-fg); }
+    .nation { display: flex; flex-direction: column; gap: 28px; }
+    .nation + .nation { margin-top: 40px; }
+    .nation[hidden] { display: none; }
+    .nation > h3 { margin: 0; font-size: 20px; font-weight: 800; }
+    .group { display: flex; flex-wrap: wrap; gap: 12px 24px; }
+    .letter { flex: 0 0 56px; font-size: 40px; font-weight: 800; font-stretch: 118%; line-height: 1; color: var(--eyebrow); }
+    .group ul { flex: 999 1 400px; min-width: 0; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; }
+    .group a {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px;
+      border-radius: 12px; background: var(--surface); border: 1px solid var(--line); text-decoration: none;
+    }
+    .group a span:first-child { font-weight: 600; min-width: 0; }
+    .count {
+      flex: 0 0 auto; font-size: 13px; font-weight: 700; padding: 2px 9px; border-radius: 999px;
+      background: var(--row); color: var(--muted); font-variant-numeric: tabular-nums;
+    }
+    .more p { margin: 0 0 16px; color: var(--muted); font-size: 15px; }
+    .more ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 0 32px; }
+    .more li { border-bottom: 1px solid var(--line); }
+    .more a { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 0; text-decoration: none; }
+    .more a b { display: block; font-weight: 700; }
+    .more a small { display: block; font-size: 14px; color: var(--muted); }
+    #browse[hidden] { display: none; }
+    @media (max-width: 400px) {
+      .more ul { grid-template-columns: 1fr; }
     }
   </style>
 
-  <section class="hero">
-    <div>
-      <p class="eyebrow">Badminton club finder</p>
-      <h1 class="long">Find badminton near you</h1>
-      <p class="lead">
-        Every club night in our UK directory with its days, times, venue and playing level. Search by postcode, town or club name.
-      </p>
-    </div>
-    <div class="stats">
-      <div><span>Clubs</span><b>{dir.clubs.length}</b></div>
-      <div><span>Nights a week</span><b>{nights}</b></div>
-      <div><span>Areas</span><b>{dir.areas.length}</b></div>
-    </div>
+  <section class="top">
+    <p class="eyebrow">Badminton club finder</p>
+    <h1>Find badminton near you</h1>
+    <p class="intro">{dir.clubs.length} clubs and {nights} club nights a week across the UK, each with its days, times, venue and level.</p>
+
+    <form class="panel" id="find" role="search">
+      <div class="query">
+        <div class="field">
+          <label for="q">Postcode, town or club name</label>
+          <div class="box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+            <input id="q" name="q" type="search" placeholder="e.g. SM1, Sutton or Westwood" autocomplete="postal-code" />
+          </div>
+        </div>
+        <div class="go">
+          <button type="button" id="near">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+            Near me
+          </button>
+          <button type="submit" id="search">Search</button>
+        </div>
+      </div>
+      <div class="filters">
+        <fieldset class="nights">
+          <legend>Night</legend>
+          <div class="pills" data-filter="day">
+            {NIGHTS.map(([v, label]) => <button type="button" class="pill" data-value={v} aria-pressed={v === '' ? 'true' : 'false'}>{label}</button>)}
+          </div>
+        </fieldset>
+        <fieldset class="levels">
+          <legend>Level</legend>
+          <div class="pills" data-filter="level">
+            {LEVELS.map(([v, label]) => <button type="button" class="pill" data-value={v} aria-pressed={v === '' ? 'true' : 'false'}>{label}</button>)}
+          </div>
+        </fieldset>
+        <div class="switch-row">
+          <button type="button" id="open" aria-pressed="false" aria-labelledby="open-label"><span></span></button>
+          <label id="open-label" for="open">Only clubs taking new players</label>
+        </div>
+      </div>
+    </form>
   </section>
 
-  <form class="card search" id="find" role="search" onsubmit="return false">
-    <div class="row">
-      <input type="search" id="q" name="q" placeholder="Postcode, town or club name" aria-label="Postcode, town or club name" autocomplete="postal-code" />
-      <button type="button" class="btn dark" id="near">Near me</button>
-    </div>
-    <div class="row">
-      <select id="day" aria-label="Day">
-        <option value="">Any day</option>
-        <option value="1">Monday</option><option value="2">Tuesday</option>
-        <option value="3">Wednesday</option><option value="4">Thursday</option>
-        <option value="5">Friday</option><option value="6">Saturday</option>
-        <option value="0">Sunday</option>
-      </select>
-      <select id="level" aria-label="Level">
-        <option value="">Any level</option>
-        <option value="1">Beginner</option><option value="2">Intermediate</option>
-        <option value="3">Upper intermediate</option><option value="4">Advanced</option>
-      </select>
-      <label class="check"><input type="checkbox" id="open" /> Taking new players</label>
-    </div>
-  </form>
   <p id="status" aria-live="polite"></p>
   <ul id="results" data-photos={JSON.stringify(PHOTOS)}></ul>
 
   <div id="browse">
-    {nations.map((n) => (
-      <>
-        <h2>Badminton in {n.name}</h2>
-        <nav class="links" aria-label={`Areas in ${n.name}`}>
-          {n.areas.map((a) => <a href={a.url}><span>{a.name}<small>{a.clubs.length} clubs</small></span></a>)}
-        </nav>
-      </>
-    ))}
+    <section class="busy" aria-labelledby="busy-h">
+      <h2 class="h-section" id="busy-h">Busiest areas</h2>
+      <div class="tiles">
+        {busiest.map((a, i) => (
+          <a href={a.url} style={`background: ${TINTS[i]}`}>
+            <span class="name">
+              {a.name}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"></path></svg>
+            </span>
+            <span class="n"><b>{a.clubs.length}</b><span>clubs</span></span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <section class="browse" aria-labelledby="browse-h">
+      <div class="browse-top">
+        <h2 class="h-results" id="browse-h">Browse by area</h2>
+        {nations.length > 1 && (
+          <div class="tabs" role="group" aria-label="Country">
+            {nations.map((n, i) => <button type="button" data-nation={n.name} aria-pressed={i === 0 ? 'true' : 'false'}>{n.name}</button>)}
+          </div>
+        )}
+      </div>
+      {nations.map((n) => (
+        <div class="nation" data-nation={n.name}>
+          <h3>Badminton in {n.name}</h3>
+          {n.groups.map((g) => (
+            <div class="group">
+              <div class="letter" aria-hidden="true">{g.letter}</div>
+              <ul>
+                {g.areas.map((a) => (
+                  <li><a href={a.url}><span>{a.name}</span><span class="count" aria-label={`${a.clubs.length} clubs`}>{a.clubs.length}</span></a></li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      ))}
+    </section>
 
     {single.length > 0 && (
-      <>
-        <h2>More clubs</h2>
-        <nav class="links" aria-label="More clubs">
-          {single.map((c) => <a href={c.url}><span>{c.name}<small>{c.areaName}</small></span></a>)}
-        </nav>
-      </>
+      <section class="more" aria-labelledby="more-h">
+        <h2 class="h-section" id="more-h" style="margin-bottom: 6px">More clubs</h2>
+        <p>Clubs in areas that don't have their own page yet.</p>
+        <ul>
+          {single.map((c) => (
+            <li>
+              <a href={c.url}>
+                <span><b>{c.name}</b><small>{c.areaName}</small></span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: 0 0 auto"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
     )}
   </div>
+
+  <AppCta text="Get the NextFour app to join a club night and keep track of the clubs you play with." search={false} />
 
   <script>
     type Row = { n: string; u: string; a: string; v: string; lat: number; lng: number; d: number[]; l: [number, number]; o: number; x: number; t: number; p: number };
@@ -147,15 +281,14 @@ const crumbs = [
     const RADIUS_KM = 25;
 
     const q = document.getElementById('q') as HTMLInputElement;
-    const day = document.getElementById('day') as HTMLSelectElement;
-    const level = document.getElementById('level') as HTMLSelectElement;
-    const open = document.getElementById('open') as HTMLInputElement;
+    const open = document.getElementById('open') as HTMLButtonElement;
     const status = document.getElementById('status')!;
     const results = document.getElementById('results')!;
     const photos: { src: string; position: string }[] = JSON.parse(results.dataset.photos ?? '[]');
     // The area lists are for browsing; a search hides them (they stay in the
     // HTML, so crawlers still follow every link).
     const browse = document.getElementById('browse')!;
+    const filter = { day: '', level: '' };
 
     let rows: Row[] | null = null;
     let districts: [string, number, number, string][] | null = null;
@@ -212,12 +345,12 @@ const crumbs = [
     }
 
     function passes(r: Row) {
-      if (day.value !== '' && !r.d.includes(Number(day.value))) return false;
-      if (level.value !== '') {
-        const l = Number(level.value);
+      if (filter.day !== '' && !r.d.includes(Number(filter.day))) return false;
+      if (filter.level !== '') {
+        const l = Number(filter.level);
         if (l < r.l[0] || l > r.l[1]) return false;
       }
-      return !open.checked || r.o === 1;
+      return open.getAttribute('aria-pressed') !== 'true' || r.o === 1;
     }
 
     function render(list: { r: Row; dist?: number }[], heading: string) {
@@ -226,7 +359,7 @@ const crumbs = [
         const photo = photos[r.p] ?? photos[0];
         return `
         <li class="hit">
-          <img src="${photo.src}" alt="" loading="lazy" style="object-position: ${photo.position}" />
+          <div class="hit-img"><img src="${photo.src}" alt="" loading="lazy" style="object-position: ${photo.position}" /></div>
           <div class="hit-body">
             <div class="hit-top">
               <a class="hit-name" href="${esc(r.u)}">${esc(r.n)}</a>
@@ -237,7 +370,7 @@ const crumbs = [
               ${[1, 2, 3, 4, 5, 6, 0].filter((d) => r.d.includes(d)).map((d) => `<span class="hit-day">${DAYS[d]}</span>`).join('')}
               ${r.x ? '<span class="tag lime">Runs on NextFour</span>' : ''}
               ${r.o ? '' : '<span class="tag warn">Not taking new players</span>'}
-              ${r.t ? '<span class="tag ok">Visitor terms listed</span>' : ''}
+              ${r.t ? '<span class="tag ok">Visitor terms listed</span>' : '<span class="tag">No visitor info yet</span>'}
             </div>
           </div>
         </li>`;
@@ -276,7 +409,34 @@ const crumbs = [
       clearTimeout(timer);
       timer = window.setTimeout(run, 250);
     });
-    [day, level, open].forEach((el) => el.addEventListener('change', run));
+    document.getElementById('find')!.addEventListener('submit', (e) => { e.preventDefault(); clearTimeout(timer); run(); });
+
+    // Night and level pills: one pressed per group.
+    document.querySelectorAll<HTMLElement>('.pills').forEach((group) => {
+      const key = group.dataset.filter as 'day' | 'level';
+      group.querySelectorAll<HTMLButtonElement>('.pill').forEach((b) => b.addEventListener('click', () => {
+        group.querySelectorAll('.pill').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        filter[key] = b.dataset.value ?? '';
+        run();
+      }));
+    });
+    open.addEventListener('click', () => {
+      open.setAttribute('aria-pressed', String(open.getAttribute('aria-pressed') !== 'true'));
+      run();
+    });
+
+    // Country tabs: every country is in the HTML; the tabs show one at a time.
+    const tabs = document.querySelectorAll<HTMLButtonElement>('.tabs button');
+    const nations = document.querySelectorAll<HTMLElement>('.nation');
+    const showNation = (name: string) => {
+      tabs.forEach((t) => t.setAttribute('aria-pressed', String(t.dataset.nation === name)));
+      nations.forEach((n) => { n.hidden = n.dataset.nation !== name; });
+    };
+    if (tabs.length) {
+      tabs.forEach((t) => t.addEventListener('click', () => showNation(t.dataset.nation!)));
+      showNation(tabs[0].dataset.nation!);
+    }
+
     document.getElementById('near')!.addEventListener('click', () => {
       if (!navigator.geolocation) { status.textContent = 'Your browser cannot share its location.'; return; }
       status.textContent = 'Finding you…';

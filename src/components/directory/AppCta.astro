@@ -1,43 +1,48 @@
 ---
-// The closing panel on every directory page: the app, and the finder.
+// The closing app banner on every directory page. Inverts to solid lime in
+// dark mode (the --cta-* tokens).
 interface Props {
   heading?: string;
   text?: string;
+  /** The outlined "Search all clubs" button; the finder itself leaves it off. */
+  search?: boolean;
 }
 const {
   heading = "See who's going before you go.",
   text = 'Get the NextFour app to join a club night, or search every club by postcode, town or name.',
+  search = true,
 } = Astro.props;
 ---
 
-<section class="cta">
-  <div>
-    <h2>{heading}</h2>
+<section class="cta" aria-labelledby="cta-h">
+  <div class="copy">
+    <h2 id="cta-h">{heading}</h2>
     <p>{text}</p>
   </div>
   <div class="actions">
-    <a class="btn go" href="/get.html">Get the app</a>
-    <a class="btn ghost" href="/badminton.html">Search all clubs</a>
+    <a class="go" href="/get.html">Get the app</a>
+    {search && <a class="ghost" href="/badminton.html">Search all clubs</a>}
   </div>
 </section>
 
 <style>
   .cta {
-    margin-top: 56px; background: var(--panel); color: var(--panel-ink); border-radius: 22px;
-    padding: 40px 36px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px;
-    border: 0;
+    background: var(--cta-bg); border-radius: 24px; padding: clamp(28px, 5vw, 48px); margin-bottom: 56px;
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px;
   }
-  .cta > div:first-child { flex: 1 1 380px; }
+  .copy { flex: 999 1 420px; min-width: 0; }
   h2 {
-    margin: 0 0 10px; color: var(--panel-head); font-family: var(--head); font-weight: 900;
-    font-size: clamp(1.7rem, 4.4vw, 2.5rem); line-height: 1.08; letter-spacing: -0.03em;
+    margin: 0; font-size: clamp(28px, 4vw, 40px); line-height: 1.05; font-weight: 800; font-stretch: 112%;
+    letter-spacing: -0.02em; color: var(--cta-head);
   }
-  p { margin: 0; color: var(--panel-muted); max-width: 30rem; }
-  .actions { display: flex; flex-direction: column; gap: 12px; }
-  .go { background: var(--panel-btn); color: var(--panel-btn-ink); border-color: var(--panel-btn); }
-  .ghost { background: transparent; color: var(--panel-ink); border-color: var(--panel-muted); }
+  p { margin: 12px 0 0; max-width: 520px; font-size: 17px; color: var(--cta-body); }
+  .actions { flex: 1 1 260px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: flex-end; }
+  .go, .ghost { text-decoration: none; border-radius: 999px; min-height: 48px; display: inline-flex; align-items: center; }
+  .go { background: var(--cta-btn-bg); color: var(--cta-btn-fg); font-weight: 800; padding: 0 24px; }
+  .ghost { color: var(--cta-btn2); font-weight: 700; padding: 0 22px; border: 1.5px solid var(--cta-btn2); }
+  .go:hover { color: var(--cta-btn-fg); opacity: 0.92; }
+  .ghost:hover { color: var(--cta-btn2); opacity: 0.85; }
   @media (max-width: 640px) {
-    .cta { padding: 28px 22px; }
-    .actions { width: 100%; }
+    .actions { justify-content: flex-start; }
   }
 </style>

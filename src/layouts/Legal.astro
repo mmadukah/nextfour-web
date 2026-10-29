@@ -3,6 +3,7 @@
 // deletion). Renders a Markdown content entry inside the simple 720px column
 // styling these pages have always used.
 import Base from './Base.astro';
+import ThemeToggle from '../components/ThemeToggle.astro';
 import { getRelativeLocaleUrl, getAbsoluteLocaleUrl } from 'astro:i18n';
 
 interface Props {
@@ -56,40 +57,66 @@ const alternates = [
   ))}
 
   <style slot="head" is:global>
-    :root { color-scheme: light dark; }
+    /* The site's light and dark (ThemeToggle): system setting until chosen. */
+    :root {
+      color-scheme: light;
+      --bg: #f3f5ee;
+      --ink: #13221a;
+      --muted: #5b675e;
+      --link: #3d6b1f;
+      --border: #e1e6da;
+      --box: #ffffff;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme='light']) {
+        color-scheme: dark;
+        --bg: #0f1923;
+        --ink: #f2f5f7;
+        --muted: #9aa7b5;
+        --link: #c8f135;
+        --border: #2a3a4a;
+        --box: #192230;
+      }
+    }
+    :root[data-theme='dark'] {
+      color-scheme: dark;
+      --bg: #0f1923;
+      --ink: #f2f5f7;
+      --muted: #9aa7b5;
+      --link: #c8f135;
+      --border: #2a3a4a;
+      --box: #192230;
+    }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       max-width: 720px;
       margin: 2rem auto;
       padding: 0 1.25rem;
       line-height: 1.6;
-      color: #1a1a1a;
-      background: #fff;
+      color: var(--ink);
+      background: var(--bg);
     }
-    @media (prefers-color-scheme: dark) {
-      body { background: #111; color: #eee; }
-      a { color: #79b8ff; }
-    }
+    a { color: var(--link); }
     h1 { font-size: 1.75rem; margin-bottom: 0.25rem; }
     h2 { font-size: 1.2rem; margin-top: 2rem; }
-    .meta { color: #666; font-size: 0.9rem; margin-bottom: 2rem; }
+    .meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 2rem; }
     ol, ul { padding-left: 1.25rem; }
     code { background: rgba(127,127,127,0.15); padding: 0 0.25rem; border-radius: 3px; }
     .box {
-      border: 1px solid rgba(127,127,127,0.3);
+      border: 1px solid var(--border);
       border-radius: 8px;
       padding: 1rem 1.25rem;
       margin: 1.5rem 0;
-      background: rgba(127,127,127,0.06);
+      background: var(--box);
     }
     .faq dt { font-weight: 600; margin-top: 1.25rem; }
     .faq dd { margin: 0.25rem 0 0; padding-left: 0; }
-    .langbar { display: flex; gap: 0.75rem; justify-content: flex-end; font-size: 0.85rem; margin-bottom: 1.5rem; }
+    .langbar { display: flex; gap: 0.75rem; justify-content: flex-end; align-items: center; font-size: 0.85rem; margin-bottom: 1.5rem; }
     .langbar a { text-decoration: none; opacity: 0.7; }
     .langbar a[aria-current="true"] { font-weight: 700; opacity: 1; }
     nav.crumbs { margin-top: 2.5rem; font-size: 0.9rem; }
     nav.crumbs a { margin-right: 1rem; }
-    footer { margin-top: 3rem; font-size: 0.85rem; color: #666; }
+    footer { margin-top: 3rem; font-size: 0.85rem; color: var(--muted); }
   </style>
 
   <nav class="langbar" aria-label="Language">
@@ -100,6 +127,7 @@ const alternates = [
         hreflang={loc}
       >{localeNames[loc]}</a>
     ))}
+    <ThemeToggle />
   </nav>
 
   <h1>{fullTitle}</h1>

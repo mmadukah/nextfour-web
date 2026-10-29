@@ -1,19 +1,21 @@
 ---
-// Three bars, Beginner, Intermediate, Advanced, lit across the night's range.
+// Three segments, Beginner, Intermediate, Advanced, lit across the night's
+// range, and the level in words.
 interface Props { range: [number, number]; label: string }
 const { range, label } = Astro.props;
 ---
 
 <span class="level">
-  <span class="bars" aria-hidden="true">
+  <span class="segs" aria-hidden="true">
     {[1, 2, 3].map((b) => <i class={b >= range[0] && b <= range[1] ? 'on' : ''} />)}
   </span>
-  <span>{label}</span>
+  <span class="text">{label}</span>
 </span>
 
 <style>
-  .level { display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem; color: var(--muted); }
-  .bars { display: inline-flex; gap: 3px; }
-  i { display: block; width: 16px; height: 6px; border-radius: 2px; background: var(--bar-off); }
-  i.on { background: var(--bar-on); }
+  .level { flex: 1 1 220px; display: flex; align-items: center; gap: 10px; }
+  .segs { display: flex; gap: 3px; }
+  i { display: block; width: 22px; height: 8px; border-radius: 2px; background: var(--seg-off); }
+  i.on { background: var(--seg-on); }
+  .text { font-size: 14px; color: var(--body); }
 </style>

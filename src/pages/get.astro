@@ -15,12 +15,26 @@ import { PLAY_URL, APP_STORE_URL } from '../store-links';
   ogDescription="Find a game near you, or run your club night."
 >
   <style slot="head">
-    :root { color-scheme: dark; }
+    /* Follows the site's light or dark choice (ThemeToggle on other pages). */
+    :root {
+      color-scheme: light;
+      --bg: #f3f5ee; --ink: #13221a; --muted: #5b675e; --card: #ffffff; --border: #e1e6da; --on-accent: #13221a;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme='light']) {
+        color-scheme: dark;
+        --bg: #0f1923; --ink: #f2f5f7; --muted: #9aa7b5; --card: #192230; --border: #2a3a4a; --on-accent: #0f1923;
+      }
+    }
+    :root[data-theme='dark'] {
+      color-scheme: dark;
+      --bg: #0f1923; --ink: #f2f5f7; --muted: #9aa7b5; --card: #192230; --border: #2a3a4a; --on-accent: #0f1923;
+    }
     body {
       margin: 0;
       font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
-      background: #0f1923;
-      color: #f2f5f7;
+      background: var(--bg);
+      color: var(--ink);
       display: flex;
       min-height: 100vh;
       align-items: center;
@@ -30,14 +44,14 @@ import { PLAY_URL, APP_STORE_URL } from '../store-links';
       text-align: center;
     }
     h1 { font-size: 1.6rem; margin: 0 0 0.5rem; }
-    p { color: #9aa7b5; margin: 0 0 1.5rem; }
+    p { color: var(--muted); margin: 0 0 1.5rem; }
     .stores { display: flex; flex-direction: column; gap: 0.75rem; max-width: 18rem; margin: 0 auto; }
     .stores a {
       display: block; padding: 0.8rem 1.2rem; border-radius: 10px;
       font-weight: 700; text-decoration: none;
-      background: #192230; color: #f2f5f7; border: 1px solid #2a3a4a;
+      background: var(--card); color: var(--ink); border: 1px solid var(--border);
     }
-    .stores a.primary { background: #c8f135; color: #0f1923; border-color: #c8f135; }
+    .stores a.primary { background: #c8f135; color: var(--on-accent); border-color: #c8f135; }
   </style>
 
   <main>

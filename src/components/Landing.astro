@@ -2,6 +2,7 @@
 // The marketing landing page, rendered from a per-language strings table so
 // the same markup serves /  (en) and /fr/ (fr).
 import Base from '../layouts/Base.astro';
+import ThemeToggle from './ThemeToggle.astro';
 import { getRelativeLocaleUrl } from 'astro:i18n';
 import { PLAY_URL, APP_STORE_URL } from '../store-links';
 import { INSTAGRAM_URL, FACEBOOK_URL } from '../social-links';
@@ -287,10 +288,41 @@ const alternates = [
 
     /* Brand kit: the same navy, card and lime as the app and the social
        posts, so a visitor arriving from either recognises the page. */
+    /* Light or dark follows the system setting until the visitor picks one
+       with the toggle (ThemeToggle). Lime is a fill only on light; text and
+       marks in the accent use --accent-ink. */
     :root {
-      color-scheme: dark;
+      color-scheme: light;
       --accent: #c8f135;
       --accent-dark: #b4dc22;
+      --accent-ink: #3d6b1f;
+      --on-accent: #13221a;
+      --ink: #13221a;
+      --muted: #5b675e;
+      --bg: #f3f5ee;
+      --card: #ffffff;
+      --card-2: #eceee8;
+      --border: #e1e6da;
+      --glow: #e4ecd2;
+      --head: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme='light']) {
+        color-scheme: dark;
+        --accent-ink: #c8f135;
+        --on-accent: #0f1923;
+        --ink: #f2f5f7;
+        --muted: #9aa7b5;
+        --bg: #0f1923;
+        --card: #192230;
+        --card-2: #232f40;
+        --border: #2a3a4a;
+        --glow: #1b2a3a;
+      }
+    }
+    :root[data-theme='dark'] {
+      color-scheme: dark;
+      --accent-ink: #c8f135;
       --on-accent: #0f1923;
       --ink: #f2f5f7;
       --muted: #9aa7b5;
@@ -298,7 +330,7 @@ const alternates = [
       --card: #192230;
       --card-2: #232f40;
       --border: #2a3a4a;
-      --head: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --glow: #1b2a3a;
     }
 
     * { box-sizing: border-box; }
@@ -311,7 +343,7 @@ const alternates = [
       background: var(--bg);
       -webkit-font-smoothing: antialiased;
     }
-    a { color: var(--accent); }
+    a { color: var(--accent-ink); }
     h1, h2, h3 { font-family: var(--head); }
     .wrap { max-width: 1080px; margin: 0 auto; padding: 0 1.25rem; }
     img { max-width: 100%; }
@@ -326,13 +358,14 @@ const alternates = [
       color: var(--ink);
       text-transform: uppercase;
     }
+    .topbar-end { display: flex; align-items: center; gap: 1rem; }
     .langbar { display: flex; gap: 0.85rem; font-size: 0.85rem; }
     .langbar a { color: var(--muted); text-decoration: none; }
     .langbar a[aria-current="true"] { color: var(--ink); font-weight: 700; }
 
     /* ---------- Hero ---------- */
     .hero {
-      background: radial-gradient(110% 90% at 85% 10%, #1b2a3a 0%, var(--bg) 60%);
+      background: radial-gradient(110% 90% at 85% 10%, var(--glow) 0%, var(--bg) 60%);
       padding: 0 0 4.5rem;
       border-bottom: 1px solid var(--border);
       overflow: hidden;
@@ -351,7 +384,7 @@ const alternates = [
       font-weight: 900;
       letter-spacing: -0.02em;
     }
-    .hero h1 .accent { color: var(--accent); }
+    .hero h1 .accent { color: var(--accent-ink); }
     .hero p.lead {
       font-size: clamp(1.05rem, 2.2vw, 1.2rem);
       color: var(--muted);
@@ -369,10 +402,10 @@ const alternates = [
       text-decoration: none;
       transition: border-color .15s ease, transform .08s ease;
     }
-    .path:hover { border-color: var(--accent); }
+    .path:hover { border-color: var(--accent-ink); }
     .path:active { transform: translateY(1px); }
     .path strong { display: block; font-size: 1rem; }
-    .path strong::after { content: ' \2192'; color: var(--accent); }
+    .path strong::after { content: ' \2192'; color: var(--accent-ink); }
     .path span { color: var(--muted); font-size: 0.88rem; }
 
     .cta-row { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
@@ -433,7 +466,7 @@ const alternates = [
       font-weight: 700;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: var(--accent);
+      color: var(--accent-ink);
       margin-bottom: 0.6rem;
     }
     .split h2 { font-size: clamp(1.8rem, 4vw, 2.5rem); line-height: 1.1; margin: 0 0 1rem; font-weight: 900; }
@@ -443,7 +476,7 @@ const alternates = [
       padding: 1.1rem 1.25rem;
       border-radius: 14px;
       background: var(--card);
-      border-left: 4px solid var(--accent);
+      border-left: 4px solid var(--accent-ink);
     }
     .callout strong { display: block; color: var(--ink); margin-bottom: 0.25rem; }
     .callout p { margin: 0; font-size: 0.98rem; }
@@ -461,7 +494,7 @@ const alternates = [
       font-family: var(--head);
       font-weight: 800;
       font-size: 0.95rem;
-      color: var(--accent);
+      color: var(--accent-ink);
       margin-bottom: 0.4rem;
     }
     .beat h3 { font-size: clamp(1.4rem, 3vw, 1.8rem); line-height: 1.15; margin: 0 0 0.75rem; font-weight: 900; }
@@ -485,7 +518,7 @@ const alternates = [
     }
     .plan h3 { margin: 0 0 0.35rem; font-size: 1.05rem; }
     .plan p { margin: 0; color: var(--muted); font-size: 0.96rem; }
-    .plan:first-child { border-color: var(--accent); }
+    .plan:first-child { border-color: var(--accent-ink); }
     .plans-note { text-align: center; color: var(--muted); font-size: 0.88rem; margin: 1.25rem 0 0; }
 
     /* ---------- QR for desktop visitors ---------- */
@@ -555,6 +588,7 @@ const alternates = [
   <header class="hero">
     <div class="wrap topbar">
       <div class="brand">NextFour</div>
+      <div class="topbar-end">
       <nav class="langbar" aria-label="Language">
         {locales.map((loc) => (
           <a
@@ -564,6 +598,8 @@ const alternates = [
           >{localeNames[loc]}</a>
         ))}
       </nav>
+        <ThemeToggle />
+      </div>
     </div>
     <div class="wrap hero-grid">
       <div>

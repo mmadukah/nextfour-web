@@ -1,0 +1,13 @@
+---
+// Head tags for light and dark: applies a saved choice from ThemeToggle
+// before first paint, so a visitor who picked light never sees a dark flash.
+interface Props { light: string; dark: string }
+const { light, dark } = Astro.props;
+---
+
+<script is:inline>
+  try { const t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch {}
+</script>
+<meta name="color-scheme" content="light dark" />
+<meta name="theme-color" content={light} media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content={dark} media="(prefers-color-scheme: dark)" />

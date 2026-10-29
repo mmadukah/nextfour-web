@@ -1,6 +1,8 @@
 ---
-// One night on one weekday: the day, the time and how long, the level, and
-// where it is when that differs from the club's usual venue.
+// One session on one weekday: the day label, the time and how long, the
+// level, and where it is when that differs from the club's usual venue. The
+// area page's night picker dims the rows on other days (.dim) and lights the
+// day label of the ones that match (.hl).
 import LevelBars from './LevelBars.astro';
 import { durationText, timeRange, levelBars, type NightRow } from '../../data/directory';
 
@@ -19,7 +21,7 @@ const extras = [n.venue.name !== clubVenue ? n.venue.name : null, detail ? n.pri
 const membersOnly = detail && clubTakesNewPlayers && !n.takingNewPlayers;
 ---
 
-<div class="line" data-day={row.day ?? ''}>
+<li class="line" data-day={row.day ?? ''}>
   <span class="day">{row.label}</span>
   <span class="time"><b>{timeRange(n)}</b>{duration && <small>{duration}</small>}</span>
   <LevelBars range={levelBars(n)} label={n.levels} />
@@ -29,23 +31,21 @@ const membersOnly = detail && clubTakesNewPlayers && !n.takingNewPlayers;
       {membersOnly && <span class="tag warn">Members only</span>}
     </span>
   )}
-</div>
+</li>
 
 <style>
   .line {
-    display: grid; grid-template-columns: 112px minmax(150px, 1fr) minmax(0, 1.2fr); align-items: center;
-    gap: 6px 16px; background: var(--row); border-radius: 10px; padding: 9px 12px;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; padding: 12px 14px;
+    border-radius: 12px; background: var(--row); transition: opacity 0.15s;
   }
-  .line[hidden] { display: none; }
+  .line:global(.dim) { opacity: 0.45; }
   .day {
-    background: var(--strong); color: var(--on-strong); border-radius: 7px; text-align: center;
-    font-weight: 800; font-size: 0.88rem; padding: 4px 8px; white-space: nowrap;
+    flex: 0 0 auto; min-width: 104px; font-weight: 800; font-size: 15px; padding: 4px 10px; border-radius: 8px;
+    text-align: center; background: var(--chip-bg); color: var(--chip-fg); white-space: nowrap;
   }
-  .time b { font-family: var(--head); font-weight: 800; font-size: 1rem; white-space: nowrap; }
-  .time small { color: var(--muted); font-size: 0.8rem; margin-left: 6px; white-space: nowrap; }
-  .extra { grid-column: 2 / -1; color: var(--muted); font-size: 0.85rem; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-  @media (max-width: 640px) {
-    .line { grid-template-columns: auto 1fr; }
-    .line > :global(.level), .extra { grid-column: 1 / -1; }
-  }
+  .line:global(.hl) .day { background: var(--hl-bg); color: var(--hl-fg); }
+  .time { flex: 1 1 180px; display: flex; align-items: baseline; gap: 8px; font-variant-numeric: tabular-nums; }
+  .time b { font-size: 17px; font-weight: 700; white-space: nowrap; }
+  .time small { font-size: 13px; color: var(--muted); white-space: nowrap; }
+  .extra { flex: 1 1 100%; font-size: 14px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 </style>

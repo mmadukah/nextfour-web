@@ -3,12 +3,12 @@
 // /badminton/<area>.html, written for "badminton in <town>" searches.
 //
 // One static list, never paginated. The night picker runs in the browser and
-// only hides cards and rows, so every club is in the HTML for crawlers.
+// only hides cards and dims rows, so every club is in the HTML for crawlers.
 import Directory from '../../layouts/Directory.astro';
 import ClubCard from '../../components/directory/ClubCard.astro';
 import {
-  getDirectory, nearbyAreas, weeklyNights, nightsPerDay, newestCheck, shortDate, checkedText,
-  SHORT_DAYS, WEEK_ORDER, type Area,
+  getDirectory, nearbyAreas, weeklyNights, nightsPerDay, newestCheck, checkedText,
+  DAY_NAMES, SHORT_DAYS, WEEK_ORDER, type Area,
 } from '../../data/directory';
 
 export async function getStaticPaths() {
@@ -27,6 +27,7 @@ const nearby = nearbyAreas(dir, area);
 const site = Astro.site!;
 const newest = newestCheck(area.clubs);
 const checked = checkedText(newest);
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 const title = `Badminton in ${area.name}: ${area.clubs.length} clubs and club nights | NextFour`;
 const description =
@@ -52,37 +53,50 @@ const crumbs = [
   { name: area.name, href: area.url },
 ];
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+const allHeading = `${plural(area.clubs.length, 'club')}, ${plural(nights, 'night')} a week`;
 ---
 
 <Directory title={title} description={description} crumbs={crumbs} jsonLd={[listLd]}>
   <style>
-    .picker { margin-top: 32px; }
-    .picker-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
-    .picker-top h2 { margin: 0; font-family: var(--body); font-weight: 800; font-size: 1.02rem; letter-spacing: 0; }
-    .any { padding: 8px 18px; font-size: 0.9rem; }
-    .any[aria-pressed='true'] { background: var(--pick); color: var(--panel-btn); border-color: var(--pick); }
-    .days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
-    .days button {
-      font: inherit; color: var(--ink); background: var(--card); cursor: pointer;
-      border: 1px solid var(--border); border-radius: 12px; padding: 12px 4px 10px; text-align: center;
-      display: grid; gap: 2px; justify-items: center;
+    h1 { font-size: clamp(44px, 7vw, 84px); line-height: 0.95; font-stretch: 118%; }
+    .week-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+    .week-top h2 { margin: 0; font-size: 18px; font-weight: 700; }
+    .any {
+      min-height: 44px; padding: 0 18px; border-radius: 999px; font-size: 15px; font-weight: 700; cursor: pointer;
+      border: 1.5px solid var(--ink); background: var(--surface); color: var(--ink);
     }
-    .days button b { font-size: 0.78rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
-    .days button strong { font-family: var(--head); font-weight: 900; font-size: 1.5rem; line-height: 1.1; }
-    .days button small { font-size: 0.74rem; color: var(--muted); }
-    .days button:hover:not(:disabled) { border-color: var(--accent-ink); }
-    .days button[aria-pressed='true'] { background: var(--pick); color: var(--on-pick); border-color: var(--pick); }
-    .days button[aria-pressed='true'] small { color: inherit; opacity: 0.75; }
-    .days button:disabled { cursor: default; background: var(--row); color: var(--muted); opacity: 0.7; }
-    .list-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-    .list-head h2 { margin-bottom: 16px; }
-    .clubs { display: grid; gap: 14px; }
-    #empty { display: none; }
-    @media (max-width: 640px) {
+    .any[aria-pressed='true'] { border-color: var(--sel-bg); background: var(--sel-bg); color: var(--sel-fg); }
+    .days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+    .day {
+      min-height: 92px; padding: 12px 4px; border-radius: 14px; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 8px;
+      border: 1.5px solid var(--line-strong); background: var(--surface); color: var(--ink);
+    }
+    .day .short { font-size: 14px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+    .day .count { font-size: 28px; font-weight: 800; font-stretch: 112%; line-height: 1; }
+    .day .unit { font-size: 12px; opacity: 0.85; }
+    .day.none { background: var(--bg); color: var(--empty-day); border-color: var(--line); }
+    .day.none .count { opacity: 0.6; }
+    .day[aria-pressed='true'] { background: var(--sel-bg); color: var(--sel-fg); border-color: var(--sel-bg); }
+    .day[aria-pressed='true'] .count { opacity: 1; }
+    .results { padding: 40px 0 24px; }
+    .results-top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 20px; }
+    .results-top p { margin: 0; font-size: 14px; color: var(--muted); }
+    .clubs { display: flex; flex-direction: column; gap: 16px; }
+    .empty {
+      border: 1.5px dashed var(--line-strong); border-radius: 20px; padding: 40px 24px; text-align: center;
+      background: var(--surface); margin-bottom: 16px;
+    }
+    .empty[hidden] { display: none; }
+    .empty .what { margin: 0; font-size: 20px; font-weight: 700; }
+    .empty .try { margin: 8px 0 20px; color: var(--muted); }
+    .empty .go { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+    @media (max-width: 560px) {
       .days { gap: 5px; }
-      .days button { padding: 9px 2px 8px; border-radius: 10px; }
-      .days button strong { font-size: 1.2rem; }
-      .days button small { display: none; }
+      .day { min-height: 78px; padding: 10px 2px; border-radius: 12px; }
+      .day .short { font-size: 12px; }
+      .day .count { font-size: 22px; }
+      .day .unit { display: none; }
     }
   </style>
 
@@ -90,62 +104,70 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
     <div>
       <p class="eyebrow">Badminton club nights</p>
       <h1>{area.name}</h1>
-      <p class="lead">
-        Where to play badminton in {area.name} this week. Every club below shows its nights, times, venue and playing level.
-      </p>
+      <p class="intro">Where to play badminton in {area.name} this week. Every club below shows its nights, times, venue and playing level.</p>
     </div>
-    <div class="stats">
-      <div><span>Clubs</span><b>{area.clubs.length}</b></div>
-      <div><span>Nights a week</span><b>{nights}</b></div>
-      {newest && <div><span>Checked</span><b class="text">{shortDate(newest)}</b></div>}
-    </div>
+    <dl class="stats">
+      <div><dt>Clubs</dt><dd>{area.clubs.length}</dd></div>
+      <div><dt>Nights a week</dt><dd>{nights}</dd></div>
+      {newest && <div><dt>Checked</dt><dd class="date">{newest.getDate()} {MONTHS[newest.getMonth()]}<br />{newest.getFullYear()}</dd></div>}
+    </dl>
   </section>
 
-  <section class="card picker" aria-label="Pick a night">
-    <div class="picker-top">
-      <h2>Pick a night</h2>
-      <button type="button" class="btn any" data-day="" aria-pressed="true">Any day</button>
+  <section class="panel" aria-labelledby="week-h">
+    <div class="week-top">
+      <h2 id="week-h">Pick a night</h2>
+      <button type="button" class="any" data-day="" aria-pressed="true">Any day</button>
     </div>
     <div class="days">
       {WEEK_ORDER.map((d) => (
-        <button type="button" data-day={d} aria-pressed="false" disabled={perDay[d] === 0}
-          aria-label={`${SHORT_DAYS[d]}: ${plural(perDay[d], 'night')}`}>
-          <b>{SHORT_DAYS[d]}</b>
-          <strong>{perDay[d]}</strong>
-          <small>{perDay[d] === 1 ? 'night' : 'nights'}</small>
+        <button type="button" class:list={['day', { none: perDay[d] === 0 }]} data-day={d} aria-pressed="false"
+          aria-label={`${DAY_NAMES[d]}, ${perDay[d]} club night${perDay[d] === 1 ? '' : 's'}`}>
+          <span class="short">{SHORT_DAYS[d]}</span>
+          <span class="count">{perDay[d]}</span>
+          <span class="unit">{perDay[d] === 1 ? 'night' : 'nights'}</span>
         </button>
       ))}
     </div>
   </section>
 
-  <div class="list-head">
-    <h2 id="count">{plural(area.clubs.length, 'club')}, {plural(nights, 'night')} a week</h2>
-    <span class="muted small">Sorted by club name</span>
-  </div>
-  <div class="clubs">
-    {area.clubs.map((c) => <ClubCard club={c} />)}
-  </div>
-  <p class="muted" id="empty">No club here plays that night. Try another night or a nearby area.</p>
-  <p class="note">
-    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6M12 7.5v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-    Level bars run Beginner, Intermediate, Advanced. Each club page says when its details were last checked.
-  </p>
+  <section class="results" aria-labelledby="results-h">
+    <div class="results-top">
+      <h2 class="h-results" id="results-h" aria-live="polite">{allHeading}</h2>
+      <p>Sorted by club name</p>
+    </div>
+
+    <div class="empty" id="empty" hidden>
+      <p class="what">No club nights in {area.name} on <span id="empty-day"></span></p>
+      <p class="try">Try another night, or look in a nearby area.</p>
+      <div class="go">
+        {nearby.slice(0, 3).map((a) => <a class="btn" href={a.url}>{a.name}</a>)}
+      </div>
+    </div>
+
+    <div class="clubs">
+      {area.clubs.map((c) => <ClubCard club={c} />)}
+    </div>
+
+    <p class="note">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg>
+      Level bars run Beginner, Intermediate, Advanced. Times come from each club's published information.
+    </p>
+  </section>
 
   {nearby.length > 0 && (
-    <>
-      <h2>Badminton near {area.name}</h2>
-      <nav class="links" aria-label="Nearby areas">
-        {nearby.map((a) => <a href={a.url}>{a.name}</a>)}
-      </nav>
-    </>
+    <section class="near" aria-labelledby="near-h">
+      <h2 class="h-section" id="near-h">Badminton near {area.name}</h2>
+      <div class="cards">
+        {nearby.map((a) => <a href={a.url}>{a.name} <span aria-hidden="true">→</span></a>)}
+      </div>
+    </section>
   )}
 
-  <script define:vars={{ total: area.clubs.length, nights }}>
+  <script define:vars={{ allHeading, dayNames: DAY_NAMES }}>
     const buttons = document.querySelectorAll('button[data-day]');
     const cards = document.querySelectorAll('.club');
-    const count = document.getElementById('count');
+    const heading = document.getElementById('results-h');
     const empty = document.getElementById('empty');
-    const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
     buttons.forEach((b) => b.addEventListener('click', () => {
       buttons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
       const day = b.dataset.day ?? '';
@@ -153,14 +175,19 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
       cards.forEach((c) => {
         const on = day === '' || (c.dataset.days ?? '').split(',').includes(day);
         c.hidden = !on;
-        if (!on) return;
-        shown++;
-        c.querySelectorAll('.line').forEach((l) => { l.hidden = day !== '' && l.dataset.day !== day; });
+        if (on) shown++;
+        c.querySelectorAll('.line').forEach((l) => {
+          const match = day === '' || l.dataset.day === day;
+          l.classList.toggle('dim', !match);
+          l.classList.toggle('hl', match && day !== '');
+        });
       });
-      count.textContent = day === ''
-        ? `${plural(total, 'club')}, ${plural(nights, 'night')} a week`
-        : `${plural(shown, 'club')} playing that night`;
-      empty.style.display = shown ? 'none' : 'block';
+      const name = day === '' ? '' : dayNames[Number(day)];
+      heading.textContent = day === ''
+        ? allHeading
+        : shown ? `${shown} club${shown === 1 ? '' : 's'} on ${name}` : `Nothing on ${name}`;
+      document.getElementById('empty-day').textContent = name;
+      empty.hidden = shown > 0;
     }));
   </script>
 </Directory>
