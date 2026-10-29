@@ -74,6 +74,12 @@ const dropInCount = weeklyDropIns(dir.dropIns);
       flex: 1 1 auto; min-width: 0; border: 0; outline: none; background: transparent; color: var(--ink);
       font-size: 17px; height: 100%;
     }
+    /* A search box, not an address form: no autofill colouring, no clear button. */
+    .box input:-webkit-autofill, .box input:-webkit-autofill:focus {
+      -webkit-box-shadow: 0 0 0 100px var(--bg) inset; -webkit-text-fill-color: var(--ink); caret-color: var(--ink);
+      transition: background-color 9999s;
+    }
+    .box input::-webkit-search-cancel-button { -webkit-appearance: none; }
     .go { flex: 1 1 auto; display: flex; gap: 10px; }
     .go button {
       flex: 1 1 auto; height: 56px; border-radius: 14px; font-size: 15px; font-weight: 700; cursor: pointer;
@@ -166,7 +172,7 @@ const dropInCount = weeklyDropIns(dir.dropIns);
           <label for="q">Postcode, town or club name</label>
           <div class="box">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
-            <input id="q" name="q" type="search" placeholder="e.g. SM1, Sutton or Westwood" autocomplete="postal-code" />
+            <input id="q" name="q" type="search" placeholder="e.g. SM1, Sutton or Westwood" autocomplete="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-form-type="other" />
           </div>
         </div>
         <div class="go">
