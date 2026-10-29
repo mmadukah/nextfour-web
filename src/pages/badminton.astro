@@ -99,25 +99,9 @@ const LEVELS = [['', 'Any level'], ['1', 'Beginner'], ['2', 'Intermediate'], ['3
 
     #status { margin: 8px 0 16px; font-size: 22px; font-weight: 800; font-stretch: 106%; }
     #status:empty { display: none; }
-    #results { list-style: none; padding: 0; margin: 0 0 48px; display: flex; flex-direction: column; gap: 12px; }
+    /* The cards themselves: src/styles/club-card.css, shared with the area pages. */
+    #results { list-style: none; padding: 0; margin: 0 0 48px; display: flex; flex-direction: column; gap: 16px; }
     #results:empty { display: none; }
-    /* Result cards are written by the script below, so these rules are
-       global: Astro's scoped selectors never match innerHTML. */
-    :global(#results .hit) {
-      display: flex; flex-wrap: wrap; overflow: hidden; background: var(--surface); border: 1px solid var(--line); border-radius: 18px;
-    }
-    :global(#results .hit-img) { flex: 1 0 140px; max-width: 100%; min-height: 120px; position: relative; background: var(--row); }
-    :global(#results .hit-img img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-    :global(#results .hit-body) { flex: 999 1 380px; min-width: 0; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; }
-    :global(#results .hit-top) { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 16px; }
-    :global(#results .hit-name) { font-size: 19px; font-weight: 800; font-stretch: 104%; line-height: 1.25; text-decoration: none; }
-    :global(#results .hit-dist) { font-size: 14px; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
-    :global(#results .hit-venue) { margin: 0; color: var(--muted); font-size: 15px; }
-    :global(#results .hit-tags) { display: flex; flex-wrap: wrap; gap: 6px; }
-    :global(#results .hit-day) {
-      font-weight: 800; font-size: 13px; padding: 4px 10px; border-radius: 8px; background: var(--chip-bg); color: var(--chip-fg);
-    }
-
     section.busy { padding: 16px 0 40px; }
     .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
     .tiles a {
@@ -275,8 +259,9 @@ const LEVELS = [['', 'Any level'], ['1', 'Beginner'], ['2', 'Intermediate'], ['3
   <AppCta text="Get the NextFour app to join a club night and keep track of the clubs you play with." search={false} />
 
   <script>
-    type Row = { n: string; u: string; a: string; v: string; lat: number; lng: number; d: number[]; l: [number, number]; o: number; x: number; t: number; p: number };
-    const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    /** A session row: day, label, time, duration, level bars, level words, other venue. */
+    type Line = [number | null, string, string, string | null, [number, number], string, string | null];
+    type Row = { n: string; u: string; a: string; v: string; lat: number; lng: number; d: number[]; l: [number, number]; o: number; x: number; t: number; p: number; s: Line[] };
     const POSTCODE = /^([A-Z]{1,2}\d[A-Z\d]?)(\s*\d[A-Z]{2})?$/i;
     const RADIUS_KM = 25;
 
@@ -353,28 +338,48 @@ const LEVELS = [['', 'Any level'], ['1', 'Beginner'], ['2', 'Intermediate'], ['3
       return open.getAttribute('aria-pressed') !== 'true' || r.o === 1;
     }
 
-    function render(list: { r: Row; dist?: number }[], heading: string) {
-      status.textContent = heading;
-      results.innerHTML = list.slice(0, 40).map(({ r, dist }) => {
-        const photo = photos[r.p] ?? photos[0];
-        return `
-        <li class="hit">
-          <div class="hit-img"><img src="${photo.src}" alt="" loading="lazy" style="object-position: ${photo.position}" /></div>
-          <div class="hit-body">
-            <div class="hit-top">
-              <a class="hit-name" href="${esc(r.u)}">${esc(r.n)}</a>
-              ${dist != null ? `<span class="hit-dist">${dist < 1 ? 'under 1' : Math.round(dist)} km</span>` : ''}
+    const PIN = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg>';
+    const ARROW = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>';
+
+    /** One session row, as NightLine.astro draws it; a picked night dims the others. */
+    function line([day, label, time, duration, bars, levels, venue]: Line) {
+      const state = filter.day === '' ? '' : String(day) === filter.day ? ' hl' : ' dim';
+      const segs = [1, 2, 3].map((b) => `<i class="${b >= bars[0] && b <= bars[1] ? 'on' : ''}"></i>`).join('');
+      return `<li class="night-line${state}">
+        <span class="nl-day">${esc(label)}</span>
+        <span class="nl-time"><b>${esc(time)}</b>${duration ? `<small>${esc(duration)}</small>` : ''}</span>
+        <span class="nl-level"><span class="nl-segs" aria-hidden="true">${segs}</span><span class="nl-level-text">${esc(levels)}</span></span>
+        ${venue ? `<span class="nl-extra">${esc(venue)}</span>` : ''}
+      </li>`;
+    }
+
+    /** A club, as ClubCard.astro draws it, with its distance from the search. */
+    function card(r: Row, dist?: number) {
+      const photo = photos[r.p] ?? photos[0];
+      return `<li><article class="club-card">
+        <div class="cc-slot"><img src="${photo.src}" alt="" loading="lazy" style="object-position: ${photo.position}" /></div>
+        <div class="cc-body">
+          <div class="cc-top">
+            <div class="cc-who">
+              <h3 class="cc-name"><a href="${esc(r.u)}">${esc(r.n)}</a></h3>
+              <p class="cc-venue">${PIN}${esc(r.v)}, ${esc(r.a)}</p>
             </div>
-            <p class="hit-venue">${esc(r.v)}, ${esc(r.a)}</p>
-            <div class="hit-tags">
-              ${[1, 2, 3, 4, 5, 6, 0].filter((d) => r.d.includes(d)).map((d) => `<span class="hit-day">${DAYS[d]}</span>`).join('')}
+            <div class="cc-tags">
+              ${dist != null ? `<span class="tag">${dist < 1 ? 'Under 1' : Math.round(dist)} km away</span>` : ''}
               ${r.x ? '<span class="tag lime">Runs on NextFour</span>' : ''}
               ${r.o ? '' : '<span class="tag warn">Not taking new players</span>'}
               ${r.t ? '<span class="tag ok">Visitor terms listed</span>' : '<span class="tag">No visitor info yet</span>'}
             </div>
           </div>
-        </li>`;
-      }).join('');
+          <ul class="cc-lines">${r.s.map(line).join('')}</ul>
+          <a class="cc-more" href="${esc(r.u)}">Club details and visitor info ${ARROW}</a>
+        </div>
+      </article></li>`;
+    }
+
+    function render(list: { r: Row; dist?: number }[], heading: string) {
+      status.textContent = heading;
+      results.innerHTML = list.slice(0, 40).map(({ r, dist }) => card(r, dist)).join('');
     }
 
     async function run() {

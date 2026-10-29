@@ -165,7 +165,7 @@ const allHeading = `${plural(area.clubs.length, 'club')}, ${plural(nights, 'nigh
 
   <script define:vars={{ allHeading, dayNames: DAY_NAMES }}>
     const buttons = document.querySelectorAll('button[data-day]');
-    const cards = document.querySelectorAll('.club');
+    const cards = document.querySelectorAll('.club-card');
     const heading = document.getElementById('results-h');
     const empty = document.getElementById('empty');
     buttons.forEach((b) => b.addEventListener('click', () => {
@@ -176,7 +176,7 @@ const allHeading = `${plural(area.clubs.length, 'club')}, ${plural(nights, 'nigh
         const on = day === '' || (c.dataset.days ?? '').split(',').includes(day);
         c.hidden = !on;
         if (on) shown++;
-        c.querySelectorAll('.line').forEach((l) => {
+        c.querySelectorAll('.night-line').forEach((l) => {
           const match = day === '' || l.dataset.day === day;
           l.classList.toggle('dim', !match);
           l.classList.toggle('hl', match && day !== '');

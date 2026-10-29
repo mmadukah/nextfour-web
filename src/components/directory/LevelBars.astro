@@ -1,21 +1,13 @@
 ---
 // Three segments, Beginner, Intermediate, Advanced, lit across the night's
-// range, and the level in words.
+// range, and the level in words. Styles: src/styles/club-card.css.
 interface Props { range: [number, number]; label: string }
 const { range, label } = Astro.props;
 ---
 
-<span class="level">
-  <span class="segs" aria-hidden="true">
+<span class="nl-level">
+  <span class="nl-segs" aria-hidden="true">
     {[1, 2, 3].map((b) => <i class={b >= range[0] && b <= range[1] ? 'on' : ''} />)}
   </span>
-  <span class="text">{label}</span>
+  <span class="nl-level-text">{label}</span>
 </span>
-
-<style>
-  .level { flex: 1 1 220px; display: flex; align-items: center; gap: 10px; }
-  .segs { display: flex; gap: 3px; }
-  i { display: block; width: 22px; height: 8px; border-radius: 2px; background: var(--seg-off); }
-  i.on { background: var(--seg-on); }
-  .text { font-size: 14px; color: var(--body); }
-</style>

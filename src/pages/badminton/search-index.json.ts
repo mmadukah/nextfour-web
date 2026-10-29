@@ -2,7 +2,7 @@
 // browser. The same facts the pages show, cut down to what a result needs;
 // prices and visitor terms stay on the club pages.
 import type { APIRoute } from 'astro';
-import { getDirectory, photoIndex } from '../../data/directory';
+import { getDirectory, photoIndex, sortedRows, timeRange, durationText, levelBars } from '../../data/directory';
 
 export const GET: APIRoute = async () => {
   const dir = await getDirectory();
@@ -21,6 +21,13 @@ export const GET: APIRoute = async () => {
     // Visitor terms listed; the card photo, as an index into PHOTOS.
     t: c.visitorPolicy ? 1 : 0,
     p: photoIndex(c.id),
+    // The card's session rows, as the area pages draw them: day number (null
+    // for an undated one-off), day label, time, duration, level bars, level
+    // words, and the venue when it is not the club's usual one.
+    s: sortedRows(c).map((r) => [
+      r.day, r.label, timeRange(r.night), durationText(r.night), levelBars(r.night), r.night.levels,
+      r.night.venue.name !== c.venue.name ? r.night.venue.name : null,
+    ]),
   }));
   return new Response(JSON.stringify(rows), {
     headers: { 'Content-Type': 'application/json' },
