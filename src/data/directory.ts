@@ -124,13 +124,22 @@ export interface DropIn {
   /** Claimed by its organiser, who now runs it on NextFour. */
   claimed: boolean;
   bookingUrl: string | null;
+  /** The feed gave a level; otherwise the card shows no level bar. */
+  levelKnown: boolean;
   night: Night;
 }
 
-/** A venue's drop-in sessions: drop-ins are listed by venue, not by club. */
+/**
+ * A drop-in listing: one session name at one venue ("No Strings Badminton"
+ * at Waddon Leisure Centre), with all the times it runs. Its card matches a
+ * club's: the name first, then where.
+ */
 export interface DropInVenue {
   id: string;
+  /** The session's name, the card's title. */
   name: string;
+  /** Where it is, the card's pin line. */
+  venueName: string;
   /** Who runs them ("Everyone Active"), for the card and the attribution. */
   operators: string[];
   venue: RawVenue;
@@ -321,7 +330,7 @@ function shape(raw: RawDirectory): Directory {
 
   const areas: Area[] = [];
   for (const [slug, { name, code, clubs, dropIns }] of byArea) {
-    dropIns.sort((a, b) => a.name.localeCompare(b.name));
+    dropIns.sort((a, b) => a.venueName.localeCompare(b.venueName) || a.name.localeCompare(b.name));
     clubs.sort((a, b) => a.name.localeCompare(b.name));
     // Slugs are unique within an area; a namesake gets a number.
     const used = new Set<string>();
@@ -367,19 +376,21 @@ function dropInVenues(raw: RawDropIn[]): DropInVenue[] {
   const byVenue = new Map<string, DropInVenue>();
   for (const s of raw) {
     if (s.sport.toLowerCase() !== 'badminton' || !s.venue) continue;
-    const key = `${s.venue.name}|${s.venue.lat}|${s.venue.lng}`;
+    const title = dropInTitle(s.title);
+    const key = `${s.venue.name}|${s.venue.lat}|${s.venue.lng}|${title.toLowerCase()}`;
     let v = byVenue.get(key);
     if (!v) {
-      v = { id: s.id, name: s.venue.name.trim(), operators: [], venue: s.venue, areaSlug: '', areaName: '', anchor: '', sessions: [] };
+      v = { id: s.id, name: title, venueName: s.venue.name.trim(), operators: [], venue: s.venue, areaSlug: '', areaName: '', anchor: '', sessions: [] };
       byVenue.set(key, v);
     }
     const operator = operatorName(s.operator);
     if (operator && !v.operators.includes(operator)) v.operators.push(operator);
     v.sessions.push({
       id: s.id,
-      title: dropInTitle(s.title),
+      title,
       claimed: s.claimed,
       bookingUrl: s.booking_url && /^https?:\/\//i.test(s.booking_url) ? s.booking_url : null,
+      levelKnown: s.levels.length > 0,
       night: {
         id: s.id,
         days: s.recurring ? (s.days ?? []) : [],
@@ -395,7 +406,7 @@ function dropInVenues(raw: RawDropIn[]): DropInVenue[] {
     });
   }
   const venues = [...byVenue.values()];
-  for (const v of venues) v.anchor = `drop-in-${slugify(v.name)}`;
+  for (const v of venues) v.anchor = `drop-in-${slugify(`${v.venueName} ${v.name}`)}`;
   return venues;
 }
 

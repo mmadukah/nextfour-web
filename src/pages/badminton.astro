@@ -287,9 +287,9 @@ const dropInCount = weeklyDropIns(dir.dropIns);
   <script>
     /** A grouped session row: days, one-off date, days in words, time, duration, level bars, level words, other venue. */
     type Line = [number[], string | null, string, string, string | null, [number, number], string, string | null];
-    /** A drop-in row: days, one-off date, days in words, time, duration, title, price, booking link, claimed. */
-    type DropLine = [number[], string | null, string, string, string | null, string, string | null, string | null, number];
-    type Row = { y?: 'd'; n: string; u: string | null; a: string; v: string; lat: number; lng: number; d: number[]; l: [number, number]; o: number; x: number; t: number; p: number; s: Line[] | DropLine[]; k: string | null };
+    /** A drop-in row: days, one-off date, days in words, time, duration, price, level bars and words (or null). */
+    type DropLine = [number[], string | null, string, string, string | null, string | null, [number, number] | null, string | null];
+    type Row = { y?: 'd'; n: string; w?: string; u: string | null; a: string; v: string; lat: number; lng: number; d: number[]; l: [number, number]; o: number; x: number; t: number; p: number; s: Line[] | DropLine[]; k: string | null };
     const WEEK = [1, 2, 3, 4, 5, 6, 0];
     const LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
     const POSTCODE = /^([A-Z]{1,2}\d[A-Z\d]?)(\s*\d[A-Z]{2})?$/i;
@@ -427,11 +427,11 @@ const dropInCount = weeklyDropIns(dir.dropIns);
       </article></li>`;
     }
 
-    const TICKET = '<svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9a3 3 0 0 0 0 6v3a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3a3 3 0 0 0 0-6V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1z"></path><path d="M14 5v2M14 11v2M14 17v2"></path></svg>';
-    const OUT = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"></path></svg>';
+    // The building, as DropInCard.astro draws it.
+    const BUILDING = '<svg width="88" height="88" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-opacity="0.75" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"></path><path d="M4 21V10l8-5 8 5v11"></path><path d="M9 21v-5h6v5"></path><path d="M8 11h2M14 11h2"></path></svg>';
 
     /** A drop-in row, as DropInCard.astro draws it. */
-    function dropLine([days, label, daysText, time, duration, title, price, booking, claimed]: DropLine) {
+    function dropLine([days, label, daysText, time, duration, price, bars, levels]: DropLine) {
       const picked = filter.day === '' ? null : Number(filter.day);
       const state = picked == null ? '' : days.includes(picked) ? ' hl' : ' dim';
       const strip = label
@@ -440,48 +440,46 @@ const dropInCount = weeklyDropIns(dir.dropIns);
           const on = days.includes(d);
           return `<span class="ds-cell${on ? ' on' : ''}${on && d === picked ? ' hl' : ''}" aria-hidden="true">${LETTERS[d]}</span>`;
         }).join('')}</span>`;
-      const act = claimed
-        ? '<a class="di-book" href="/get.html?src=dropin">Join in the app</a>'
-        : booking ? `<a class="di-book" href="${esc(booking)}" rel="noopener nofollow" target="_blank">Book${OUT}</a>` : '';
+      const segs = bars ? [1, 2, 3].map((b) => `<i class="${b >= bars[0] && b <= bars[1] ? 'on' : ''}"></i>`).join('') : '';
       return `<li class="night-line${state}">
         ${strip}
         <span class="nl-time"><b>${esc(time)}</b>${duration ? `<small>${esc(duration)}</small>` : ''}</span>
-        <span class="di-what">${esc(title)}${price ? `<b> · ${esc(price)}</b>` : ''}</span>
-        ${act}
+        ${price ? `<span class="di-price"><b>${esc(price)}</b> per session</span>` : ''}
+        ${bars ? `<span class="nl-level"><span class="nl-segs" aria-hidden="true">${segs}</span><span class="nl-level-text">${esc(levels ?? '')}</span></span>` : ''}
       </li>`;
     }
 
-    /** A venue's drop-ins, as DropInCard.astro draws them, with the distance from the search. */
+    /** A drop-in listing, as DropInCard.astro draws it, with the distance from the search. */
     function dropCard(r: Row, dist?: number) {
       const lines = r.s as DropLine[];
-      const unclaimed = lines.some((l) => !l[8]);
       return `<li><article class="club-card dropin">
-        <div class="cc-slot di-slot">${TICKET}</div>
+        <div class="cc-slot" style="background: ${tints[r.p] ?? tints[0]}">${BUILDING}</div>
         <div class="cc-body">
           <div class="cc-top">
             <div class="cc-who">
               <h3 class="cc-name">${r.u ? `<a href="${esc(r.u)}">${esc(r.n)}</a>` : esc(r.n)}</h3>
-              <p class="cc-venue">${PIN}${r.v ? `Run by ${esc(r.v)}, ` : ''}${esc(r.a)}</p>
+              <p class="cc-venue">${PIN}${esc(r.w ?? '')}, ${esc(r.a)}</p>
+              ${r.v ? `<p class="di-run">Run by ${esc(r.v)}</p>` : ''}
             </div>
             <div class="cc-tags">
               ${dist != null ? `<span class="tag">${dist < 1 ? 'Under 1' : Math.round(dist)} km away</span>` : ''}
               <span class="tag">Drop-in</span>
-              ${r.x ? '<span class="tag lime">Runs on NextFour</span>' : ''}
+              ${r.x ? '<span class="tag ok">Runs on NextFour</span>' : ''}
             </div>
           </div>
           <ul class="cc-lines">${lines.map(dropLine).join('')}</ul>
-          ${unclaimed ? '<p class="di-claim">Run one of these sessions? <a href="/get.html?src=claim">Claim it in the NextFour app</a> to take sign-ups and run the night with a digital pegboard.</p>' : ''}
+          <a class="di-join" href="/get.html?src=dropin">Join in the app</a>
         </div>
       </article></li>`;
     }
 
-    /** "12 clubs and 3 drop-in venues": each kind counted on its own. */
+    /** "12 clubs and 3 drop-ins": each kind counted on its own. */
     function counted(list: { r: Row }[]) {
       const venues = list.filter((x) => x.r.y === 'd').length;
       const clubs = list.length - venues;
       const parts = [
         clubs ? `${clubs} club${clubs === 1 ? '' : 's'}` : '',
-        venues ? `${venues} drop-in venue${venues === 1 ? '' : 's'}` : '',
+        venues ? `${venues} drop-in${venues === 1 ? '' : 's'}` : '',
       ].filter(Boolean);
       return parts.join(' and ');
     }

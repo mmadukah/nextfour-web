@@ -1,34 +1,40 @@
 ---
-// A venue's drop-in sessions on an area page: sessions run by a leisure
-// operator, not a club, that anyone books onto and pays for each time. Built
-// from the club card's pieces (src/styles/club-card.css) so the two read as
-// one family, with what differs: a ticket instead of the court, who runs
-// them, a price and a booking link on each row, and the claim line, since
-// each session can be claimed by whoever runs it. The finder's results build
-// the same markup in its script; keep the two in step.
-import { dropInRows, durationText, timeRange, daysPlural, DAY_LETTERS, WEEK_ORDER, type DropInVenue } from '../../data/directory';
+// A drop-in listing on an area page (REDESIGN-BRIEF, "Drop-in session
+// cards"): a session run by a leisure operator, not a club, on the same card
+// as the clubs so the list reads as one family. What tells it apart is the
+// building icon, the tags, the price and the button, never a bright panel:
+// the panel takes the clubs' rotating tints. The finder's results build the
+// same markup in its script; keep the two in step.
+import LevelBars from './LevelBars.astro';
+import {
+  dropInRows, durationText, timeRange, daysPlural, levelBars, clubTint, DAY_LETTERS, WEEK_ORDER, type DropInVenue,
+} from '../../data/directory';
 
 interface Props { venue: DropInVenue }
 const { venue } = Astro.props;
 const rows = dropInRows(venue);
 const days = [...new Set(rows.flatMap((r) => r.days))];
-const anyClaimed = venue.sessions.some((s) => s.claimed);
-const anyUnclaimed = venue.sessions.some((s) => !s.claimed);
+const claimed = venue.sessions.some((s) => s.claimed);
+const getHref = '/get.html?src=dropin';
 ---
 
 <article class="club-card dropin" id={venue.anchor} data-days={days.join(',')}>
-  <div class="cc-slot di-slot">
-    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9a3 3 0 0 0 0 6v3a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3a3 3 0 0 0 0-6V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1z"></path><path d="M14 5v2M14 11v2M14 17v2"></path></svg>
+  <div class="cc-slot" style={`background: ${clubTint(venue.id)}`}>
+    <svg width="88" height="88" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-opacity="0.75" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"></path><path d="M4 21V10l8-5 8 5v11"></path><path d="M9 21v-5h6v5"></path><path d="M8 11h2M14 11h2"></path></svg>
   </div>
   <div class="cc-body">
     <div class="cc-top">
       <div class="cc-who">
         <h3 class="cc-name">{venue.name}</h3>
-        {venue.operators.length > 0 && <p class="cc-venue">Run by {venue.operators.join(' and ')}</p>}
+        <p class="cc-venue">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg>
+          {venue.venueName}, {venue.areaName}
+        </p>
+        {venue.operators.length > 0 && <p class="di-run">Run by {venue.operators.join(' and ')}</p>}
       </div>
       <div class="cc-tags">
         <span class="tag">Drop-in</span>
-        {anyClaimed && <span class="tag lime">Runs on NextFour</span>}
+        {claimed && <span class="tag ok">Runs on NextFour</span>}
       </div>
     </div>
     <ul class="cc-lines">
@@ -46,16 +52,12 @@ const anyUnclaimed = venue.sessions.some((s) => !s.claimed);
                 </span>
               )}
             <span class="nl-time"><b>{timeRange(n)}</b>{duration && <small>{duration}</small>}</span>
-            <span class="di-what">{s.title}{n.price && <b> · {n.price.replace(' a session', '')}</b>}</span>
-            {s.claimed
-              ? <a class="di-book" href="/get.html?src=dropin">Join in the app</a>
-              : s.bookingUrl && <a class="di-book" href={s.bookingUrl} rel="noopener nofollow" target="_blank">Book<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"></path></svg></a>}
+            {n.price && <span class="di-price"><b>{n.price.replace(' a session', '')}</b> per session</span>}
+            {s.levelKnown && <LevelBars range={levelBars(n)} label={n.levels} />}
           </li>
         );
       })}
     </ul>
-    {anyUnclaimed && (
-      <p class="di-claim">Run one of these sessions? <a href="/get.html?src=claim">Claim it in the NextFour app</a> to take sign-ups and run the night with a digital pegboard.</p>
-    )}
+    <a class="di-join" href={getHref}>Join in the app</a>
   </div>
 </article>

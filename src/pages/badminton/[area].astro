@@ -75,7 +75,7 @@ const today = new Date();
 const dropInLd = area.dropIns.flatMap((v) => v.sessions.flatMap((s) => s.night.days.map((d) => ({
   '@context': 'https://schema.org',
   '@type': 'SportsEvent',
-  name: `${s.title} at ${v.name}`,
+  name: `${s.title} at ${v.venueName}`,
   sport: 'Badminton',
   startDate: `${nextDate(d, today)}T${s.night.start}`,
   ...(s.night.end ? { endDate: `${nextDate(d, today)}T${s.night.end}` } : {}),
@@ -86,7 +86,7 @@ const dropInLd = area.dropIns.flatMap((v) => v.sessions.flatMap((s) => s.night.d
     startTime: s.night.start, ...(s.night.end ? { endTime: s.night.end } : {}), scheduleTimezone: 'Europe/London',
   },
   location: {
-    '@type': 'SportsActivityLocation', name: v.name,
+    '@type': 'SportsActivityLocation', name: v.venueName,
     ...(v.venue.address ? { address: v.venue.address } : {}),
     geo: { '@type': 'GeoCoordinates', latitude: v.venue.lat, longitude: v.venue.lng },
   },

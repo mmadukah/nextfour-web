@@ -47,12 +47,13 @@
 .nl-level-text { font-size: 14px; color: var(--body); }
 .nl-extra { flex: 1 1 100%; font-size: 14px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 
-/* Drop-in cards (DropInCard.astro): the club card with a ticket in the slot. */
-.di-slot { background: var(--sel-bg); color: var(--sel-fg); min-height: 120px; }
-.di-what { flex: 1 1 200px; font-size: 14px; color: var(--body); min-width: 0; }
-.di-what b { color: var(--ink); font-weight: 700; }
-.di-book {
-  flex: 0 0 auto; display: inline-flex; align-items: center; gap: 4px; min-height: 36px; padding: 0 14px;
-  border-radius: 999px; border: 1.5px solid var(--ink); font-weight: 700; font-size: 14px; text-decoration: none;
+/* Drop-in cards (DropInCard.astro): the club card with a building in the slot,
+   the price where a club shows its level, and one "Join in the app" button. */
+.di-run { margin: 4px 0 0; font-size: 14px; color: var(--muted); }
+.di-price { flex: 1 1 160px; font-size: 14px; color: var(--muted); }
+.di-price b { font-size: 16px; font-weight: 800; color: var(--ink); margin-right: 4px; }
+.di-join {
+  align-self: flex-start; display: inline-flex; align-items: center; min-height: 44px; box-sizing: border-box; padding: 0 20px;
+  border-radius: 999px; background: var(--hl-bg); color: var(--hl-fg); font-weight: 800; font-size: 15px; text-decoration: none;
 }
-.di-claim { margin: 0; font-size: 14px; color: var(--muted); }
+.di-join:hover { color: var(--hl-fg); opacity: 0.92; }

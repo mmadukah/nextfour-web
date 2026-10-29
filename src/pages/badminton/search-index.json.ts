@@ -39,6 +39,8 @@ export const GET: APIRoute = async () => {
     return {
       y: 'd',
       n: v.name,
+      w: v.venueName,
+      p: tintIndex(v.id),
       // The card on its area page; a venue in an area without one has no link.
       u: area?.hasPage ? `${area.url}#${v.anchor}` : null,
       a: v.areaName,
@@ -49,11 +51,11 @@ export const GET: APIRoute = async () => {
       x: v.sessions.some((s) => s.claimed) ? 1 : 0,
       o: 1,
       // Drop-in rows: days, one-off date label, days in words, time,
-      // duration, title, price, booking link (null once claimed), claimed.
+      // duration, price, and the level bars and words when the feed gave a level.
       s: rowsOf.map((r) => [
         r.days, r.label, daysPlural(r.days), timeRange(r.session.night), durationText(r.session.night),
-        r.session.title, r.session.night.price?.replace(' a session', '') ?? null,
-        r.session.claimed ? null : r.session.bookingUrl, r.session.claimed ? 1 : 0,
+        r.session.night.price?.replace(' a session', '') ?? null,
+        r.session.levelKnown ? levelBars(r.session.night) : null, r.session.levelKnown ? r.session.night.levels : null,
       ]),
     };
   });
