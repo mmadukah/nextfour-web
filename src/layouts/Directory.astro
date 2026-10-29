@@ -31,14 +31,17 @@ interface Props {
   /** The header link marked as the current page. */
   current?: 'finder' | 'how';
   lang?: 'en' | 'fr';
-  footer?: 'directory' | 'site';
+  /** 'custom' takes the page's own footer from its "footer" slot (the home page). */
+  footer?: 'directory' | 'site' | 'custom';
+  /** Full-width main, for a page that lays out its own bands (the home page). */
+  bare?: boolean;
   /** Language versions of this page, for the pills and hreflang links. */
   languages?: { lang: string; label: string; href: string }[];
   /** A shorter line for link previews (Base's og:description). */
   ogDescription?: string;
 }
 const {
-  title, description, crumbs, jsonLd = [], cta = true, current, lang = 'en', footer = 'directory', languages = [], ogDescription,
+  title, description, crumbs, jsonLd = [], cta = true, current, lang = 'en', footer = 'directory', languages = [], ogDescription, bare = false,
 } = Astro.props;
 
 const WORDS = {
@@ -78,7 +81,8 @@ const breadcrumbLd = {
     item: new URL(c.href, site).href,
   })),
 };
-const ld = [breadcrumbLd, ...jsonLd];
+// No trail (the home page) means no breadcrumb.
+const ld = crumbs.length > 1 ? [breadcrumbLd, ...jsonLd] : jsonLd;
 ---
 
 <Base title={title} description={description} lang={lang} alternates={alternates} ogDescription={ogDescription}>
@@ -253,7 +257,8 @@ const ld = [breadcrumbLd, ...jsonLd];
     </div>
   </header>
 
-  <main class="wrap">
+  <main class:list={[{ wrap: !bare }]}>
+    {crumbs.length > 1 && (
     <div class="crumb-row">
       <nav class="crumbs" aria-label={WORDS.crumbs}>
         {crumbs.map((c, i) => (
@@ -269,10 +274,12 @@ const ld = [breadcrumbLd, ...jsonLd];
         </nav>
       )}
     </div>
+    )}
     <slot />
     {cta && <AppFeaturesCompact />}
   </main>
 
+  {footer === 'custom' ? <slot name="footer" /> : (
   <footer class="foot">
     <div class="wrap">
       <nav aria-label={WORDS.foot}>
@@ -300,4 +307,5 @@ const ld = [breadcrumbLd, ...jsonLd];
       )}
     </div>
   </footer>
+  )}
 </Base>

@@ -1,8 +1,9 @@
 ---
-// The marketing landing page, rendered from a per-language strings table so
-// the same markup serves /  (en) and /fr/ (fr).
-import Base from '../layouts/Base.astro';
-import ThemeToggle from './ThemeToggle.astro';
+// The home page, rendered from a per-language strings table so the same
+// markup serves / (en) and /fr/ (fr). Design: REDESIGN-BRIEF, "Home page",
+// in the site's shared header (Directory.astro) with its own footer. The
+// words are the table's; the design only adds the short labels marked below.
+import Directory from '../layouts/Directory.astro';
 import { getRelativeLocaleUrl } from 'astro:i18n';
 import { PLAY_URL, APP_STORE_URL } from '../store-links';
 import { INSTAGRAM_URL, FACEBOOK_URL } from '../social-links';
@@ -65,6 +66,15 @@ type Strings = {
   nav: { clubs: string; howItWorks: string; support: string; privacy: string; terms: string; delete: string };
   questions: string;
   copyright: string;
+  // Labels the redesign adds.
+  sportsLead: string;
+  sportsLabel: string;
+  sports: string[];
+  findPlaceholder: string;
+  storyLink: string;
+  endingTitle: string;
+  plansKicker: string;
+  setupKicker: string;
 };
 
 const content: Record<string, Strings> = {
@@ -154,6 +164,14 @@ const content: Record<string, Strings> = {
     nav: { clubs: 'Badminton clubs', howItWorks: 'How it works', support: 'Support', privacy: 'Privacy', terms: 'Terms', delete: 'Account & Data Deletion' },
     questions: 'Questions? Email',
     copyright: '© 2026 NextFour. All rights reserved.',
+    sportsLead: 'Free to get started. Built for',
+    sportsLabel: 'Sports',
+    sports: ['Badminton', 'Squash', 'Tennis', 'Padel', 'Table tennis'],
+    findPlaceholder: 'Postcode, town or club name',
+    storyLink: 'The rules behind it',
+    endingTitle: 'Everyone played',
+    plansKicker: 'Plans',
+    setupKicker: 'Getting started',
   },
   fr: {
     title: 'NextFour : Trouvez un match, gérez votre soirée de club',
@@ -241,523 +259,204 @@ const content: Record<string, Strings> = {
     nav: { clubs: 'Clubs de badminton', howItWorks: 'Comment ça marche', support: 'Assistance', privacy: 'Confidentialité', terms: 'Conditions', delete: 'Suppression du compte et des données' },
     questions: 'Des questions ? Écrivez à',
     copyright: '© 2026 NextFour. Tous droits réservés.',
+    sportsLead: 'Gratuit pour commencer. Conçu pour',
+    sportsLabel: 'Sports',
+    sports: ['Badminton', 'Squash', 'Tennis', 'Padel', 'Tennis de table'],
+    findPlaceholder: 'Code postal, ville ou nom du club',
+    storyLink: 'Les règles derrière tout ça',
+    endingTitle: 'Tout le monde a joué',
+    plansKicker: 'Formules',
+    setupKicker: 'Pour commencer',
   },
 };
 
 const s = content[lang] ?? content.en;
-// Clean per-locale homepage paths: / for the default, /<loc>/ otherwise.
+const fr = lang === 'fr';
 const localeHome = (loc: string) => (loc === 'en' ? '/' : `/${loc}/`);
-const homeUrl = (loc: string) => new URL(localeHome(loc), Astro.site).href;
-const alternates = [
-  ...locales.map((loc) => ({ hreflang: loc, href: homeUrl(loc) })),
-  { hreflang: 'x-default', href: homeUrl('en') },
-];
+const languages = locales.map((loc) => ({ lang: loc, label: localeNames[loc], href: localeHome(loc) }));
+const site = Astro.site!;
+
+// The players' and organisers' paragraphs as ticked points, sentence by sentence.
+const sentences = (t: string) => t.split(/(?<=[.!?])\s+(?=[A-ZÀ-Ý])/);
+const playerPoints = [...sentences(s.players.body), s.players.night];
+const hostPoints = [s.hosts.body, s.hosts.terminal];
+// "10:00pm. Everyone played, …": the time, then the rest.
+const [, endTime, endText] = s.story.ending.match(/^(\S+)\.\s+(.*)$/) ?? ['', '', s.story.ending];
+
+// Store links carry the "Get the app" tracking (REDESIGN-BRIEF): src=home.
+const appStore = APP_STORE_URL && `${APP_STORE_URL}?ct=home`;
+const play = PLAY_URL && `${PLAY_URL}&referrer=${encodeURIComponent('utm_source=nextfour_web&utm_campaign=home')}`;
+
+const qrSvg = (await import('../../public/get-qr.svg?raw')).default;
+const TICK = '<path d="m5 12 5 5 9-10"></path>';
+
+const orgLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'NextFour',
+  url: new URL('/', site).href,
+  logo: new URL('/apple-touch-icon.png', site).href,
+  email: 'support@nextfour.app',
+  sameAs: [INSTAGRAM_URL, FACEBOOK_URL].filter(Boolean),
+};
+const siteLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'NextFour',
+  url: new URL('/', site).href,
+  inLanguage: fr ? 'fr' : 'en-GB',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: { '@type': 'EntryPoint', urlTemplate: `${new URL('/badminton.html', site).href}?q={search_term_string}` },
+    'query-input': 'required name=search_term_string',
+  },
+};
 ---
 
-<Base
+<Directory
   title={s.title}
   description={s.description}
   ogDescription={s.ogDescription}
-  lang={lang}
+  crumbs={[]}
+  jsonLd={[orgLd, siteLd]}
+  cta={false}
+  lang={fr ? 'fr' : 'en'}
+  languages={languages}
+  footer="custom"
+  bare
 >
-  <Fragment slot="head">
-    <link rel="preload" href="/fonts/montserrat-latin.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/nunito-sans-latin.woff2" as="font" type="font/woff2" crossorigin />
-    {alternates.map((alt) => (
-      <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
-    ))}
-  </Fragment>
-
-  <style is:global>
-    /* Fonts are self-hosted (latin subset, variable weight). Loading them
-       from Google would send every visitor's IP address to Google. */
-    @font-face {
-      font-family: 'Montserrat';
-      font-style: normal;
-      font-weight: 800 900;
-      font-display: swap;
-      src: url(/fonts/montserrat-latin.woff2) format('woff2');
-    }
-    @font-face {
-      font-family: 'Nunito Sans';
-      font-style: normal;
-      font-weight: 400 700;
-      font-display: swap;
-      src: url(/fonts/nunito-sans-latin.woff2) format('woff2');
-    }
-
-    /* Brand kit: the same navy, card and lime as the app and the social
-       posts, so a visitor arriving from either recognises the page. */
-    /* Light or dark follows the system setting until the visitor picks one
-       with the toggle (ThemeToggle). Lime is a fill only on light; text and
-       marks in the accent use --accent-ink. */
-    :root {
-      color-scheme: light;
-      --accent: #c8f135;
-      --accent-dark: #b4dc22;
-      --accent-ink: #3d6b1f;
-      --on-accent: #13221a;
-      --ink: #13221a;
-      --muted: #5b675e;
-      --bg: #f3f5ee;
-      --card: #ffffff;
-      --card-2: #eceee8;
-      --border: #e1e6da;
-      --glow: #e4ecd2;
-      --head: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme='light']) {
-        color-scheme: dark;
-        --accent-ink: #c8f135;
-        --on-accent: #0f1923;
-        --ink: #f2f5f7;
-        --muted: #9aa7b5;
-        --bg: #0f1923;
-        --card: #192230;
-        --card-2: #232f40;
-        --border: #2a3a4a;
-        --glow: #1b2a3a;
-      }
-    }
-    :root[data-theme='dark'] {
-      color-scheme: dark;
-      --accent-ink: #c8f135;
-      --on-accent: #0f1923;
-      --ink: #f2f5f7;
-      --muted: #9aa7b5;
-      --bg: #0f1923;
-      --card: #192230;
-      --card-2: #232f40;
-      --border: #2a3a4a;
-      --glow: #1b2a3a;
-    }
-
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      margin: 0;
-      line-height: 1.6;
-      color: var(--ink);
-      background: var(--bg);
-      -webkit-font-smoothing: antialiased;
-    }
-    a { color: var(--accent-ink); }
-    h1, h2, h3 { font-family: var(--head); }
-    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 1.25rem; }
-    img { max-width: 100%; }
-
-    /* ---------- Top bar ---------- */
-    .topbar { display: flex; justify-content: space-between; align-items: center; padding-top: 1.25rem; }
-    .brand {
-      font-family: var(--head);
-      font-weight: 800;
-      letter-spacing: 0.35em;
-      font-size: 0.85rem;
-      color: var(--ink);
-      text-transform: uppercase;
-    }
-    .topbar-end { display: flex; align-items: center; gap: 1rem; }
-    .langbar { display: flex; gap: 0.85rem; font-size: 0.85rem; }
-    .langbar a { color: var(--muted); text-decoration: none; }
-    .langbar a[aria-current="true"] { color: var(--ink); font-weight: 700; }
-
-    /* ---------- Hero ---------- */
-    .hero {
-      background: radial-gradient(110% 90% at 85% 10%, var(--glow) 0%, var(--bg) 60%);
-      padding: 0 0 4.5rem;
-      border-bottom: 1px solid var(--border);
-      overflow: hidden;
-    }
-    .hero-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      gap: 2.5rem;
-      align-items: center;
-      padding-top: 3.5rem;
-    }
-    .hero h1 {
-      font-size: clamp(2.5rem, 6vw, 4rem);
-      line-height: 1.02;
-      margin: 0 0 1.1rem;
-      font-weight: 900;
-      letter-spacing: -0.02em;
-    }
-    .hero h1 .accent { color: var(--accent-ink); }
-    .hero p.lead {
-      font-size: clamp(1.05rem, 2.2vw, 1.2rem);
-      color: var(--muted);
-      max-width: 42ch;
-      margin: 0 0 1.75rem;
-    }
-    .paths { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.75rem; max-width: 30rem; }
-    .path {
-      display: block;
-      padding: 0.95rem 1.1rem;
-      border-radius: 14px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      color: var(--ink);
-      text-decoration: none;
-      transition: border-color .15s ease, transform .08s ease;
-    }
-    .path:hover { border-color: var(--accent-ink); }
-    .path:active { transform: translateY(1px); }
-    .path strong { display: block; font-size: 1rem; }
-    .path strong::after { content: ' \2192'; color: var(--accent-ink); }
-    .path span { color: var(--muted); font-size: 0.88rem; }
-
-    .cta-row { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
-    .btn {
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      font-weight: 700; font-size: 0.95rem;
-      padding: 0.75rem 1.25rem; border-radius: 10px;
-      text-decoration: none; transition: transform .08s ease, background .2s ease;
-    }
-    .btn:active { transform: translateY(1px); }
-    .btn-primary { background: var(--accent); color: var(--on-accent); }
-    .btn-primary:hover { background: var(--accent-dark); }
-    .btn-ghost { background: var(--card); color: var(--ink); border: 1px solid var(--border); }
-    .btn-ghost:hover { background: var(--card-2); }
-    .hero .note { color: var(--muted); font-size: 0.85rem; margin: 1.25rem 0 0; }
-
-    /* ---------- Device frames ---------- */
-    .devices { position: relative; padding-bottom: 3rem; }
-    .tablet {
-      border: 10px solid #05080c;
-      border-radius: 22px;
-      background: #05080c;
-      box-shadow: 0 30px 60px rgba(0,0,0,0.5);
-      overflow: hidden;
-    }
-    .tablet img { display: block; width: 100%; height: auto; border-radius: 10px; }
-    .phone {
-      width: 100%;
-      max-width: 270px;
-      border: 8px solid #05080c;
-      border-radius: 34px;
-      background: #05080c;
-      box-shadow: 0 24px 50px rgba(0,0,0,0.55);
-      overflow: hidden;
-    }
-    .phone img { display: block; width: 100%; height: auto; border-radius: 26px; }
-    .devices .phone {
-      position: absolute;
-      right: -0.5rem;
-      bottom: 0;
-      width: 36%;
-      outline: 1px solid var(--border);
-    }
-
-    /* ---------- Audience sections ---------- */
-    section.audience { padding: 5rem 0 2rem; scroll-margin-top: 1rem; }
-    .split {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
-      gap: 3.5rem;
-      align-items: center;
-    }
-    .split.flip .shot { order: 2; }
-    .split .shot .phone { margin: 0 auto; }
-    .kicker {
-      display: inline-block;
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--accent-ink);
-      margin-bottom: 0.6rem;
-    }
-    .split h2 { font-size: clamp(1.8rem, 4vw, 2.5rem); line-height: 1.1; margin: 0 0 1rem; font-weight: 900; }
-    .split p { color: var(--muted); margin: 0 0 1rem; font-size: 1.05rem; }
-    .callout {
-      margin-top: 1.5rem;
-      padding: 1.1rem 1.25rem;
-      border-radius: 14px;
-      background: var(--card);
-      border-left: 4px solid var(--accent-ink);
-    }
-    .callout strong { display: block; color: var(--ink); margin-bottom: 0.25rem; }
-    .callout p { margin: 0; font-size: 0.98rem; }
-
-    .section-head { text-align: center; max-width: 40ch; margin: 0 auto 2.75rem; }
-    .section-head h2 { font-size: clamp(1.6rem, 4vw, 2.1rem); margin: 0 0 0.6rem; letter-spacing: -0.01em; }
-    .section-head p { color: var(--muted); margin: 0; }
-
-    /* ---------- One night, start to finish ---------- */
-    section.story { padding: 5rem 0 1rem; border-top: 1px solid var(--border); }
-    .beat { margin-bottom: 4rem; }
-    /* A tablet board takes the wider column: it is unreadable small. */
-    .beat.wide { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
-    .beat .time {
-      font-family: var(--head);
-      font-weight: 800;
-      font-size: 0.95rem;
-      color: var(--accent-ink);
-      margin-bottom: 0.4rem;
-    }
-    .beat h3 { font-size: clamp(1.4rem, 3vw, 1.8rem); line-height: 1.15; margin: 0 0 0.75rem; font-weight: 900; }
-    .beat .shot .phone { max-width: 250px; }
-    .ending {
-      max-width: 36ch;
-      margin: 0 auto;
-      text-align: center;
-      font-family: var(--head);
-      font-weight: 800;
-      font-size: clamp(1.15rem, 2.6vw, 1.45rem);
-      line-height: 1.35;
-    }
-
-    /* ---------- Pricing ---------- */
-    section.pricing { padding: 5rem 0 1rem; }
-    .plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
-    .plan {
-      border: 1px solid var(--border); border-radius: 14px;
-      padding: 1.3rem 1.3rem 1.4rem; background: var(--card);
-    }
-    .plan h3 { margin: 0 0 0.35rem; font-size: 1.05rem; }
-    .plan p { margin: 0; color: var(--muted); font-size: 0.96rem; }
-    .plan:first-child { border-color: var(--accent-ink); }
-    .plans-note { text-align: center; color: var(--muted); font-size: 0.88rem; margin: 1.25rem 0 0; }
-
-    /* ---------- QR for desktop visitors ---------- */
-    /* Only on a wide screen with a mouse: on a phone the store buttons are
-       the way in, and a QR there would be one more thing to scroll past.
-       It sits under the closing buttons, not in the hero, to keep the top clean. */
-    .qr { display: none; }
-    @media (min-width: 821px) and (hover: hover) and (pointer: fine) {
-      .qr {
-        display: flex; align-items: center; gap: 0.9rem; text-align: left;
-        margin: 2rem auto 0; padding: 0.75rem; max-width: 22rem;
-        background: var(--card); border: 1px solid var(--border); border-radius: 14px;
-      }
-    }
-    .qr img { width: 88px; height: 88px; border-radius: 8px; flex: none; }
-    .qr strong { display: block; font-size: 0.95rem; }
-    .qr span { color: var(--muted); font-size: 0.88rem; }
-
-    /* ---------- How it works ---------- */
-    section.steps { padding: 3.5rem 0; }
-    .steps ol { counter-reset: step; list-style: none; padding: 0; margin: 0; display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); }
-    .steps li { position: relative; padding: 1.3rem 1.3rem 1.3rem 3.5rem; border: 1px solid var(--border); border-radius: 14px; background: var(--card); }
-    .steps li::before {
-      counter-increment: step; content: counter(step);
-      position: absolute; left: 1.1rem; top: 1.2rem;
-      width: 1.7rem; height: 1.7rem; border-radius: 50%;
-      background: var(--accent); color: var(--on-accent); font-weight: 800; font-size: 0.9rem;
-      display: grid; place-items: center;
-    }
-    .steps li strong { display: block; margin-bottom: 0.2rem; }
-    .steps li span { color: var(--muted); font-size: 0.95rem; }
-
-    /* ---------- Closing CTA ---------- */
-    section.closing { text-align: center; padding: 4rem 0 4.5rem; }
-    section.closing h2 { font-size: clamp(1.6rem, 4vw, 2.2rem); margin: 0 0 0.5rem; }
-    section.closing p { color: var(--muted); margin: 0 0 1.75rem; }
-    section.closing .cta-row { justify-content: center; }
-
-    /* ---------- Footer ---------- */
-    footer { border-top: 1px solid var(--border); padding: 2.5rem 0 3rem; }
-    footer .cols { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1.5rem; align-items: center; }
-    footer nav a { color: var(--ink); text-decoration: none; margin-right: 1.25rem; font-size: 0.92rem; opacity: 0.85; }
-    footer nav a:hover { opacity: 1; text-decoration: underline; }
-    footer .small { color: var(--muted); font-size: 0.85rem; margin-top: 1.5rem; }
-    footer .social { display: flex; gap: 1rem; }
-    footer .social a { color: var(--ink); opacity: 0.85; display: inline-flex; }
-    footer .social a:hover { opacity: 1; }
-    footer .social svg { width: 22px; height: 22px; fill: currentColor; }
-
-    /* ---------- Narrow screens ---------- */
-    @media (max-width: 820px) {
-      .hero-grid, .split, .beat.wide { grid-template-columns: minmax(0, 1fr); gap: 2.5rem; }
-      .hero-grid { padding-top: 2.5rem; }
-      .split.flip .shot { order: 0; }
-      .split .shot .phone { max-width: 240px; }
-      .devices { max-width: 560px; margin: 0 auto; width: 100%; }
-    }
-    @media (max-width: 420px) {
-      .paths { grid-template-columns: minmax(0, 1fr); }
-    }
-  </style>
-
-  <!-- ============ HERO ============ -->
-  <!-- Two audiences, two doors: players find a game, organisers run the
-       night. The devices show one of each: the board a club sees on the
-       night, and the nudge a player gets on their phone. -->
-  <header class="hero">
-    <div class="wrap topbar">
-      <div class="brand">NextFour</div>
-      <div class="topbar-end">
-      <nav class="langbar" aria-label="Language">
-        {locales.map((loc) => (
-          <a
-            href={localeHome(loc)}
-            aria-current={loc === lang ? 'true' : undefined}
-            hreflang={loc}
-          >{localeNames[loc]}</a>
-        ))}
-      </nav>
-        <ThemeToggle />
+  <section class="hero x">
+    <div class="hero-copy">
+      <h1>{s.heroLine1}<br /><span class="accent">{s.heroLine2}</span></h1>
+      <p class="lead">{s.lead}</p>
+      <div class="paths">
+        <a class="path primary" href="#players"><span><b>{s.pathPlayers.label}</b><small>{s.pathPlayers.sub}</small></span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"></path></svg></a>
+        <a class="path" href="#organisers"><span><b>{s.pathHosts.label}</b><small>{s.pathHosts.sub}</small></span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"></path></svg></a>
+      </div>
+      <div class="stores">
+        {appStore && <a href={appStore} aria-label={s.ctaAppStore}><img class="apple" src="/badges/app-store.svg" alt="" width="162" height="54" /></a>}
+        {play && <a href={play} aria-label={s.ctaPlay}><img class="google" src="/badges/google-play.png" alt="" width="207" height="80" /></a>}
+      </div>
+      <div class="built">
+        <p>{s.sportsLead}</p>
+        <ul aria-label={s.sportsLabel}>{s.sports.map((sp) => <li>{sp}</li>)}</ul>
       </div>
     </div>
-    <div class="wrap hero-grid">
-      <div>
-        <h1>{s.heroLine1}<br /><span class="accent">{s.heroLine2}</span></h1>
-        <p class="lead">{s.lead}</p>
-        <div class="paths">
-          <a class="path" href="#players"><strong>{s.pathPlayers.label}</strong><span>{s.pathPlayers.sub}</span></a>
-          <a class="path" href="#organisers"><strong>{s.pathHosts.label}</strong><span>{s.pathHosts.sub}</span></a>
-        </div>
-        <div class="cta-row">
-          {PLAY_URL && <a class="btn btn-primary" href={PLAY_URL}>{s.ctaPlay}</a>}
-          {APP_STORE_URL && <a class="btn btn-ghost" href={APP_STORE_URL}>{s.ctaAppStore}</a>}
-        </div>
-        <p class="note">{s.note}</p>
-      </div>
-      <div class="devices">
-        <div class="tablet">
-          <img src={s.heroBoard.src} alt={s.heroBoard.alt} width="720" height="430" decoding="async" fetchpriority="high" />
-        </div>
-        <div class="phone">
-          <img src={s.heroPhone.src} alt={s.heroPhone.alt} width="540" height="1116" decoding="async" />
-        </div>
-      </div>
+    <div class="hero-art">
+      <div class="tablet"><img src={s.heroBoard.src} alt={s.heroBoard.alt} width="720" height="430" fetchpriority="high" /></div>
+      <div class="phone overlap"><img src={s.heroPhone.src} alt={s.heroPhone.alt} width="540" height="1116" /></div>
     </div>
-  </header>
+  </section>
 
-  <!-- ============ FOR PLAYERS ============ -->
-  <section class="audience" id="players">
-    <div class="wrap split">
-      <div class="shot">
-        <div class="phone">
-          <img src={s.players.shot.src} alt={s.players.shot.alt} width="508" height="1074" loading="lazy" decoding="async" />
-        </div>
+  <section class="band" id="players" aria-labelledby="pl-h">
+    <div class="x split">
+      <div class="phones">
+        <div class="phone"><img src={s.players.shot.src} alt={s.players.shot.alt} width="508" height="1074" loading="lazy" /></div>
+        <div class="phone raised"><img src={s.hosts.shot.src} alt={s.hosts.shot.alt} width="540" height="1116" loading="lazy" /></div>
       </div>
-      <div>
-        <span class="kicker">{s.players.kicker}</span>
-        <h2>{s.players.head}</h2>
-        <p>{s.players.body}</p>
-        <p>{s.players.night}</p>
-        <div class="callout">
-          <strong>{s.players.calloutHead}</strong>
+      <div class="copy">
+        <p class="eyebrow">{s.players.kicker}</p>
+        <h2 id="pl-h">{s.players.head}</h2>
+        <ul class="ticks">{playerPoints.map((p) => <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={TICK} /><span>{p}</span></li>)}</ul>
+        <form class="find" action="/badminton.html" method="get" role="search">
+          <label for="hq">{s.players.calloutHead}</label>
+          <div class="find-row">
+            <input id="hq" name="q" type="search" placeholder={s.findPlaceholder} autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other" />
+            <button type="submit">{s.players.find}</button>
+          </div>
           <p>{s.players.calloutBody}</p>
-          <p><a href="/badminton.html">{s.players.find}</a></p>
-        </div>
+        </form>
       </div>
     </div>
   </section>
 
-  <!-- ============ FOR ORGANISERS ============ -->
-  <section class="audience" id="organisers">
-    <div class="wrap split flip">
-      <div class="shot">
-        <div class="phone">
-          <img src={s.hosts.shot.src} alt={s.hosts.shot.alt} width="540" height="1116" loading="lazy" decoding="async" />
-        </div>
-      </div>
+  <section class="x split org" id="organisers" aria-labelledby="org-h">
+    <div class="copy">
+      <p class="eyebrow">{s.hosts.kicker}</p>
+      <h2 id="org-h">{s.hosts.head}</h2>
+      <ul class="ticks">{hostPoints.map((p) => <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={TICK} /><span>{p}</span></li>)}</ul>
+      <p class="help">{s.hosts.help} <a href="mailto:support@nextfour.app">support@nextfour.app</a>.</p>
+    </div>
+    <div class="org-art"><div class="tablet"><img src={s.heroBoard.src} alt={s.heroBoard.alt} width="720" height="430" loading="lazy" /></div></div>
+  </section>
+
+  <section class="x night" aria-labelledby="night-h">
+    <div class="sec-top">
       <div>
-        <span class="kicker">{s.hosts.kicker}</span>
-        <h2>{s.hosts.head}</h2>
-        <p>{s.hosts.body}</p>
-        <p>{s.hosts.terminal}</p>
-        <p>{s.hosts.help} <a href="mailto:clubs@nextfour.app?subject=NextFour%20club%20night">clubs@nextfour.app</a>.</p>
+        <p class="eyebrow">{s.story.sub}</p>
+        <h2 id="night-h">{s.story.head}</h2>
       </div>
+      <a class="arrow" href={fr ? '/fr/how-it-works.html' : '/how-it-works.html'}>{s.storyLink}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
     </div>
-  </section>
-
-  <!-- ============ ONE NIGHT ============ -->
-  <!-- One club night told in three moments, each on the device it happens
-       on. The loops are the app's own host intro (racket-manager-app
-       assets/onboarding), so the site shows the real product moving. -->
-  <section class="story">
-    <div class="wrap">
-      <div class="section-head">
-        <h2>{s.story.head}</h2>
-        <p>{s.story.sub}</p>
-      </div>
-      {s.story.beats.map((beat, i) => (
-        <div class:list={['split', 'beat', { flip: i % 2 === 1, wide: beat.device === 'tablet' }]}>
+    <ol class="beats">
+      {s.story.beats.map((b) => (
+        <li>
           <div class="shot">
-            {beat.device === 'tablet' ? (
-              <div class="tablet">
-                <img src={beat.shot.src} alt={beat.shot.alt} width="720" height="430" loading="lazy" decoding="async" />
-              </div>
-            ) : (
-              <div class="phone">
-                <img src={beat.shot.src} alt={beat.shot.alt} width="540" height="1116" loading="lazy" decoding="async" />
-              </div>
-            )}
+            {b.device === 'tablet'
+              ? <div class="tablet"><img src={b.shot.src} alt={b.shot.alt} width="720" height="430" loading="lazy" /></div>
+              : <div class="phone-crop"><div class="phone"><img src={b.shot.src} alt={b.shot.alt} width="540" height="1116" loading="lazy" /></div></div>}
           </div>
-          <div>
-            <div class="time">{beat.time}</div>
-            <h3>{beat.title}</h3>
-            <p>{beat.body}</p>
-          </div>
-        </div>
+          <span class="time">{b.time}</span>
+          <h3>{b.title}</h3>
+          <p>{b.body}</p>
+        </li>
       ))}
-      <p class="ending">{s.story.ending}</p>
+      <li class="done">
+        <div class="shot" aria-hidden="true"><svg width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 3 3 5-6"></path></svg></div>
+        <span class="time">{endTime}</span>
+        <h3>{s.endingTitle}</h3>
+        <p>{endText}</p>
+      </li>
+    </ol>
+  </section>
+
+  <section class="band" aria-labelledby="price-h">
+    <div class="x">
+      <div class="sec-top">
+        <div>
+          <p class="eyebrow">{s.plansKicker}</p>
+          <h2 id="price-h">{s.pricing.head}</h2>
+        </div>
+        <p class="side">{s.pricing.sub} {s.pricing.note}</p>
+      </div>
+      <ul class="plans">
+        {s.pricing.plans.map((p) => <li class:list={['plan', { featured: p.name === 'Pro' }]}><b>{p.name}</b><p>{p.body}</p></li>)}
+      </ul>
     </div>
   </section>
 
-  <!-- ============ PRICING ============ -->
-  <section class="pricing">
-    <div class="wrap">
-      <div class="section-head">
-        <h2>{s.pricing.head}</h2>
-        <p>{s.pricing.sub}</p>
+  <section class="x setup" aria-labelledby="setup-h">
+    <div class="setup-copy">
+      <p class="eyebrow">{s.setupKicker}</p>
+      <h2 id="setup-h">{s.stepsHead}</h2>
+      <p class="sub">{s.stepsSub}</p>
+    </div>
+    <ol class="steps">
+      {s.steps.map((st, i) => <li><span class="n">{i + 1}</span><span><b>{st.title}</b><span>{st.body}</span></span></li>)}
+    </ol>
+  </section>
+
+  <section class="x closing-wrap" aria-labelledby="cta-h">
+    <div class="closing">
+      <div class="closing-copy">
+        <h2 id="cta-h">{s.closingHead}</h2>
+        <p>{s.closingSub}</p>
+        <div class="stores">
+          {appStore && <a href={appStore} aria-label={s.ctaAppStore}><img class="apple" src="/badges/app-store.svg" alt="" width="162" height="54" loading="lazy" /></a>}
+          {play && <a href={play} aria-label={s.ctaPlay}><img class="google" src="/badges/google-play.png" alt="" width="207" height="80" loading="lazy" /></a>}
+        </div>
       </div>
-      <div class="plans">
-        {s.pricing.plans.map((plan) => (
-          <div class="plan">
-            <h3>{plan.name}</h3>
-            <p>{plan.body}</p>
-          </div>
-        ))}
-      </div>
-      <p class="plans-note">{s.pricing.note}</p>
+      <figure class="qr">
+        <div class="code" role="img" aria-label={s.qr.alt} set:html={qrSvg} />
+        <figcaption><strong>{s.qr.head}</strong>{s.qr.body}</figcaption>
+      </figure>
     </div>
   </section>
 
-  <!-- ============ HOW IT WORKS ============ -->
-  <section class="steps">
-    <div class="wrap">
-      <div class="section-head">
-        <h2>{s.stepsHead}</h2>
-        <p>{s.stepsSub}</p>
-      </div>
-      <ol>
-        {s.steps.map((step) => (
-          <li><strong>{step.title}</strong><span>{step.body}</span></li>
-        ))}
-      </ol>
-    </div>
-  </section>
-
-  <!-- ============ CLOSING CTA ============ -->
-  <section class="closing">
-    <div class="wrap">
-      <h2>{s.closingHead}</h2>
-      <p>{s.closingSub}</p>
-      <div class="cta-row">
-        {PLAY_URL && <a class="btn btn-primary" href={PLAY_URL}>{s.ctaPlay}</a>}
-        {APP_STORE_URL && (
-          <a class="btn btn-ghost" href={APP_STORE_URL}>{s.ctaAppStore}</a>
-        )}
-      </div>
-      <div class="qr">
-        <img src="/get-app-qr.svg" alt={s.qr.alt} width="88" height="88" />
-        <div><strong>{s.qr.head}</strong><span>{s.qr.body}</span></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ FOOTER ============ -->
-  <footer>
-    <div class="wrap">
-      <div class="cols">
-        <div class="brand">NextFour</div>
-        <nav>
+  <footer slot="footer" class="home-foot">
+    <div class="x foot-row">
+      <div class="foot-left">
+        <nav aria-label={fr ? 'Pied de page' : 'Footer'}>
           <a href="/badminton.html">{s.nav.clubs}</a>
           <a href={getRelativeLocaleUrl(lang, 'how-it-works.html')}>{s.nav.howItWorks}</a>
           <a href={getRelativeLocaleUrl(lang, 'support.html')}>{s.nav.support}</a>
@@ -765,23 +464,143 @@ const alternates = [
           <a href={getRelativeLocaleUrl(lang, 'terms.html')}>{s.nav.terms}</a>
           <a href={getRelativeLocaleUrl(lang, 'delete-account.html')}>{s.nav.delete}</a>
         </nav>
-        <div class="social">
-          {INSTAGRAM_URL && (
-            <a href={INSTAGRAM_URL} aria-label="Instagram" title="Instagram" rel="noopener" target="_blank">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2c3.2 0 3.6 0 4.8.1 1.2.1 1.8.2 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1.1.4 2.2.1 1.3.1 1.6.1 4.8s0 3.6-.1 4.8c-.1 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1.1.4-2.2.4-1.3.1-1.6.1-4.8.1s-3.6 0-4.8-.1c-1.2-.1-1.8-.2-2.2-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.4-.4-1.1-.4-2.2C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.8c.1-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1.1-.4 2.2-.4C8.4 2.2 8.8 2.2 12 2.2zm0 1.8c-3.1 0-3.5 0-4.7.1-1.1.1-1.7.2-2.1.4-.5.2-.9.4-1.3.8-.4.4-.6.8-.8 1.3-.2.4-.3 1-.4 2.1C2.6 9.9 2.6 10.3 2.6 12s0 2.1.1 3.3c.1 1.1.2 1.7.4 2.1.2.5.4.9.8 1.3.4.4.8.6 1.3.8.4.2 1 .3 2.1.4 1.2.1 1.6.1 4.7.1s3.5 0 4.7-.1c1.1-.1 1.7-.2 2.1-.4.5-.2.9-.4 1.3-.8.4-.4.6-.8.8-1.3.2-.4.3-1 .4-2.1.1-1.2.1-1.6.1-4.7s0-3.5-.1-4.7c-.1-1.1-.2-1.7-.4-2.1-.2-.5-.4-.9-.8-1.3-.4-.4-.8-.6-1.3-.8-.4-.2-1-.3-2.1-.4C15.5 4 15.1 4 12 4zm0 3.1a4.9 4.9 0 1 1 0 9.8 4.9 4.9 0 0 1 0-9.8zm0 8.1a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4zm6.2-8.3a1.1 1.1 0 1 1-2.3 0 1.1 1.1 0 0 1 2.3 0z"/></svg>
-            </a>
-          )}
-          {FACEBOOK_URL && (
-            <a href={FACEBOOK_URL} aria-label="Facebook" title="Facebook" rel="noopener" target="_blank">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M24 12a12 12 0 1 0-13.9 11.9v-8.4H7.1V12h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.4l-.5 3.5h-2.9v8.4A12 12 0 0 0 24 12z"/></svg>
-            </a>
-          )}
-        </div>
+        <p>{s.questions} <a href="mailto:support@nextfour.app">support@nextfour.app</a>. {s.copyright}</p>
       </div>
-      <p class="small">
-        {s.questions} <a href="mailto:support@nextfour.app?subject=NextFour">support@nextfour.app</a>.<br />
-        {s.copyright}
-      </p>
+      <div class="foot-right">
+        {INSTAGRAM_URL && <a class="social" href={INSTAGRAM_URL} rel="noopener" aria-label="NextFour on Instagram"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"></circle></svg></a>}
+        {FACEBOOK_URL && <a class="social" href={FACEBOOK_URL} rel="noopener" aria-label="NextFour on Facebook"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 8.5V6.8c0-.8.2-1.3 1.4-1.3H17V2.3c-.3 0-1.3-.1-2.4-.1-2.4 0-4 1.4-4 4.1v2.2H8v3.6h2.6V22h3.4V12.1h2.6l.4-3.6z"></path></svg></a>}
+        <nav class="langs-foot" aria-label={fr ? 'Langue' : 'Language'}>
+          {languages.map((l) => <a href={l.href} lang={l.lang} hreflang={l.lang} aria-current={l.lang === lang ? 'true' : undefined}>{l.label}</a>)}
+        </nav>
+      </div>
     </div>
   </footer>
-</Base>
+</Directory>
+
+<style>
+  .x { max-width: 1120px; margin: 0 auto; padding-left: var(--pad); padding-right: var(--pad); box-sizing: border-box; }
+  .band { background: var(--surface); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  h2 { margin: 0; font-size: clamp(32px, 4.6vw, 52px); line-height: 1.02; font-weight: 800; font-stretch: 114%; letter-spacing: -0.03em; }
+  .eyebrow { margin: 0 0 12px; }
+  #players, #organisers { scroll-margin-top: 12px; }
+
+  /* Device frames around the real screenshots. */
+  .tablet { width: 100%; box-sizing: border-box; padding: 10px; border-radius: 24px; background: #0B0F14; box-shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.45); }
+  .phone { width: 100%; box-sizing: border-box; padding: 8px; border-radius: 32px; background: #0B0F14; box-shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.45); }
+  .tablet img, .phone img { display: block; width: 100%; height: auto; }
+  .tablet img { border-radius: 14px; }
+  .phone img { border-radius: 25px; }
+
+  .hero { padding-top: clamp(32px, 6vw, 72px); padding-bottom: clamp(40px, 6vw, 72px); display: flex; flex-wrap: wrap; gap: 40px; align-items: center; }
+  .hero-copy { flex: 999 1 480px; min-width: 0; display: flex; flex-direction: column; gap: 22px; }
+  h1 { font-size: clamp(48px, 8vw, 96px); line-height: 0.94; font-stretch: 118%; letter-spacing: -0.035em; }
+  .accent { color: var(--eyebrow); }
+  .lead { margin: 0; max-width: 540px; font-size: 19px; color: var(--body); }
+  .paths { display: flex; flex-wrap: wrap; gap: 10px; }
+  .path {
+    flex: 1 1 220px; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 76px;
+    box-sizing: border-box; padding: 14px 20px; border-radius: 18px; text-decoration: none; border: 1.5px solid var(--ink); color: var(--ink);
+  }
+  .path.primary { background: var(--hl-bg); color: var(--hl-fg); border-color: var(--hl-bg); }
+  .path:hover { color: inherit; filter: brightness(1.03); }
+  .path span { display: flex; flex-direction: column; line-height: 1.25; }
+  .path b { font-size: 18px; font-weight: 800; }
+  .path small { font-size: 14px; opacity: 0.8; }
+  .stores { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+  .stores a { display: inline-flex; align-items: center; min-height: 56px; }
+  .stores img.apple { height: 54px; width: auto; }
+  .stores img.google { height: 80px; width: auto; margin: -12px; }
+  .built { display: flex; flex-direction: column; gap: 10px; }
+  .built p { margin: 0; font-size: 14px; font-weight: 700; color: var(--muted); }
+  .built ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+  .built li { font-size: 13px; font-weight: 700; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line-strong); color: var(--body); }
+  .hero-art { flex: 1 1 380px; min-width: 0; position: relative; padding-bottom: 48px; }
+  .phone.overlap { position: absolute; right: -8px; bottom: 0; width: 34%; }
+
+  .split { display: flex; flex-wrap: wrap; gap: 48px; align-items: center; padding-top: clamp(48px, 7vw, 88px); padding-bottom: clamp(48px, 7vw, 88px); }
+  .phones { flex: 1 1 340px; min-width: 0; display: flex; justify-content: center; gap: 16px; align-items: flex-end; }
+  .phones .phone { width: 46%; max-width: 230px; }
+  .phones .phone.raised { margin-bottom: 40px; }
+  .copy { flex: 999 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 18px; }
+  .copy .eyebrow { margin-bottom: -6px; }
+  .ticks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 17px; color: var(--body); }
+  .ticks li { display: flex; gap: 10px; }
+  .ticks svg { flex: 0 0 auto; margin-top: 3px; color: var(--eyebrow); }
+  .find { margin-top: 6px; padding: 18px; border-radius: 18px; background: var(--bg); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
+  .find label { font-weight: 800; }
+  .find-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .find input {
+    flex: 999 1 220px; min-width: 0; height: 52px; box-sizing: border-box; padding: 0 16px; border-radius: 12px;
+    border: 1.5px solid var(--line-strong); background: var(--surface); color: var(--ink); font: inherit; font-size: 16px;
+  }
+  .find input:focus { outline: none; border-color: var(--eyebrow); }
+  .find input::-webkit-search-cancel-button { -webkit-appearance: none; }
+  .find button { flex: 1 1 auto; height: 52px; padding: 0 22px; border-radius: 12px; border: 0; background: var(--hl-bg); color: var(--hl-fg); font: inherit; font-weight: 800; cursor: pointer; }
+  .find p { margin: 0; font-size: 14px; color: var(--muted); }
+  .org { padding-bottom: 32px; }
+  .org-art { flex: 1 1 380px; min-width: 0; }
+  .help { margin: 0; font-size: 15px; color: var(--muted); }
+
+  .night { padding-top: 40px; padding-bottom: clamp(48px, 7vw, 88px); }
+  .sec-top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; margin-bottom: 24px; }
+  .arrow { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-weight: 700; }
+  .beats { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 12px; }
+  .beats > li { display: flex; flex-direction: column; gap: 14px; padding: 16px; border-radius: 20px; background: var(--surface); border: 1px solid var(--line); }
+  .beats .shot { height: 210px; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 14px; }
+  .phone-crop { display: flex; justify-content: center; align-items: flex-start; width: 100%; height: 100%; background: var(--row); border-radius: 14px; padding-top: 14px; box-sizing: border-box; overflow: hidden; }
+  .phone-crop .phone { width: 52%; }
+  .time { align-self: flex-start; font-size: 14px; font-weight: 800; padding: 3px 10px; border-radius: 999px; background: var(--chip-bg); color: var(--chip-fg); }
+  .beats h3 { margin: 0; font-size: 20px; font-weight: 800; }
+  .beats p { margin: 0; font-size: 15px; color: var(--body); }
+  .beats .done { background: var(--hl-bg); color: var(--hl-fg); border-color: var(--hl-bg); }
+  .beats .done .time { background: var(--hl-fg); color: var(--hl-bg); }
+  .beats .done p { color: inherit; }
+
+  .band > .x { padding-top: clamp(48px, 7vw, 88px); padding-bottom: clamp(48px, 7vw, 88px); }
+  .side { margin: 0; max-width: 360px; font-size: 15px; color: var(--muted); }
+  .plans { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 12px; }
+  .plan { padding: 22px; border-radius: 20px; display: flex; flex-direction: column; gap: 12px; background: var(--surface); color: var(--body); border: 1.5px solid var(--line); font-size: 15px; }
+  .plan b { font-size: 24px; font-weight: 800; font-stretch: 112%; color: var(--ink); }
+  .plan p { margin: 0; }
+  .plan.featured { background: var(--sel-bg); color: var(--sel-fg); border-color: var(--sel-bg); }
+  .plan.featured b { color: inherit; }
+
+  .setup { padding-top: clamp(48px, 7vw, 88px); padding-bottom: 40px; display: flex; flex-wrap: wrap; gap: 32px 48px; }
+  .setup-copy { flex: 1 1 320px; min-width: 0; }
+  .setup-copy .sub { margin: 16px 0 0; font-size: 17px; color: var(--body); }
+  .steps { flex: 999 1 460px; min-width: 0; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .steps li { display: flex; gap: 16px; align-items: flex-start; padding: 20px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); }
+  .steps .n { flex: 0 0 44px; height: 44px; border-radius: 999px; background: var(--hl-bg); color: var(--hl-fg); font-weight: 800; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+  .steps li > span:last-child { display: flex; flex-direction: column; gap: 4px; }
+  .steps b { font-size: 18px; font-weight: 800; }
+  .steps li > span:last-child > span { font-size: 15px; color: var(--body); }
+
+  .closing-wrap { padding-top: 32px; padding-bottom: 64px; }
+  .closing { background: var(--cta-bg); border-radius: 28px; padding: clamp(28px, 5vw, 56px); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 28px; }
+  .closing-copy { flex: 999 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+  .closing h2 { color: var(--cta-head); }
+  .closing p { margin: 0; max-width: 520px; font-size: 17px; color: var(--cta-body); }
+  /* On white in either theme, so cameras read it. */
+  .qr { flex: 0 0 auto; margin: 0; display: flex; align-items: center; gap: 16px; padding: 16px; border-radius: 18px; background: #FFFFFF; }
+  .qr .code { line-height: 0; }
+  .qr .code :global(svg) { width: 116px; height: 116px; display: block; }
+  .qr figcaption { max-width: 130px; font-size: 14px; color: #12261C; line-height: 1.35; }
+  .qr strong { display: block; }
+  @media (max-width: 640px) {
+    .qr { display: none; }
+  }
+
+  .home-foot { border-top: 1px solid var(--line); }
+  .foot-row { padding-top: 32px; padding-bottom: 40px; display: flex; flex-wrap: wrap; gap: 20px 40px; justify-content: space-between; align-items: flex-start; }
+  .foot-left { display: flex; flex-direction: column; gap: 14px; flex: 999 1 420px; min-width: 0; font-size: 13px; color: var(--muted); }
+  .foot-left nav { display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 14px; font-weight: 600; }
+  .foot-left nav a { color: var(--body); text-decoration: none; }
+  .foot-left nav a:hover { color: var(--link-hover); }
+  .foot-left p { margin: 0; }
+  .foot-left p a { color: var(--muted); }
+  .foot-right { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .social { width: 44px; height: 44px; border-radius: 999px; border: 1px solid var(--line-strong); display: flex; align-items: center; justify-content: center; color: var(--ink); }
+  .langs-foot { display: flex; gap: 6px; margin-left: 8px; }
+  .langs-foot a { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line-strong); text-decoration: none; color: var(--muted); font-size: 13px; }
+  .langs-foot a[aria-current='true'] { background: var(--chip-bg); color: var(--chip-fg); border-color: var(--chip-bg); font-weight: 700; }
+</style>
