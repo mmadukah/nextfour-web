@@ -7,7 +7,7 @@
 // pages are linked instead. The summary is written here from the facts,
 // never the stored description, which can name where the club was found.
 import Directory from '../../../layouts/Directory.astro';
-import AppCta from '../../../components/directory/AppCta.astro';
+import AppFeatures from '../../../components/directory/AppFeatures.astro';
 import NightLine from '../../../components/directory/NightLine.astro';
 import CourtArt from '../../../components/directory/CourtArt.astro';
 import VenueMap from '../../../components/directory/VenueMap.astro';
@@ -391,12 +391,8 @@ const crumbs = [
     </section>
   )}
 
-  <AppCta
-    heading={club.claimed ? `Join ${club.name} in the app.` : "See who's going before you go."}
-    text={club.claimed
-      ? "See who's going tonight, ask to join, and get your turn to pick on your phone. Find the club in the app after installing."
-      : 'Follow this club in the app for alerts about new sessions, and find other club nights near you.'}
-  />
+  <!-- An unclaimed club's page is often found by its own organiser, so its banner speaks to them. -->
+  <AppFeatures variant={club.claimed ? 'claimed' : 'unclaimed'} clubName={club.name} />
 
   <script>
     // Follow and Claim open a short explanation; both happen in the app.

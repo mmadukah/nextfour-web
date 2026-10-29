@@ -13,7 +13,7 @@
 // deletion link) instead of the directory's data notes, and `languages` puts
 // the English/Français pills beside the breadcrumb.
 import Base from './Base.astro';
-import AppCta from '../components/directory/AppCta.astro';
+import AppFeatures from '../components/directory/AppFeatures.astro';
 import ThemeToggle from '../components/ThemeToggle.astro';
 import LogoMark from '../components/LogoMark.astro';
 import '../styles/club-card.css';
@@ -25,7 +25,7 @@ interface Props {
   description: string;
   crumbs: Crumb[];
   jsonLd?: object[];
-  /** The closing "get the app" panel; pages with their own turn it off. */
+  /** The closing app block (AppFeatures, players' banner); pages with their own turn it off. */
   cta?: boolean;
   /** The header link marked as the current page. */
   current?: 'finder' | 'how';
@@ -258,7 +258,7 @@ const ld = [breadcrumbLd, ...jsonLd];
       )}
     </div>
     <slot />
-    {cta && <AppCta />}
+    {cta && <AppFeatures />}
   </main>
 
   <footer class="foot">

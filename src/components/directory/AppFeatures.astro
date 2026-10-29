@@ -1,0 +1,229 @@
+---
+// The app block at the foot of the finder, area and club pages
+// (REDESIGN-BRIEF, "App features block"): what the app does on club night,
+// in four tiles all on show at once (not a carousel), with the app banner
+// as a band across the bottom of the same card. Replaces the standalone
+// banner on these pages; How it works keeps its own.
+//
+// The tiles' words follow How it works, plans included, so they never
+// promise more than the app does. The illustrations are shapes in the theme
+// tokens with no names or numbers, so they make no claims either.
+interface Props {
+  /** players: finder and area pages; unclaimed and claimed: club pages. */
+  variant?: 'players' | 'unclaimed' | 'claimed';
+  clubName?: string;
+  /** The finder leaves out "Search all clubs": it is that page. */
+  search?: boolean;
+}
+const { variant = 'players', clubName = '', search = true } = Astro.props;
+
+const banner = {
+  players: {
+    heading: "See who's going before you go.",
+    body: 'Get the NextFour app to join a club night, or search every club by postcode, town or name.',
+    search,
+  },
+  unclaimed: {
+    heading: 'Run your club night on NextFour.',
+    body: 'A digital pegboard and a courtside board, free to start, with skill-based picking and King of the Court on Pro. Players can follow the club for new sessions.',
+    search,
+  },
+  claimed: {
+    heading: `Join ${clubName} in the app.`,
+    body: "See who's going tonight, ask to join, and get your turn to pick on your phone.",
+    search: false,
+  },
+}[variant];
+
+const ARROW = '<path d="M5 12h14M13 6l6 6-6 6"></path>';
+const TICK = '<path d="m5 12 5 5 9-10"></path>';
+---
+
+<section class="app" aria-labelledby="app-h">
+  <div class="features">
+    <div class="head">
+      <div>
+        <p class="eyebrow">The NextFour app</p>
+        <h2 id="app-h">What the app does on club night</h2>
+      </div>
+      <a class="how" href="/how-it-works.html">
+        How it works
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={ARROW} />
+      </a>
+    </div>
+    <ul class="tiles">
+      <li>
+        <div class="art" aria-hidden="true" style="align-items: flex-end">
+          <div class="phone">
+            <span class="pill">Your pick</span>
+            {[true, true, false, false].map((picked) => (
+              <span class="pick-row">
+                <span class:list={['dot', { on: picked }]}></span>
+                <span class="bar"></span>
+                {picked
+                  ? <span class="box on"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" set:html={TICK} /></span>
+                  : <span class="box"></span>}
+              </span>
+            ))}
+          </div>
+        </div>
+        <div class="copy">
+          <span class="badges"><span class="badge">Free</span></span>
+          <h3>Your turn to pick</h3>
+          <p>A digital pegboard on your phone. You get a nudge when it's your pick, and the queue keeps everyone's place.</p>
+        </div>
+        <a class="more" href="/how-it-works.html#picking">How picking works<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={ARROW} /></a>
+      </li>
+
+      <li>
+        <div class="art" aria-hidden="true">
+          <div class="court">
+            <span class="net"></span>
+            <span class="crown"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"></path></svg></span>
+            {[[26, 18], [22, 22]].map((bars) => (
+              <span class="side">
+                {bars.map((w) => <span class="player"><span class="head-dot"></span><span class="rating" style={`width: ${w}px`}></span></span>)}
+              </span>
+            ))}
+          </div>
+        </div>
+        <div class="copy">
+          <span class="badges"><span class="badge paid">Pro</span></span>
+          <h3>Even games</h3>
+          <p>Skill-based picking builds the most even game from whoever is waiting, and King of the Court keeps the winners on.</p>
+        </div>
+        <a class="more" href="/how-it-works.html#picking">Picking methods<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={ARROW} /></a>
+      </li>
+
+      <li>
+        <div class="art" aria-hidden="true" style="align-items: flex-end">
+          <div class="phone">
+            <span class="stat-row">
+              <span class="stat"><span class="label">Games</span><span class="value" style="width: 70%"></span></span>
+              <span class="stat"><span class="label">Win rate</span><span class="value" style="width: 55%"></span></span>
+            </span>
+            <span class="chart">
+              {[40, 65, 50, 85, 60, 100].map((h, i) => <span class:list={['col', { top: i === 5 }]} style={`height: ${h}%`}></span>)}
+            </span>
+            <span class="pick-row"><span class="dot dark"></span><span class="dot on overlap"></span><span class="bar"></span></span>
+          </div>
+        </div>
+        <div class="copy">
+          <span class="badges"><span class="badge">Free</span><span class="badge paid">More on Player</span></span>
+          <h3>Your stats</h3>
+          <p>Games played and win rate for everyone. The Player plan adds your full match history, best partners and toughest rivals.</p>
+        </div>
+        <a class="more" href="/how-it-works.html#scores">Scores and stats<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={ARROW} /></a>
+      </li>
+
+      <li>
+        <div class="art" aria-hidden="true">
+          <div class="tablet">
+            <span class="courts">
+              {[1, 2, 3].map(() => (
+                <span class="mini-court"><span class="lime-bar"></span><span class="four">{[1, 2, 3, 4].map(() => <span class="head-dot small"></span>)}</span></span>
+              ))}
+            </span>
+            <span class="next">
+              <span class="label">Next</span>
+              {[1, 2, 3, 4].map(() => <span class="pick-row tight"><span class="dot on tiny"></span><span class="bar thin"></span></span>)}
+            </span>
+          </div>
+        </div>
+        <div class="copy">
+          <span class="badges"><span class="badge">Free</span></span>
+          <h3>The board in the hall</h3>
+          <p>Any tablet becomes a courtside board showing every court, who's on, who's next and how long everyone has waited.</p>
+        </div>
+        <a class="more" href="/how-it-works.html#board">The courtside board<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={ARROW} /></a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="band">
+    <div class="band-copy">
+      <p class="band-head">{banner.heading}</p>
+      <p class="band-body">{banner.body}</p>
+    </div>
+    <div class="band-acts">
+      <a class="go" href="/get.html">Get the app</a>
+      {banner.search && <a class="ghost" href="/badminton.html">Search all clubs</a>}
+    </div>
+  </div>
+</section>
+
+<style>
+  .app { margin: 48px 0 56px; border-radius: 24px; overflow: hidden; border: 1px solid var(--line); background: var(--surface); }
+  .features { padding: clamp(20px, 4vw, 40px); }
+  .head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; margin-bottom: 24px; }
+  .head > div { min-width: 0; flex: 999 1 420px; }
+  .head .eyebrow { margin: 0 0 8px; }
+  h2 { margin: 0; font-size: clamp(26px, 3.6vw, 36px); line-height: 1.1; font-weight: 800; font-stretch: 110%; letter-spacing: -0.02em; }
+  .how, .more { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-weight: 700; }
+  .how { flex: 0 0 auto; font-size: 15px; }
+  .tiles { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 12px; }
+  .tiles > li { display: flex; flex-direction: column; gap: 12px; padding: 12px 12px 8px; border-radius: 18px; background: var(--bg); border: 1px solid var(--line); }
+  .copy { display: flex; flex-direction: column; gap: 6px; padding: 0 4px; flex: 1 1 auto; }
+  .copy h3 { margin: 0; font-size: 18px; font-weight: 800; }
+  .copy p { margin: 0; font-size: 15px; color: var(--body); }
+  .badges { display: flex; flex-wrap: wrap; gap: 6px; }
+  .badge { font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; background: var(--tag2-bg); color: var(--tag2-fg); }
+  .badge.paid { background: var(--tag-bg); color: var(--tag-fg); }
+  .more { padding: 0 4px; font-size: 14px; }
+
+  /* Illustrations: shapes only, in the theme's colours. */
+  .art { height: 156px; border-radius: 12px; background: var(--row); border: 1px solid var(--line); overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  .phone {
+    width: 134px; height: 136px; box-sizing: border-box; padding: 12px 10px 0; border-radius: 18px 18px 0 0;
+    background: var(--surface); border: 1.5px solid var(--line-strong); border-bottom: 0; display: flex; flex-direction: column; gap: 8px;
+  }
+  .pill { align-self: flex-start; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: var(--hl-bg); color: var(--hl-fg); }
+  .pick-row { display: flex; align-items: center; gap: 6px; }
+  .pick-row.tight { gap: 4px; }
+  .dot { width: 14px; height: 14px; border-radius: 999px; background: var(--seg-off); flex: none; }
+  .dot.on { background: var(--seg-on); }
+  .dot.dark { background: var(--chip-bg); }
+  .dot.overlap { margin-left: -10px; border: 1.5px solid var(--surface); box-sizing: border-box; }
+  .dot.tiny { width: 8px; height: 8px; }
+  .bar { flex: 1 1 auto; height: 6px; border-radius: 3px; background: var(--seg-off); }
+  .bar.thin { height: 5px; border-radius: 2px; }
+  .box { width: 14px; height: 14px; border-radius: 4px; border: 1.5px solid var(--line-strong); box-sizing: border-box; flex: none; display: flex; align-items: center; justify-content: center; }
+  .box.on { border: 0; background: var(--chip-bg); color: var(--chip-fg); }
+  .court { position: relative; width: 176px; height: 100px; box-sizing: border-box; border: 1.5px solid var(--line-strong); border-radius: 4px; background: var(--surface); display: flex; }
+  .net { position: absolute; left: 50%; top: -6px; bottom: -6px; width: 3px; margin-left: -1.5px; background: var(--hl-bg); border-radius: 2px; }
+  .crown { position: absolute; left: 10px; top: -14px; color: var(--eyebrow); }
+  .side { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+  .player { display: flex; align-items: center; gap: 5px; }
+  .head-dot { width: 20px; height: 20px; border-radius: 999px; background: var(--chip-bg); }
+  .head-dot.small { width: 10px; height: 10px; }
+  .rating { height: 6px; border-radius: 3px; background: var(--seg-on); }
+  .stat-row { display: flex; gap: 6px; }
+  .stat { flex: 1 1 0; padding: 6px; border-radius: 8px; background: var(--row); display: flex; flex-direction: column; gap: 4px; }
+  .stat .label, .next .label { font-size: 9px; font-weight: 700; color: var(--muted); }
+  .stat .value { height: 8px; border-radius: 3px; background: var(--ink); }
+  .chart { display: flex; align-items: flex-end; gap: 4px; height: 38px; padding: 0 2px; }
+  .col { flex: 1 1 0; border-radius: 2px; background: var(--seg-on); }
+  .col.top { background: var(--hl-bg); }
+  .tablet { width: 196px; height: 122px; box-sizing: border-box; padding: 8px; border-radius: 12px; background: var(--surface); border: 1.5px solid var(--line-strong); display: flex; gap: 6px; }
+  .courts { flex: 3 1 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
+  .mini-court { border-radius: 5px; background: var(--row); display: flex; flex-direction: column; gap: 5px; padding: 4px; }
+  .lime-bar { height: 5px; border-radius: 2px; background: var(--hl-bg); }
+  .four { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px; justify-items: center; padding-top: 4px; }
+  .next { flex: 2 1 0; display: flex; flex-direction: column; gap: 5px; padding: 2px 2px 0 4px; border-left: 1px solid var(--line); }
+  .next .label { font-weight: 800; }
+
+  /* The banner, a band across the bottom of the card. */
+  .band { background: var(--cta-bg); padding: clamp(24px, 4vw, 40px); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px 24px; }
+  .band-copy { flex: 999 1 420px; min-width: 0; }
+  .band-head { margin: 0; font-size: clamp(24px, 3.4vw, 34px); line-height: 1.1; font-weight: 800; font-stretch: 112%; letter-spacing: -0.02em; color: var(--cta-head); }
+  .band-body { margin: 10px 0 0; max-width: 560px; font-size: 16px; color: var(--cta-body); }
+  .band-acts { flex: 1 1 240px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: flex-end; }
+  .go, .ghost { display: inline-flex; align-items: center; min-height: 48px; box-sizing: border-box; border-radius: 999px; text-decoration: none; }
+  .go { padding: 0 24px; background: var(--cta-btn-bg); color: var(--cta-btn-fg); font-weight: 800; }
+  .ghost { padding: 0 22px; border: 1.5px solid var(--cta-btn2); color: var(--cta-btn2); font-weight: 700; }
+  .go:hover { color: var(--cta-btn-fg); opacity: 0.92; }
+  .ghost:hover { color: var(--cta-btn2); opacity: 0.85; }
+  @media (max-width: 640px) {
+    .band-acts { justify-content: flex-start; }
+  }
+</style>

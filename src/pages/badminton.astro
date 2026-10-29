@@ -8,7 +8,7 @@
 // reach every page without running any script: the country tabs only hide
 // the other countries once the script runs.
 import Directory from '../layouts/Directory.astro';
-import AppCta from '../components/directory/AppCta.astro';
+import AppFeatures from '../components/directory/AppFeatures.astro';
 import { getDirectory, weeklyNights, weeklyDropIns, TINTS as COURT_TINTS, type Area } from '../data/directory';
 
 const dir = await getDirectory();
@@ -273,7 +273,7 @@ const dropInCount = weeklyDropIns(dir.dropIns);
     )}
   </div>
 
-  <AppCta text="Get the NextFour app to join a club night and keep track of the clubs you play with." search={false} />
+  <AppFeatures search={false} />
 
   <script>
     /** A grouped session row: days, one-off date, days in words, time, duration, level bars, level words, other venue. */
