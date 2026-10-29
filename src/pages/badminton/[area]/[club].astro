@@ -13,7 +13,7 @@ import CourtArt from '../../../components/directory/CourtArt.astro';
 import VenueMap from '../../../components/directory/VenueMap.astro';
 import {
   getDirectory, clubDaysText, checkedText, shortDate, townOf, nearbyClubs, nextDate, sortedRows, dayRows,
-  addressLines, clubTint, clubTimeText, clubDaysShort, fitTitle, fitDescription, DAY_NAMES, SHORT_DAYS, WEEK_ORDER, type Club,
+  addressLines, clubTint, clubTimeText, clubDaysShort, fitTitle, fitDescription, slugify, DAY_NAMES, SHORT_DAYS, WEEK_ORDER, type Club,
 } from '../../../data/directory';
 
 export async function getStaticPaths() {
@@ -36,6 +36,12 @@ const pageUrl = new URL(club.url, site).href;
 
 const venues = [...new Map(club.nights.map((n) => [n.venue.name, n.venue])).values()];
 const otherVenues = venues.filter((v) => v.name !== club.venue.name);
+// Several venues: the map pins them all, every night says where it is, and
+// each venue has its own directions (one link to the first would send a
+// Thursday player to the Tuesday hall).
+const several = venues.length > 1;
+const pins = several ? venues.map((v) => ({ id: slugify(v.name), lat: v.lat, lng: v.lng, name: v.name })) : [];
+const directionsTo = (v: typeof club.venue) => `https://www.google.com/maps/dir/?api=1&destination=${v.lat},${v.lng}`;
 
 // Shortest form that still says what and where; "badminton" only once.
 const sayBadminton = /badminton/i.test(club.name) ? '' : 'badminton ';
@@ -62,7 +68,7 @@ const summary = [
 
 const rows = sortedRows(club);
 const playDays = new Set(rows.map((r) => r.day).filter((d) => d != null));
-const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${club.venue.lat},${club.venue.lng}`;
+const directionsUrl = directionsTo(club.venue);
 const [website, ...otherLinks] = club.links;
 const prices = [...new Set(club.nights.map((n) => n.price).filter(Boolean))];
 const costsPublished = Boolean(club.visitorPolicy || club.fees || prices.length);
@@ -193,6 +199,15 @@ const crumbs = [
     .venue-text h2 { margin: 0; }
     address { font-style: normal; font-size: 16px; line-height: 1.6; }
     address strong { display: block; font-size: 18px; }
+    .place { display: flex; flex-direction: column; gap: 8px; scroll-margin-top: 24px; }
+    .place + .place { padding-top: 14px; border-top: 1px solid var(--line); }
+    .place-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 18px; }
+    .place-acts .arrow-link { align-self: center; min-height: 44px; }
+    .show-on-map {
+      min-height: 44px; padding: 0; border: 0; background: none; color: var(--ink); font: inherit; font-weight: 700;
+      text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
+    }
+    .show-on-map:hover { color: var(--link-hover); }
     .arrow-link { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; font-weight: 700; min-height: 24px; }
 
     .claim { border: 2px solid var(--hl-bg); }
@@ -262,7 +277,7 @@ const crumbs = [
           </a>
         )}
         {otherLinks.map((l) => <a class="act soft" href={l.href} rel="noopener" target="_blank">{l.label}</a>)}
-        <a class="act" href={directionsUrl} rel="noopener" target="_blank">
+        <a class="act" href={several ? '#venue-h' : directionsUrl} {...(several ? {} : { rel: 'noopener', target: '_blank' })}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11 21 3l-8 18-2-8-8-2z"></path></svg>
           Directions
         </a>
@@ -277,7 +292,7 @@ const crumbs = [
     </div>
     <div class="art" style={`background: ${clubTint(club.id)}`}>
       <CourtArt width={240} />
-      <span>{club.venue.name}</span>
+      <span>{several ? `${venues.length} venues` : club.venue.name}</span>
     </div>
   </section>
 
@@ -291,7 +306,7 @@ const crumbs = [
           ))}
         </ol>
         <ul class="lines">
-          {dayRows(club).map((row) => <NightLine row={row} clubVenue={club.venue.name} detail clubTakesNewPlayers={club.takingNewPlayers} />)}
+          {dayRows(club).map((row) => <NightLine row={row} clubVenue={several ? '' : club.venue.name} detail clubTakesNewPlayers={club.takingNewPlayers} />)}
         </ul>
         <p class="note">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg>
@@ -333,20 +348,25 @@ const crumbs = [
 
       <section class="box venue" aria-labelledby="venue-h">
         <div class="map">
-          <VenueMap lat={club.venue.lat} lng={club.venue.lng} name={club.venue.name} />
+          <VenueMap lat={club.venue.lat} lng={club.venue.lng} name={club.venue.name} points={pins} />
         </div>
         <div class="venue-text">
           <h2 id="venue-h">{venues.length === 1 ? 'Venue' : 'Venues'}</h2>
           {venues.map((v) => (
-            <address>
-              <strong>{v.name}</strong>
-              {addressLines(v).map((line, i) => <>{i > 0 && <br />}{line}</>)}
-            </address>
+            <div class="place" id={several ? `venue-${slugify(v.name)}` : undefined}>
+              <address>
+                <strong>{v.name}</strong>
+                {addressLines(v).map((line, i) => <>{i > 0 && <br />}{line}</>)}
+              </address>
+              <div class="place-acts">
+                <a class="arrow-link" href={directionsTo(v)} rel="noopener" target="_blank">
+                  Get directions
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"></path></svg>
+                </a>
+                {several && <button type="button" class="show-on-map" data-focus={slugify(v.name)}>Show on map</button>}
+              </div>
+            </div>
           ))}
-          <a class="arrow-link" href={directionsUrl} rel="noopener" target="_blank">
-            Get directions
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"></path></svg>
-          </a>
         </div>
       </section>
     </div>

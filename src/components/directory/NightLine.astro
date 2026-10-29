@@ -4,7 +4,9 @@
 // day name on the club page), the time and how long, the level, and a pin
 // line when the venue is not the club's usual one. A night filter dims rows that don't include that day (.dim) and lights
 // its cell (.hl). Styles: src/styles/club-card.css, shared with the finder's
-// results, which build the same markup in its script.
+// results, which build the same markup in its script. On the club page the
+// venue is a link that shows it on the page's map (VenueMap, data-focus).
+import { slugify } from '../../data/directory';
 import LevelBars from './LevelBars.astro';
 import { durationText, timeRange, levelBars, daysPlural, DAY_LETTERS, WEEK_ORDER, type GroupRow } from '../../data/directory';
 
@@ -43,7 +45,9 @@ const membersOnly = detail && clubTakesNewPlayers && !n.takingNewPlayers;
   {elsewhere && (
     <span class="nl-note">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg>
-      At {elsewhere}
+      {detail
+        ? <a href={`#venue-${slugify(elsewhere)}`} data-focus={slugify(elsewhere)}>At {elsewhere}</a>
+        : <>At {elsewhere}</>}
     </span>
   )}
 </li>
