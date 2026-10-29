@@ -22,7 +22,8 @@ import { getDirectory } from '../data/directory';
 interface Crumb { name: string; href: string }
 interface Props {
   title: string;
-  description: string;
+  /** Optional: the legal pages have never had one. */
+  description?: string;
   crumbs: Crumb[];
   jsonLd?: object[];
   /** The closing app block (the compact one, players' banner); pages with their own turn it off. */

@@ -1,10 +1,11 @@
 ---
-// Layout for the prose / legal pages (privacy, terms, support, account
-// deletion). Renders a Markdown content entry inside the simple 720px column
-// styling these pages have always used.
-import Base from './Base.astro';
-import ThemeToggle from '../components/ThemeToggle.astro';
-import { getRelativeLocaleUrl, getAbsoluteLocaleUrl } from 'astro:i18n';
+// Layout for the prose pages (privacy, terms, support, account deletion), in
+// English and French: a Markdown content entry in the site's shared frame
+// (Directory.astro: header, breadcrumb with the language pills, footer), set
+// in a readable column. The Markdown is the page's words; nothing here adds
+// to them.
+import Directory from './Directory.astro';
+import { getRelativeLocaleUrl } from 'astro:i18n';
 
 interface Props {
   title: string;
@@ -13,134 +14,52 @@ interface Props {
   slug: string;
 }
 const { title, meta, lang, slug } = Astro.props;
-const fullTitle = lang === 'fr' ? `NextFour : ${title}` : `NextFour: ${title}`;
+const fr = lang === 'fr';
+const fullTitle = fr ? `NextFour : ${title}` : `NextFour: ${title}`;
 
-const locales = ['en', 'fr'] as const;
-const localeNames: Record<string, string> = { en: 'English', fr: 'Français' };
-
-// UI strings that aren't part of the Markdown body.
-const ui: Record<string, { home: string; crumbs: Record<string, string> }> = {
-  en: {
-    home: 'Home',
-    crumbs: {
-      'how-it-works': 'How it works',
-      privacy: 'Privacy Policy',
-      terms: 'Terms & Conditions',
-      support: 'Support',
-      'delete-account': 'Account & Data Deletion',
-    },
-  },
-  fr: {
-    home: 'Accueil',
-    crumbs: {
-      'how-it-works': 'Comment ça marche',
-      privacy: 'Politique de confidentialité',
-      terms: 'Conditions générales',
-      support: 'Assistance',
-      'delete-account': 'Suppression du compte et des données',
-    },
-  },
-};
-const t = ui[lang] ?? ui.en;
-const crumbSlugs = ['how-it-works', 'privacy', 'terms', 'support', 'delete-account'];
-
-// hreflang alternates for the <head>, including x-default -> English.
-const alternates = [
-  ...locales.map((loc) => ({ hreflang: loc, href: getAbsoluteLocaleUrl(loc, `${slug}.html`) })),
-  { hreflang: 'x-default', href: getAbsoluteLocaleUrl('en', `${slug}.html`) },
+const crumbs = [
+  { name: fr ? 'Accueil' : 'Home', href: fr ? '/fr/' : '/' },
+  { name: title, href: getRelativeLocaleUrl(lang, `${slug}.html`) },
+];
+const languages = [
+  { lang: 'en', label: 'English', href: getRelativeLocaleUrl('en', `${slug}.html`) },
+  { lang: 'fr', label: 'Français', href: getRelativeLocaleUrl('fr', `${slug}.html`) },
 ];
 ---
 
-<Base title={fullTitle} lang={lang}>
-  {alternates.map((alt) => (
-    <link slot="head" rel="alternate" hreflang={alt.hreflang} href={alt.href} />
-  ))}
-
-  <style slot="head" is:global>
-    /* The site's light and dark (ThemeToggle): system setting until chosen. */
-    :root {
-      color-scheme: light;
-      --bg: #f3f5ee;
-      --ink: #13221a;
-      --muted: #5b675e;
-      --link: #3d6b1f;
-      --border: #e1e6da;
-      --box: #ffffff;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme='light']) {
-        color-scheme: dark;
-        --bg: #0f1923;
-        --ink: #f2f5f7;
-        --muted: #9aa7b5;
-        --link: #c8f135;
-        --border: #2a3a4a;
-        --box: #192230;
-      }
-    }
-    :root[data-theme='dark'] {
-      color-scheme: dark;
-      --bg: #0f1923;
-      --ink: #f2f5f7;
-      --muted: #9aa7b5;
-      --link: #c8f135;
-      --border: #2a3a4a;
-      --box: #192230;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      max-width: 720px;
-      margin: 2rem auto;
-      padding: 0 1.25rem;
-      line-height: 1.6;
-      color: var(--ink);
-      background: var(--bg);
-    }
-    a { color: var(--link); }
-    h1 { font-size: 1.75rem; margin-bottom: 0.25rem; }
-    h2 { font-size: 1.2rem; margin-top: 2rem; }
-    .meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 2rem; }
-    ol, ul { padding-left: 1.25rem; }
-    code { background: rgba(127,127,127,0.15); padding: 0 0.25rem; border-radius: 3px; }
-    .box {
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 1rem 1.25rem;
-      margin: 1.5rem 0;
-      background: var(--box);
-    }
-    .faq dt { font-weight: 600; margin-top: 1.25rem; }
-    .faq dd { margin: 0.25rem 0 0; padding-left: 0; }
-    .langbar { display: flex; gap: 0.75rem; justify-content: flex-end; align-items: center; font-size: 0.85rem; margin-bottom: 1.5rem; }
-    .langbar a { text-decoration: none; opacity: 0.7; }
-    .langbar a[aria-current="true"] { font-weight: 700; opacity: 1; }
-    nav.crumbs { margin-top: 2.5rem; font-size: 0.9rem; }
-    nav.crumbs a { margin-right: 1rem; }
-    footer { margin-top: 3rem; font-size: 0.85rem; color: var(--muted); }
+<Directory title={fullTitle} crumbs={crumbs} cta={false} lang={fr ? 'fr' : 'en'} footer="site" languages={languages}>
+  <style>
+    .page { padding: 28px 0 56px; max-width: 720px; }
+    .page .eyebrow { margin: 0 0 10px; }
+    h1 { font-size: clamp(34px, 5vw, 52px); line-height: 1.05; font-stretch: 112%; }
+    .meta { margin: 14px 0 0; font-size: 14px; color: var(--muted); }
+    /* The Markdown's own elements. */
+    .prose { margin-top: 32px; font-size: 16px; line-height: 1.65; color: var(--body); }
+    .prose :global(h2) { margin: 40px 0 12px; font-size: 24px; line-height: 1.2; font-weight: 800; font-stretch: 106%; letter-spacing: -0.01em; color: var(--ink); }
+    .prose :global(h3) { margin: 28px 0 8px; font-size: 18px; font-weight: 800; color: var(--ink); }
+    .prose :global(p) { margin: 0 0 14px; }
+    .prose :global(ul), .prose :global(ol) { margin: 0 0 14px; padding-left: 22px; }
+    .prose :global(li) { margin: 0 0 6px; }
+    .prose :global(strong) { color: var(--ink); }
+    .prose :global(a) { color: var(--ink); text-decoration-color: var(--eyebrow); text-underline-offset: 2px; }
+    .prose :global(a:hover) { color: var(--link-hover); }
+    .prose :global(code) { background: var(--row); padding: 1px 5px; border-radius: 4px; font-size: 0.92em; }
+    .prose :global(table) { width: 100%; border-collapse: collapse; margin: 0 0 16px; font-size: 15px; }
+    .prose :global(th), .prose :global(td) { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    .prose :global(th) { color: var(--ink); font-weight: 700; }
+    /* Callouts and question lists that support and account deletion write as HTML. */
+    .prose :global(.box) { margin: 24px 0; padding: 18px 20px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); }
+    .prose :global(.box) :global(> :last-child) { margin-bottom: 0; }
+    .prose :global(.faq dt) { margin-top: 20px; font-weight: 700; color: var(--ink); }
+    .prose :global(.faq dd) { margin: 4px 0 0; padding: 0; }
   </style>
 
-  <nav class="langbar" aria-label="Language">
-    {locales.map((loc) => (
-      <a
-        href={getRelativeLocaleUrl(loc, `${slug}.html`)}
-        aria-current={loc === lang ? 'true' : undefined}
-        hreflang={loc}
-      >{localeNames[loc]}</a>
-    ))}
-    <ThemeToggle />
-  </nav>
-
-  <h1>{fullTitle}</h1>
-  <p class="meta">{meta}</p>
-
-  <slot />
-
-  <nav class="crumbs">
-    <a href={lang === 'en' ? '/' : `/${lang}/`}>{t.home}</a>
-    {crumbSlugs.map((s) => (
-      <a href={getRelativeLocaleUrl(lang, `${s}.html`)}>{t.crumbs[s]}</a>
-    ))}
-  </nav>
-
-  <footer>&copy; 2026 NextFour. All rights reserved.</footer>
-</Base>
+  <article class="page">
+    <p class="eyebrow">NextFour</p>
+    <h1>{title}</h1>
+    <p class="meta">{meta}</p>
+    <div class="prose">
+      <slot />
+    </div>
+  </article>
+</Directory>
