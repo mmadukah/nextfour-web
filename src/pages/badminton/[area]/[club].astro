@@ -13,7 +13,7 @@ import CourtArt from '../../../components/directory/CourtArt.astro';
 import VenueMap from '../../../components/directory/VenueMap.astro';
 import {
   getDirectory, clubDaysText, checkedText, shortDate, townOf, nearbyClubs, nextDate, sortedRows, dayRows,
-  addressLines, clubTint, clubTimeText, clubDaysShort, DAY_NAMES, SHORT_DAYS, WEEK_ORDER, type Club,
+  addressLines, clubTint, clubTimeText, clubDaysShort, fitTitle, fitDescription, DAY_NAMES, SHORT_DAYS, WEEK_ORDER, type Club,
 } from '../../../data/directory';
 
 export async function getStaticPaths() {
@@ -37,12 +37,21 @@ const pageUrl = new URL(club.url, site).href;
 const venues = [...new Map(club.nights.map((n) => [n.venue.name, n.venue])).values()];
 const otherVenues = venues.filter((v) => v.name !== club.venue.name);
 
-const title = `${club.name}, ${town} | Badminton club nights and times`;
-const description = [
+// Shortest form that still says what and where; "badminton" only once.
+const sayBadminton = /badminton/i.test(club.name) ? '' : 'badminton ';
+const title = fitTitle([
+  `${club.name}, ${town} | Badminton club nights and times`,
+  `${club.name}, ${town}: ${sayBadminton}club nights and times`,
+  `${club.name}, ${town}: ${sayBadminton}nights and times`,
+  `${club.name}: ${sayBadminton}club nights and times`,
+  `${club.name}, ${town}`,
+  club.name,
+]);
+const description = fitDescription([
   `${club.name} plays badminton at ${club.venue.name}${days ? ` on ${days}` : ''}.`,
   'Times, levels, visitor terms and how to join.',
   checked ? `Checked ${checked}.` : '',
-].filter(Boolean).join(' ');
+]);
 
 const summary = [
   `${club.name} is a badminton club in ${club.areaName}.`,

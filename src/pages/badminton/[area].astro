@@ -12,7 +12,7 @@ import ClubCard from '../../components/directory/ClubCard.astro';
 import DropInCard from '../../components/directory/DropInCard.astro';
 import {
   getDirectory, nearbyAreas, weeklyNights, nightsPerDay, newestCheck, checkedText, dropInsPerDay, weeklyDropIns,
-  nextDate, DAY_NAMES, SHORT_DAYS, WEEK_ORDER, type Area,
+  nextDate, fitTitle, fitDescription, DAY_NAMES, SHORT_DAYS, WEEK_ORDER, type Area,
 } from '../../data/directory';
 
 export async function getStaticPaths() {
@@ -38,16 +38,23 @@ const checked = checkedText(newest);
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
-const title = area.clubs.length
-  ? `Badminton in ${area.name}: ${area.clubs.length} clubs and club nights | NextFour`
-  : `Badminton in ${area.name}: drop-in sessions | NextFour`;
-const description = [
-  `Where to play badminton in ${area.name}:`,
+const title = fitTitle(area.clubs.length
+  ? [
+    `Badminton in ${area.name}: ${area.clubs.length} clubs and club nights | NextFour`,
+    `Badminton in ${area.name}: ${area.clubs.length} clubs | NextFour`,
+    `Badminton in ${area.name} | NextFour`,
+    `Badminton in ${area.name}`,
+  ]
+  : [`Badminton in ${area.name}: drop-in sessions | NextFour`, `Badminton in ${area.name} | NextFour`, `Badminton in ${area.name}`]);
+const what = [
   area.clubs.length ? `${plural(area.clubs.length, 'club')} and ${plural(nights, 'club night')} a week` : '',
-  area.clubs.length && dropIns ? 'plus' : '',
   dropIns ? `${plural(dropIns, 'drop-in session')} you can book` : '',
-  `with days, times and venues.${checked ? ` Updated ${checked}.` : ''}`,
-].filter(Boolean).join(' ').replace(' with', ', with');
+].filter(Boolean).join(', plus ');
+const description = fitDescription([
+  `Where to play badminton in ${area.name}: ${what}.`,
+  'Days, times, venues and levels.',
+  checked ? `Updated ${checked}.` : '',
+]);
 
 const listLd = {
   '@context': 'https://schema.org',

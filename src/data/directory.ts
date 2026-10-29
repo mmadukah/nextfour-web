@@ -714,3 +714,31 @@ export function dropInsPerDay(venues: DropInVenue[]): number[] {
 export function weeklyDropIns(venues: DropInVenue[]): number {
   return venues.reduce((t, v) => t + v.sessions.reduce((u, s) => u + Math.max(s.night.days.length, 1), 0), 0);
 }
+
+// ---------------------------------------------------------------------------
+// Search result fitting
+// ---------------------------------------------------------------------------
+
+/** Google shows about this much of a title, and of a description. */
+const TITLE_MAX = 65;
+const DESCRIPTION_MAX = 160;
+
+/** The first title that fits, longest and most useful first; the last one regardless. */
+export function fitTitle(candidates: string[]): string {
+  return candidates.find((t) => t.length <= TITLE_MAX) ?? candidates[candidates.length - 1];
+}
+
+/**
+ * Sentences joined until the next would run past what Google shows; the
+ * first always stays, cut at a word with an ellipsis if it alone is too long.
+ */
+export function fitDescription(sentences: string[]): string {
+  const parts = sentences.filter(Boolean);
+  let out = parts[0] ?? '';
+  if (out.length > DESCRIPTION_MAX) return `${out.slice(0, DESCRIPTION_MAX - 1).replace(/\s+\S*$/, '')}…`;
+  for (const s of parts.slice(1)) {
+    if (`${out} ${s}`.length > DESCRIPTION_MAX) break;
+    out = `${out} ${s}`;
+  }
+  return out;
+}
