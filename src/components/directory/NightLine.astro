@@ -1,15 +1,16 @@
 ---
-// One session on one weekday: the day label, the time and how long, the
-// level, and where it is when that differs from the club's usual venue. A
-// night filter dims the rows on other days (.dim) and lights the day label of
-// the ones that match (.hl). Styles: src/styles/club-card.css, shared with the
-// finder's results, which build the same markup in its script.
+// One row of sessions that share a time, level and venue: a 7-day strip of
+// the days they run (a dated one-off shows its date instead), the time and
+// how long, the level, and a pin line when the venue is not the club's usual
+// one. A night filter dims rows that don't include that day (.dim) and lights
+// its cell (.hl). Styles: src/styles/club-card.css, shared with the finder's
+// results, which build the same markup in its script.
 import LevelBars from './LevelBars.astro';
-import { durationText, timeRange, levelBars, type NightRow } from '../../data/directory';
+import { durationText, timeRange, levelBars, daysPlural, DAY_LETTERS, WEEK_ORDER, type GroupRow } from '../../data/directory';
 
 interface Props {
-  row: NightRow;
-  /** The club's usual venue; a night elsewhere names its own. */
+  row: GroupRow;
+  /** The club's usual venue; a row elsewhere names its own. */
   clubVenue: string;
   /** Price and membership notes, on the club page. */
   detail?: boolean;
@@ -18,18 +19,31 @@ interface Props {
 const { row, clubVenue, detail = false, clubTakesNewPlayers = true } = Astro.props;
 const n = row.night;
 const duration = durationText(n);
-const extras = [n.venue.name !== clubVenue ? n.venue.name : null, detail ? n.price : null].filter(Boolean);
+const elsewhere = n.venue.name !== clubVenue ? n.venue.name : null;
+const price = detail ? n.price : null;
 const membersOnly = detail && clubTakesNewPlayers && !n.takingNewPlayers;
 ---
 
-<li class="night-line" data-day={row.day ?? ''}>
-  <span class="nl-day">{row.label}</span>
+<li class="night-line" data-days={row.days.join(',')}>
+  {row.oneOff
+    ? <span class="nl-day">{row.oneOff}</span>
+    : (
+      <span class="day-strip" role="img" aria-label={daysPlural(row.days)}>
+        {WEEK_ORDER.map((d) => <span class:list={['ds-cell', { on: row.days.includes(d) }]} data-d={d} aria-hidden="true">{DAY_LETTERS[d]}</span>)}
+      </span>
+    )}
   <span class="nl-time"><b>{timeRange(n)}</b>{duration && <small>{duration}</small>}</span>
   <LevelBars range={levelBars(n)} label={n.levels} />
-  {(extras.length > 0 || membersOnly) && (
+  {(price || membersOnly) && (
     <span class="nl-extra">
-      {extras.join(' · ')}
+      {price}
       {membersOnly && <span class="tag alert">Members only</span>}
+    </span>
+  )}
+  {elsewhere && (
+    <span class="nl-note">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg>
+      At {elsewhere}
     </span>
   )}
 </li>

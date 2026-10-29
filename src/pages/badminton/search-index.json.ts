@@ -2,7 +2,7 @@
 // browser. The same facts the pages show, cut down to what a result needs;
 // prices and visitor terms stay on the club pages.
 import type { APIRoute } from 'astro';
-import { getDirectory, tintIndex, sortedRows, timeRange, durationText, levelBars } from '../../data/directory';
+import { getDirectory, tintIndex, groupedRows, sessionCountText, daysPlural, timeRange, durationText, levelBars } from '../../data/directory';
 
 export const GET: APIRoute = async () => {
   const dir = await getDirectory();
@@ -21,13 +21,15 @@ export const GET: APIRoute = async () => {
     // Visitor terms listed; the card's court tint, as an index into TINTS.
     t: c.visitorPolicy ? 1 : 0,
     p: tintIndex(c.id),
-    // The card's session rows, as the area pages draw them: day number (null
-    // for an undated one-off), day label, time, duration, level bars, level
-    // words, and the venue when it is not the club's usual one.
-    s: sortedRows(c).map((r) => [
-      r.day, r.label, timeRange(r.night), durationText(r.night), levelBars(r.night), r.night.levels,
+    // The card's grouped session rows, as the area pages draw them: days
+    // (Monday first), a one-off's date label, the strip's text alternative,
+    // time, duration, level bars, level words, and the venue when it is not
+    // the club's usual one.
+    s: groupedRows(c).map((r) => [
+      r.days, r.oneOff, daysPlural(r.days), timeRange(r.night), durationText(r.night), levelBars(r.night), r.night.levels,
       r.night.venue.name !== c.venue.name ? r.night.venue.name : null,
     ]),
+    k: sessionCountText(c),
   }));
   return new Response(JSON.stringify(rows), {
     headers: { 'Content-Type': 'application/json' },

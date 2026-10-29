@@ -476,3 +476,60 @@ export function clubDaysShort(club: Club): string {
   if (days.length === 1) return `${DAY_NAMES[days[0]]}s`;
   return listText(days.map((d) => SHORT_DAYS[d]));
 }
+
+// ---------------------------------------------------------------------------
+// Grouped session rows (REDESIGN-BRIEF, "Grouping sessions")
+// ---------------------------------------------------------------------------
+
+/**
+ * One row for sessions that differ only in their day: same start, end, level
+ * and venue (and price and membership rule, so a merged row never shows the
+ * wrong price). A one-off keeps its own row, labelled with its date.
+ */
+export interface GroupRow {
+  /** 0 Sunday .. 6 Saturday, Monday first; a dated one-off has its weekday. */
+  days: number[];
+  /** A one-off's date ("Sat 8 Nov"); null for weekly rows. */
+  oneOff: string | null;
+  night: Night;
+}
+
+export const DAY_LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const mondayFirst = (d: number) => (d + 6) % 7;
+
+export function groupedRows(club: Club): GroupRow[] {
+  const rows: GroupRow[] = [];
+  const byKey = new Map<string, GroupRow>();
+  for (const r of nightRows(club)) {
+    const n = r.night;
+    if (n.days.length === 0) {
+      rows.push({ days: r.day == null ? [] : [r.day], oneOff: r.label, night: n });
+      continue;
+    }
+    const key = [n.start, n.end ?? '', n.levels, n.venue.name, n.price ?? '', n.takingNewPlayers].join('|');
+    let row = byKey.get(key);
+    if (!row) {
+      row = { days: [], oneOff: null, night: n };
+      byKey.set(key, row);
+      rows.push(row);
+    }
+    if (r.day != null && !row.days.includes(r.day)) row.days.push(r.day);
+  }
+  for (const row of rows) row.days.sort((a, b) => mondayFirst(a) - mondayFirst(b));
+  // By first day, then start time; one-offs after the weekly rows.
+  const rank = (row: GroupRow) => (row.oneOff || row.days.length === 0 ? 7 : mondayFirst(row.days[0]));
+  return rows.sort((a, b) => rank(a) - rank(b) || a.night.start.localeCompare(b.night.start));
+}
+
+/** "Mondays and Wednesdays": the day strip's text alternative. */
+export function daysPlural(days: number[]): string {
+  return listText(days.map((d) => `${DAY_NAMES[d]}s`));
+}
+
+/** "8 sessions a week, 6 nights", for clubs with three or more weekly sessions; else null. */
+export function sessionCountText(club: Club): string | null {
+  const rows = nightRows(club).filter((r) => r.night.days.length > 0);
+  if (rows.length < 3) return null;
+  const nights = new Set(rows.map((r) => r.day)).size;
+  return `${rows.length} sessions a week, ${nights} night${nights === 1 ? '' : 's'}`;
+}

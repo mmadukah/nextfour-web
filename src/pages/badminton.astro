@@ -262,9 +262,11 @@ const LEVELS = [['', 'Any level'], ['1', 'Beginner'], ['2', 'Intermediate'], ['3
   <AppCta text="Get the NextFour app to join a club night and keep track of the clubs you play with." search={false} />
 
   <script>
-    /** A session row: day, label, time, duration, level bars, level words, other venue. */
-    type Line = [number | null, string, string, string | null, [number, number], string, string | null];
-    type Row = { n: string; u: string; a: string; v: string; lat: number; lng: number; d: number[]; l: [number, number]; o: number; x: number; t: number; p: number; s: Line[] };
+    /** A grouped session row: days, one-off date, days in words, time, duration, level bars, level words, other venue. */
+    type Line = [number[], string | null, string, string, string | null, [number, number], string, string | null];
+    type Row = { n: string; u: string; a: string; v: string; lat: number; lng: number; d: number[]; l: [number, number]; o: number; x: number; t: number; p: number; s: Line[]; k: string | null };
+    const WEEK = [1, 2, 3, 4, 5, 6, 0];
+    const LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
     const POSTCODE = /^([A-Z]{1,2}\d[A-Z\d]?)(\s*\d[A-Z]{2})?$/i;
     const RADIUS_KM = 25;
 
@@ -350,17 +352,25 @@ const LEVELS = [['', 'Any level'], ['1', 'Beginner'], ['2', 'Intermediate'], ['3
         .map(([x1, y1, x2, y2]) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" ${COURT_LINE}></line>`).join('')}
       <line x1="80" y1="8" x2="80" y2="112" stroke="#C8F135" stroke-width="2.4"></line>
     </svg>`;
+    const PIN_SMALL = PIN.replace(/width="16" height="16"/, 'width="14" height="14"');
     const ARROW = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>';
 
-    /** One session row, as NightLine.astro draws it; a picked night dims the others. */
-    function line([day, label, time, duration, bars, levels, venue]: Line) {
-      const state = filter.day === '' ? '' : String(day) === filter.day ? ' hl' : ' dim';
+    /** One grouped row, as NightLine.astro draws it; a picked night dims rows without it and lights its cell. */
+    function line([days, oneOff, daysText, time, duration, bars, levels, venue]: Line) {
+      const picked = filter.day === '' ? null : Number(filter.day);
+      const state = picked == null ? '' : days.includes(picked) ? ' hl' : ' dim';
+      const strip = oneOff
+        ? `<span class="nl-day">${esc(oneOff)}</span>`
+        : `<span class="day-strip" role="img" aria-label="${esc(daysText)}">${WEEK.map((d) => {
+          const on = days.includes(d);
+          return `<span class="ds-cell${on ? ' on' : ''}${on && d === picked ? ' hl' : ''}" aria-hidden="true">${LETTERS[d]}</span>`;
+        }).join('')}</span>`;
       const segs = [1, 2, 3].map((b) => `<i class="${b >= bars[0] && b <= bars[1] ? 'on' : ''}"></i>`).join('');
       return `<li class="night-line${state}">
-        <span class="nl-day">${esc(label)}</span>
+        ${strip}
         <span class="nl-time"><b>${esc(time)}</b>${duration ? `<small>${esc(duration)}</small>` : ''}</span>
         <span class="nl-level"><span class="nl-segs" aria-hidden="true">${segs}</span><span class="nl-level-text">${esc(levels)}</span></span>
-        ${venue ? `<span class="nl-extra">${esc(venue)}</span>` : ''}
+        ${venue ? `<span class="nl-note">${PIN_SMALL}At ${esc(venue)}</span>` : ''}
       </li>`;
     }
 
@@ -373,6 +383,7 @@ const LEVELS = [['', 'Any level'], ['1', 'Beginner'], ['2', 'Intermediate'], ['3
             <div class="cc-who">
               <h3 class="cc-name"><a href="${esc(r.u)}">${esc(r.n)}</a></h3>
               <p class="cc-venue">${PIN}${esc(r.v)}, ${esc(r.a)}</p>
+              ${r.k ? `<p class="cc-count">${esc(r.k)}</p>` : ''}
             </div>
             <div class="cc-tags">
               ${dist != null ? `<span class="tag">${dist < 1 ? 'Under 1' : Math.round(dist)} km away</span>` : ''}

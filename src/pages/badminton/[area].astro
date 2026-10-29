@@ -177,9 +177,10 @@ const allHeading = `${plural(area.clubs.length, 'club')}, ${plural(nights, 'nigh
         c.hidden = !on;
         if (on) shown++;
         c.querySelectorAll('.night-line').forEach((l) => {
-          const match = day === '' || l.dataset.day === day;
+          const match = day === '' || (l.dataset.days ?? '').split(',').includes(day);
           l.classList.toggle('dim', !match);
           l.classList.toggle('hl', match && day !== '');
+          l.querySelectorAll('.ds-cell').forEach((cell) => cell.classList.toggle('hl', cell.dataset.d === day));
         });
       });
       const name = day === '' ? '' : dayNames[Number(day)];

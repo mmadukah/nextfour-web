@@ -6,12 +6,13 @@
 // src/styles/club-card.css.
 import NightLine from './NightLine.astro';
 import CourtArt from './CourtArt.astro';
-import { clubTint, sortedRows, type Club } from '../../data/directory';
+import { clubTint, groupedRows, sessionCountText, type Club } from '../../data/directory';
 
 interface Props { club: Club }
 const { club } = Astro.props;
-const rows = sortedRows(club);
-const days = [...new Set(rows.map((r) => r.day).filter((d) => d != null))];
+const rows = groupedRows(club);
+const days = [...new Set(rows.flatMap((r) => r.days))];
+const count = sessionCountText(club);
 ---
 
 <article class="club-card" data-days={days.join(',')}>
@@ -26,6 +27,7 @@ const days = [...new Set(rows.map((r) => r.day).filter((d) => d != null))];
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg>
           {club.venue.name}
         </p>
+        {count && <p class="cc-count">{count}</p>}
       </div>
       <div class="cc-tags">
         {club.claimed && <span class="tag lime">Runs on NextFour</span>}

@@ -13,6 +13,7 @@
 .cc-name { margin: 0; font-size: 22px; font-weight: 800; font-stretch: 104%; line-height: 1.2; }
 .cc-name a { text-decoration: none; }
 .cc-venue { margin: 6px 0 0; display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 15px; }
+.cc-count { margin: 8px 0 0; font-size: 14px; font-weight: 700; color: var(--eyebrow); }
 .cc-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .cc-lines { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .cc-more { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 15px; min-height: 24px; }
@@ -27,7 +28,16 @@
   text-align: center; background: var(--chip-bg); color: var(--chip-fg); white-space: nowrap;
 }
 .night-line.hl .nl-day { background: var(--hl-bg); color: var(--hl-fg); }
-.nl-time { flex: 1 1 180px; display: flex; align-items: baseline; gap: 8px; font-variant-numeric: tabular-nums; }
+/* The days a row runs: filled cells play, outlined ones don't; the filtered day turns lime. */
+.day-strip { flex: 0 0 auto; display: flex; gap: 3px; }
+.ds-cell {
+  width: 26px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; border: 1px solid var(--line); color: var(--empty-day); box-sizing: border-box;
+}
+.ds-cell.on { background: var(--chip-bg); color: var(--chip-fg); border-color: var(--chip-bg); }
+.ds-cell.on.hl { background: var(--hl-bg); color: var(--hl-fg); border-color: var(--hl-bg); }
+.nl-note { flex: 1 1 100%; display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.nl-time { flex: 1 1 150px; display: flex; align-items: baseline; gap: 8px; font-variant-numeric: tabular-nums; }
 .nl-time b { font-size: 17px; font-weight: 700; white-space: nowrap; }
 .nl-time small { font-size: 13px; color: var(--muted); white-space: nowrap; }
 .nl-level { flex: 1 1 220px; display: flex; align-items: center; gap: 10px; }
