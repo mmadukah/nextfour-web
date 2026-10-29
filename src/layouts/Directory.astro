@@ -1,0 +1,173 @@
+---
+// Layout for the club directory (/badminton.html and everything under
+// /badminton/). The landing page's brand kit: navy, lime, Montserrat
+// headings, Nunito Sans body, both self-hosted.
+//
+// Every page passes its breadcrumb trail; it is drawn at the top and emitted
+// as schema.org BreadcrumbList, next to whatever JSON-LD the page supplies.
+import Base from './Base.astro';
+
+interface Crumb { name: string; href: string }
+interface Props {
+  title: string;
+  description: string;
+  crumbs: Crumb[];
+  jsonLd?: object[];
+}
+const { title, description, crumbs, jsonLd = [] } = Astro.props;
+
+const site = Astro.site!;
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: crumbs.map((c, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: c.name,
+    item: new URL(c.href, site).href,
+  })),
+};
+const ld = [breadcrumbLd, ...jsonLd];
+---
+
+<Base title={title} description={description}>
+  {ld.map((obj) => (
+    <script slot="head" type="application/ld+json" set:html={JSON.stringify(obj)} />
+  ))}
+  <style slot="head" is:global>
+    @font-face {
+      font-family: 'Montserrat';
+      font-style: normal;
+      font-weight: 800 900;
+      font-display: swap;
+      src: url(/fonts/montserrat-latin.woff2) format('woff2');
+    }
+    @font-face {
+      font-family: 'Nunito Sans';
+      font-style: normal;
+      font-weight: 400 700;
+      font-display: swap;
+      src: url(/fonts/nunito-sans-latin.woff2) format('woff2');
+    }
+    :root {
+      color-scheme: dark;
+      --accent: #c8f135;
+      --on-accent: #0f1923;
+      --ink: #f2f5f7;
+      --muted: #9aa7b5;
+      --bg: #0f1923;
+      --card: #192230;
+      --border: #2a3a4a;
+      --head: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --body: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--body);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 0 16px; }
+    header.top {
+      border-bottom: 1px solid var(--border);
+    }
+    header.top .wrap {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; height: 60px;
+    }
+    .brand {
+      font-family: var(--head); font-weight: 900; font-size: 1.2rem;
+      color: var(--ink); text-decoration: none; letter-spacing: -0.01em;
+    }
+    .brand span { color: var(--accent); }
+    header.top nav a {
+      color: var(--muted); text-decoration: none; font-weight: 700; font-size: 0.95rem;
+      margin-left: 18px;
+    }
+    header.top nav a:hover { color: var(--ink); }
+    nav.crumbs { font-size: 0.85rem; color: var(--muted); margin: 20px 0 8px; }
+    nav.crumbs ol { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+    nav.crumbs li:not(:last-child)::after { content: '›'; margin-left: 6px; }
+    nav.crumbs a { color: var(--muted); text-decoration: none; }
+    nav.crumbs a:hover { color: var(--ink); text-decoration: underline; }
+    h1 {
+      font-family: var(--head); font-weight: 900; line-height: 1.1;
+      font-size: clamp(1.8rem, 5vw, 2.6rem); margin: 8px 0 12px; letter-spacing: -0.02em;
+    }
+    h2 { font-family: var(--head); font-weight: 800; font-size: 1.25rem; margin: 36px 0 12px; }
+    .lead { color: var(--muted); font-size: 1.08rem; max-width: 46rem; margin: 0 0 8px; }
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 16px 18px;
+    }
+    .chip {
+      display: inline-block; font-size: 0.78rem; font-weight: 700; border-radius: 999px;
+      padding: 2px 10px; border: 1px solid var(--border); color: var(--muted);
+    }
+    .chip.lime { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+    .chip.warn { color: #ffb4a8; border-color: #6b3a35; }
+    .btn {
+      display: inline-block; text-decoration: none; font-weight: 800; border-radius: 10px;
+      padding: 11px 18px; border: 1px solid var(--border); color: var(--ink); background: var(--card);
+    }
+    .btn.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+    .muted { color: var(--muted); }
+    .small { font-size: 0.88rem; }
+    footer.foot {
+      border-top: 1px solid var(--border); margin-top: 56px; padding: 24px 0 40px;
+      color: var(--muted); font-size: 0.85rem;
+    }
+    footer.foot a { color: var(--muted); }
+    footer.foot nav a { margin-right: 16px; }
+    footer.foot p { margin: 10px 0 0; }
+    @media (max-width: 560px) {
+      header.top nav a.hide-sm { display: none; }
+    }
+  </style>
+
+  <header class="top">
+    <div class="wrap">
+      <a class="brand" href="/">Next<span>Four</span></a>
+      <nav aria-label="Main">
+        <a href="/badminton.html">Find badminton</a>
+        <a class="hide-sm" href="/how-it-works.html">How it works</a>
+        <a href="/get.html">Get the app</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <ol>
+        {crumbs.map((c, i) => (
+          <li>{i < crumbs.length - 1 ? <a href={c.href}>{c.name}</a> : <span aria-current="page">{c.name}</span>}</li>
+        ))}
+      </ol>
+    </nav>
+    <slot />
+  </main>
+
+  <footer class="foot">
+    <div class="wrap">
+      <nav aria-label="Footer">
+        <a href="/">Home</a>
+        <a href="/badminton.html">Badminton clubs</a>
+        <a href="/how-it-works.html">How it works</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="/terms.html">Terms</a>
+        <a href="/support.html">Support</a>
+      </nav>
+      <p>
+        Club times come from published information and every page says when it was last checked.
+        Spotted something wrong? Email <a href="mailto:clubs@nextfour.app">clubs@nextfour.app</a>.
+        Clubs can ask for their page to be corrected or removed at the same address.
+      </p>
+      <p>Council areas and postcode districts: contains OS data © Crown copyright and database right 2024; contains Royal Mail data © Royal Mail copyright and database right 2024; source: Office for National Statistics, licensed under the Open Government Licence v3.0.</p>
+      <p>&copy; 2026 NextFour</p>
+    </div>
+  </footer>
+</Base>

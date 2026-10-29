@@ -4,6 +4,14 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # Nightly, so the club directory's "last checked" dates, expiries and next
+  # dates stay true even when nothing was pushed.
+  schedule:
+    - cron: '30 3 * * *'
+  # The app's database asks for a rebuild when a published club or session
+  # changes (racket-manager-app, web-rebuild function).
+  repository_dispatch:
+    types: [directory-changed]
 
 # Allow the workflow to deploy to Pages
 permissions:
@@ -26,6 +34,11 @@ jobs:
         uses: withastro/action@v3
         with:
           node-version: 24
+        # The club directory's data (src/data/directory.ts). A failed fetch
+        # fails the build, so the live site keeps its last good directory.
+        env:
+          DIRECTORY_URL: ${{ secrets.DIRECTORY_URL }}
+          DIRECTORY_SECRET: ${{ secrets.DIRECTORY_SECRET }}
 
   deploy:
     needs: build
