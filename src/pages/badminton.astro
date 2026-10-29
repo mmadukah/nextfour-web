@@ -28,6 +28,9 @@ const nations = ['England', 'Scotland', 'Wales', 'Northern Ireland']
 const busiest = [...withPage].sort((a, b) => b.clubs.length - a.clubs.length || a.name.localeCompare(b.name)).slice(0, 4);
 const TINTS = ['#1F4D3A', '#2C5873', '#7A4A2A', '#4B3F72'];
 const nights = weeklyNights(dir.clubs);
+// Changes every build, so a browser never pairs this page with a cached index
+// from an earlier build (the host lets browsers keep it for ten minutes).
+const build = Date.now().toString(36);
 const site = Astro.site!;
 
 const title = 'Badminton clubs near you: find a club night | NextFour';
@@ -194,7 +197,7 @@ const LEVELS = [['', 'Any level'], ['1', 'Beginner'], ['2', 'Intermediate'], ['3
   </section>
 
   <p id="status" aria-live="polite"></p>
-  <ul id="results" data-photos={JSON.stringify(PHOTOS)}></ul>
+  <ul id="results" data-photos={JSON.stringify(PHOTOS)} data-build={build}></ul>
 
   <div id="browse">
     <section class="busy" aria-labelledby="busy-h">
@@ -280,7 +283,7 @@ const LEVELS = [['', 'Any level'], ['1', 'Beginner'], ['2', 'Intermediate'], ['3
     let origin: { lat: number; lng: number; label: string } | null = null;
 
     async function index(): Promise<Row[]> {
-      rows ??= await (await fetch('/badminton/search-index.json')).json();
+      rows ??= await (await fetch(`/badminton/search-index.json?v=${results.dataset.build ?? ''}`)).json();
       return rows!;
     }
     async function postcodes() {
@@ -371,7 +374,7 @@ const LEVELS = [['', 'Any level'], ['1', 'Beginner'], ['2', 'Intermediate'], ['3
               ${r.t ? '<span class="tag ok">Visitor terms listed</span>' : '<span class="tag">No visitor info yet</span>'}
             </div>
           </div>
-          <ul class="cc-lines">${r.s.map(line).join('')}</ul>
+          <ul class="cc-lines">${(r.s ?? []).map(line).join('')}</ul>
           <a class="cc-more" href="${esc(r.u)}">Club details and visitor info ${ARROW}</a>
         </div>
       </article></li>`;
