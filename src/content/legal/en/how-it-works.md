@@ -97,7 +97,7 @@ The server refuses any change that would put a player on two games, place someon
 ## Scores, history and ratings
 
 - **Results:** the organiser chooses whether players enter scores or just the winning side. With a target score (21 in badminton, 11 in squash and table tennis), scores can't be negative or tied, so every game has a winner. Enter the loser's score and the sheet suggests the winner's (first to 21, win by two, up to 30 in badminton). With no target set, any score is accepted, draws included.
-- **History:** every game is kept with its players, sides and score. Players see their games played and win rate for free. The Player plan adds full match history, the leaderboard for each night they played, and their best partners and toughest rivals.
+- **History:** every game is kept with its players, sides and score. Players see their games played and win rate for free. The Performance plan adds full match history, the leaderboard for each night they played, and their best partners and toughest rivals.
 - **Ratings:** each player has an Elo rating per sport and per format: singles, doubles, and mixed (each side one man and one lady). After each game, each player is rated against the other side's average (K-factor 32, never below 100). Draws aren't rated. A new format starts from the player's rating in another format of the same sport, else from their self-declared level (Beginner 1200 up to Professional 1800), else 1500. Ratings drive Smart pick and skill-based picking. They aren't shown as a league table, so nobody plays to protect a number.
 
 ## The board in the hall
@@ -132,7 +132,7 @@ NextFour doesn't take payments. You can show the price per person on a session, 
 ## Plans
 
 - **Free:** find sessions, join and play. Host as many sessions as you like with pegboard or manual picking, the Session Board and availability polls.
-- **Player:** your full stats and match history, best partners and toughest rivals, and no ads.
+- **Performance:** your full stats and match history, best partners and toughest rivals, and no ads.
 - **Pro:** skill-based picking, King of the Court, player pairing, deputies, calling names aloud, QR and NFC check-in, recurring sessions, invite-only sessions and attendance reports.
 - **Club:** everything in Pro, plus club admin, player grading, club leaderboards and dedicated Club Board terminals.
 

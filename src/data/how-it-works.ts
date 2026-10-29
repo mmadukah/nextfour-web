@@ -110,7 +110,7 @@ export const UI = {
     forOrganisers: 'For organisers',
     testStats: [['Players', '32'], ['Hours', '3'], ['Courts', '3–7']],
     testRules: 'Rules that must hold in every run',
-    plans: { Free: 'Free', Player: 'Player', Pro: 'Pro', Club: 'Club' } as Record<string, string>,
+    plans: { Free: 'Free', Performance: 'Performance', Pro: 'Pro', Club: 'Club' } as Record<string, string>,
     cta: {
       heading: 'Run your next club night on NextFour.',
       text: 'Hosting with pegboard or manual picking and the Session Board is free.',
@@ -150,7 +150,7 @@ export const UI = {
     forOrganisers: 'Pour les organisateurs',
     testStats: [['Joueurs', '32'], ['Heures', '3'], ['Terrains', '3–7']],
     testRules: 'Les règles qui doivent tenir à chaque simulation',
-    plans: { Gratuit: 'Gratuit', Joueur: 'Joueur', Pro: 'Pro', Club: 'Club' } as Record<string, string>,
+    plans: { Gratuit: 'Gratuit', Performance: 'Performance', Pro: 'Pro', Club: 'Club' } as Record<string, string>,
     cta: {
       heading: 'Organisez votre prochaine soirée de club sur NextFour.',
       text: 'Organiser avec la sélection Pegboard ou manuelle et le tableau de session est gratuit.',
