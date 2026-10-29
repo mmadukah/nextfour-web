@@ -10,6 +10,7 @@
 import Base from './Base.astro';
 import AppCta from '../components/directory/AppCta.astro';
 import ThemeToggle from '../components/ThemeToggle.astro';
+import LogoMark from '../components/LogoMark.astro';
 
 interface Crumb { name: string; href: string }
 interface Props {
@@ -182,7 +183,7 @@ const ld = [breadcrumbLd, ...jsonLd];
     <div class="wrap">
       <a class="brand" href="/" aria-label="NextFour home">
         <span class="tile" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 24 24"><circle cx="8" cy="8" r="2.4" fill="currentColor" opacity="0.4"/><circle cx="16" cy="8" r="2.4" fill="currentColor" opacity="0.4"/><circle cx="8" cy="16" r="2.4" fill="currentColor" opacity="0.4"/><circle cx="16" cy="16" r="3.2" fill="currentColor"/></svg>
+          <LogoMark size={22} />
         </span>
         <span class="word">NextFour</span>
       </a>
