@@ -8,6 +8,8 @@ interface Props {
   search?: boolean;
   getLabel?: string;
   secondLabel?: string;
+  /** Where the visitor is, for the "Get the app" link's ?src= (tracking). */
+  src?: string;
 }
 const {
   heading = "See who's going before you go.",
@@ -15,6 +17,7 @@ const {
   search = true,
   getLabel = 'Get the app',
   secondLabel = 'Search all clubs',
+  src = 'banner',
 } = Astro.props;
 ---
 
@@ -24,7 +27,7 @@ const {
     <p>{text}</p>
   </div>
   <div class="actions">
-    <a class="go" href="/get.html">{getLabel}</a>
+    <a class="go" href={`/get.html?src=${src}`}>{getLabel}</a>
     {search && <a class="ghost" href="/badminton.html">{secondLabel}</a>}
   </div>
 </section>

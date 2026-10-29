@@ -262,7 +262,7 @@ const crumbs = [
           Follow club
         </button>
         <p class="follow-note" id="follow-note" hidden>
-          Follow {club.name} in the NextFour app to hear when it adds a session. <a href="/get.html">Get the app</a>, then search for the club.
+          Follow {club.name} in the NextFour app to hear when it adds a session. <a href={`/get.html?src=follow&club=${club.id}`}>Get the app</a>, then search for the club.
         </p>
       </div>
     </div>
@@ -364,7 +364,7 @@ const crumbs = [
               <li><span class="n">2</span><span><strong>Find this club and tap Claim</strong><span class="muted">We check each claim by hand before handing the club over.</span></span></li>
               <li><span class="n">3</span><span><strong>Update your listing</strong><span class="muted">Changes show on this page.</span></span></li>
             </ol>
-            <a class="claim-get" href="/get.html">Get the app to claim</a>
+            <a class="claim-get" href={`/get.html?src=claim&club=${club.id}`}>Get the app to claim</a>
           </div>
           <p class="small">Not the organiser? <a href="/how-it-works.html">How claiming works</a></p>
         </section>
@@ -392,7 +392,7 @@ const crumbs = [
   )}
 
   <!-- An unclaimed club's page is often found by its own organiser, so its banner speaks to them. -->
-  <AppFeatures variant={club.claimed ? 'claimed' : 'unclaimed'} clubName={club.name} />
+  <AppFeatures variant={club.claimed ? 'claimed' : 'unclaimed'} clubName={club.name} src={club.claimed ? 'club-claimed' : 'club-unclaimed'} clubId={club.id} />
 
   <script>
     // Follow and Claim open a short explanation; both happen in the app.

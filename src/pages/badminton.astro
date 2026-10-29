@@ -273,7 +273,7 @@ const dropInCount = weeklyDropIns(dir.dropIns);
     )}
   </div>
 
-  <AppFeatures search={false} />
+  <AppFeatures search={false} src="finder" />
 
   <script>
     /** A grouped session row: days, one-off date, days in words, time, duration, level bars, level words, other venue. */
@@ -432,7 +432,7 @@ const dropInCount = weeklyDropIns(dir.dropIns);
           return `<span class="ds-cell${on ? ' on' : ''}${on && d === picked ? ' hl' : ''}" aria-hidden="true">${LETTERS[d]}</span>`;
         }).join('')}</span>`;
       const act = claimed
-        ? '<a class="di-book" href="/get.html">Join in the app</a>'
+        ? '<a class="di-book" href="/get.html?src=dropin">Join in the app</a>'
         : booking ? `<a class="di-book" href="${esc(booking)}" rel="noopener nofollow" target="_blank">Book${OUT}</a>` : '';
       return `<li class="night-line${state}">
         ${strip}
@@ -461,7 +461,7 @@ const dropInCount = weeklyDropIns(dir.dropIns);
             </div>
           </div>
           <ul class="cc-lines">${lines.map(dropLine).join('')}</ul>
-          ${unclaimed ? '<p class="di-claim">Run one of these sessions? <a href="/get.html">Claim it in the NextFour app</a> to take sign-ups and run the night with a digital pegboard.</p>' : ''}
+          ${unclaimed ? '<p class="di-claim">Run one of these sessions? <a href="/get.html?src=claim">Claim it in the NextFour app</a> to take sign-ups and run the night with a digital pegboard.</p>' : ''}
         </div>
       </article></li>`;
     }

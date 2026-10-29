@@ -14,8 +14,15 @@ interface Props {
   clubName?: string;
   /** The finder leaves out "Search all clubs": it is that page. */
   search?: boolean;
+  /** Where the visitor is, for the "Get the app" link's ?src= (tracking). */
+  src?: string;
+  /** On a club page, passed on to /get.html so it can name the club. */
+  clubId?: string;
+  /** False on /get.html, which shows the tiles without the banner. */
+  band?: boolean;
 }
-const { variant = 'players', clubName = '', search = true } = Astro.props;
+const { variant = 'players', clubName = '', search = true, src = 'area', clubId, band = true } = Astro.props;
+const getHref = `/get.html?${new URLSearchParams({ src, ...(clubId ? { club: clubId } : {}) })}`;
 
 const banner = {
   players: {
@@ -140,16 +147,18 @@ const TICK = '<path d="m5 12 5 5 9-10"></path>';
     </ul>
   </div>
 
+  {band && (
   <div class="band">
     <div class="band-copy">
       <p class="band-head">{banner.heading}</p>
       <p class="band-body">{banner.body}</p>
     </div>
     <div class="band-acts">
-      <a class="go" href="/get.html">Get the app</a>
+      <a class="go" href={getHref}>Get the app</a>
       {banner.search && <a class="ghost" href="/badminton.html">Search all clubs</a>}
     </div>
   </div>
+  )}
 </section>
 
 <style>

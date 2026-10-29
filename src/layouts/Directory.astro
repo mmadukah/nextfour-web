@@ -33,9 +33,11 @@ interface Props {
   footer?: 'directory' | 'site';
   /** Language versions of this page, for the pills and hreflang links. */
   languages?: { lang: string; label: string; href: string }[];
+  /** A shorter line for link previews (Base's og:description). */
+  ogDescription?: string;
 }
 const {
-  title, description, crumbs, jsonLd = [], cta = true, current, lang = 'en', footer = 'directory', languages = [],
+  title, description, crumbs, jsonLd = [], cta = true, current, lang = 'en', footer = 'directory', languages = [], ogDescription,
 } = Astro.props;
 
 const WORDS = {
@@ -78,7 +80,7 @@ const breadcrumbLd = {
 const ld = [breadcrumbLd, ...jsonLd];
 ---
 
-<Base title={title} description={description} lang={lang} alternates={alternates}>
+<Base title={title} description={description} lang={lang} alternates={alternates} ogDescription={ogDescription}>
   {ld.map((obj) => (
     <script slot="head" type="application/ld+json" set:html={JSON.stringify(obj)} />
   ))}
@@ -236,7 +238,7 @@ const ld = [breadcrumbLd, ...jsonLd];
         <a href="/badminton.html" aria-current={current === 'finder' ? 'page' : undefined}>{WORDS.find}</a>
         <a class="hide-sm" href={lang === 'fr' ? '/fr/how-it-works.html' : '/how-it-works.html'} aria-current={current === 'how' ? 'page' : undefined}>{WORDS.how}</a>
         <ThemeToggle />
-        <a class="pill" href="/get.html">{WORDS.get}</a>
+        <a class="pill" href="/get.html?src=header">{WORDS.get}</a>
       </nav>
     </div>
   </header>

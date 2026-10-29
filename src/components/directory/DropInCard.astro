@@ -48,14 +48,14 @@ const anyUnclaimed = venue.sessions.some((s) => !s.claimed);
             <span class="nl-time"><b>{timeRange(n)}</b>{duration && <small>{duration}</small>}</span>
             <span class="di-what">{s.title}{n.price && <b> · {n.price.replace(' a session', '')}</b>}</span>
             {s.claimed
-              ? <a class="di-book" href="/get.html">Join in the app</a>
+              ? <a class="di-book" href="/get.html?src=dropin">Join in the app</a>
               : s.bookingUrl && <a class="di-book" href={s.bookingUrl} rel="noopener nofollow" target="_blank">Book<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"></path></svg></a>}
           </li>
         );
       })}
     </ul>
     {anyUnclaimed && (
-      <p class="di-claim">Run one of these sessions? <a href="/get.html">Claim it in the NextFour app</a> to take sign-ups and run the night with a digital pegboard.</p>
+      <p class="di-claim">Run one of these sessions? <a href="/get.html?src=claim">Claim it in the NextFour app</a> to take sign-ups and run the night with a digital pegboard.</p>
     )}
   </div>
 </article>
