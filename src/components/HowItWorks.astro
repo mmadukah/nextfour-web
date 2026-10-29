@@ -1,0 +1,365 @@
+---
+// The How it works page in either language (REDESIGN-BRIEF, "How it works
+// page"). The words are the Markdown's (src/data/how-it-works.ts parses it);
+// this only lays each section out. Sections are taken by position, which the
+// English and French pages share.
+import Directory from '../layouts/Directory.astro';
+import AppCta from './directory/AppCta.astro';
+import { CONTENT, UI, IDS, FREE, md, lead, withoutPlan, type Lang, type Block } from '../data/how-it-works';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const c = CONTENT[lang];
+const t = UI[lang];
+const [checkin, queue, picking, overrides, scores, board, signal, attendance, payments, plans, testing] = c.sections;
+
+const items = (b: Block | undefined) => (b && b.type === 'ul' ? b.items : []);
+const text = (b: Block | undefined) => (b && b.type === 'p' ? b.text : '');
+const badge = (plan: string) => `badge${FREE.has(plan) ? '' : ' paid'}`;
+
+// Ways of picking: the table's rows become tabs, each opening its ### section.
+const table = picking.blocks.find((b) => b.type === 'table') as Extract<Block, { type: 'table' }>;
+const methods = table.rows.map(([name, who, plan], i) => ({
+  id: `method-${i}`, name, who, plan, sub: picking.subs.find((s) => s.title === name)!,
+}));
+const KNOWN_COST = /^\*\*(Known costs|Les coûts connus)/;
+
+// "pair two players so they play together (Pro);": the badge stands in for "(Pro)".
+const proBadge = (item: string) => md(item).replace(/\s*\(Pro\)/, ' <span class="badge paid">Pro</span>');
+// A rule from a list as a card: sentence case, no trailing ";" or ".".
+const asCard = (item: string) => { const s = item.replace(/[;.]\s*$/, ''); return s[0].toUpperCase() + s.slice(1); };
+
+const home = lang === 'fr' ? '/fr/' : '/';
+const url = lang === 'fr' ? '/fr/how-it-works.html' : '/how-it-works.html';
+const crumbs = [{ name: lang === 'fr' ? 'Accueil' : 'Home', href: home }, { name: t.crumb, href: url }];
+const languages = [
+  { lang: 'en', label: 'English', href: '/how-it-works.html' },
+  { lang: 'fr', label: 'Français', href: '/fr/how-it-works.html' },
+];
+const title = lang === 'fr' ? `NextFour : ${c.title}` : `NextFour: ${c.title}`;
+const heading = c.meta.replace(/\s+(on a NextFour club night|d’une soirée de club NextFour)\.$/, '');
+---
+
+<Directory title={title} description={c.meta} crumbs={crumbs} cta={false} current="how" lang={lang} footer="site" languages={languages}>
+  <style>
+    .top { padding: 28px 0 40px; }
+    h1 { max-width: 860px; font-size: clamp(38px, 6vw, 72px); line-height: 1; font-stretch: 114%; }
+    .intro { max-width: 640px; }
+    .flow { list-style: none; margin: 36px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+    .flow li { display: flex; flex-direction: column; gap: 10px; padding: 18px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); }
+    .flow .head { display: flex; align-items: center; justify-content: space-between; }
+    .flow .n { width: 32px; height: 32px; border-radius: 999px; background: var(--hl-bg); color: var(--hl-fg); display: flex; align-items: center; justify-content: center; font-weight: 800; }
+    .flow .tag-word { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+    .flow b { font-size: 18px; font-weight: 800; }
+    .flow span.text { font-size: 14px; color: var(--body); }
+
+    .layout { display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start; padding: 8px 0 48px; border-top: 1px solid var(--line); }
+    .toc { flex: 1 1 220px; min-width: 0; padding-top: 32px; }
+    .toc p { margin: 0 0 10px; font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+    .toc ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; border-left: 2px solid var(--line); }
+    .toc a { display: block; padding: 6px 0 6px 14px; margin-left: -2px; border-left: 2px solid transparent; text-decoration: none; font-size: 15px; color: var(--body); }
+    .toc a:hover { border-left-color: var(--eyebrow); color: var(--ink); }
+    .content { flex: 999 1 600px; min-width: 0; display: flex; flex-direction: column; }
+    .lead-p { margin: 32px 0 0; font-size: 17px; color: var(--body); max-width: 680px; }
+
+    section.part { padding: 32px 0; border-bottom: 1px solid var(--line); scroll-margin-top: 16px; }
+    section.part.last { border-bottom: 0; }
+    section.part > h2 { margin: 0 0 16px; font-size: 28px; font-weight: 800; font-stretch: 108%; letter-spacing: -0.01em; }
+    .body-text { margin: 0 0 16px; max-width: 680px; color: var(--body); }
+    .rules { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; color: var(--body); }
+    .rules :global(strong), .card :global(strong) { color: var(--ink); }
+    .grid { display: grid; gap: 10px; }
+    .g170 { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+    .g220 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    /* Four cards sit 2 by 2 in the content column, never 3 and a straggler. */
+    .g240 { grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); }
+    .card { padding: 18px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 6px; color: var(--body); font-size: 15px; }
+    .card .ttl { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .card .ttl b, .card h3 { margin: 0; font-weight: 800; font-size: 16px; color: var(--ink); }
+    .card p { margin: 0; }
+    .badge {
+      font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px;
+      background: var(--tag2-bg); color: var(--tag2-fg); white-space: nowrap;
+    }
+    .badge.paid, :global(.badge.paid) { background: var(--tag-bg); color: var(--tag-fg); }
+    :global(.rules .badge) { font-size: 11px; font-weight: 800; letter-spacing: 0.06em; padding: 1px 7px; border-radius: 999px; }
+    .note-warn { margin: 12px 0 0; padding: 12px 14px; border-radius: 12px; background: var(--warn-bg); color: var(--warn-fg); font-size: 14px; }
+    .note-warn :global(strong) { color: inherit; }
+    .split { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+    figure { flex: 1 1 260px; margin: 0; padding: 16px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); }
+    figcaption { font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 10px; }
+    .q { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+    .q li { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; background: var(--row); }
+    .q li.away { opacity: 0.5; }
+    .q .pos { width: 22px; font-size: 13px; font-weight: 800; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .q .who { flex: 1 1 auto; font-weight: 700; }
+    .q .wait { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .split .rules { flex: 999 1 300px; min-width: 0; }
+
+    .tabs { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin-top: 4px; }
+    .tabs button {
+      text-align: left; padding: 14px 16px; border-radius: 14px; cursor: pointer; display: flex; flex-direction: column; gap: 6px;
+      border: 1.5px solid var(--line-strong); background: var(--surface); color: var(--ink); min-height: 44px;
+    }
+    .tabs button[aria-selected='true'] { border-color: var(--sel-bg); background: var(--sel-bg); color: var(--sel-fg); }
+    .tabs .ttl { display: flex; justify-content: space-between; align-items: center; gap: 6px; width: 100%; }
+    .tabs .ttl b { font-weight: 800; font-size: 16px; }
+    .tabs .who { font-size: 13px; opacity: 0.85; }
+    .panel-m { margin-top: 12px; padding: 22px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); }
+    .panel-m[hidden] { display: none; }
+    .panel-m h3 { margin: 0 0 12px; font-size: 20px; font-weight: 800; }
+    .panel-m > p { margin: 0 0 10px; color: var(--body); }
+    .panel-m > .rules { margin-bottom: 14px; }
+    .panel-m > .rules:last-child { margin-bottom: 0; }
+
+    .refuse { background: var(--row); border-style: dashed; border-color: var(--line-strong); }
+    .stats-strip {
+      margin: 12px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: var(--surface);
+    }
+    .stats-strip > div { padding: 16px 18px; box-shadow: 1px 0 0 var(--line), 0 1px 0 var(--line); }
+    .stats-strip dt { font-size: 13px; color: var(--muted); }
+    .stats-strip dd { margin: 4px 0 0; font-size: 26px; font-weight: 800; font-stretch: 112%; line-height: 1.1; font-variant-numeric: tabular-nums; }
+    .plans-top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 16px; }
+    .plans-top h2 { margin: 0; font-size: 28px; font-weight: 800; font-stretch: 108%; letter-spacing: -0.01em; }
+    .plans-top p { margin: 0; font-size: 14px; color: var(--muted); max-width: 420px; }
+    .plan { padding: 20px; border-radius: 18px; display: flex; flex-direction: column; gap: 10px; background: var(--surface); border: 1.5px solid var(--line); color: var(--body); font-size: 15px; }
+    .plan .ttl { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .plan .ttl b { font-size: 22px; font-weight: 800; font-stretch: 112%; color: var(--ink); }
+    .plan p { margin: 0; }
+    .plan.featured { background: var(--sel-bg); color: var(--sel-fg); border-color: var(--sel-bg); }
+    .plan.featured .ttl b { color: inherit; }
+    .plan.featured .badge { background: var(--hl-bg); color: var(--hl-fg); }
+    .numbered { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+    .numbered li { display: flex; gap: 12px; padding: 16px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); font-size: 15px; font-weight: 600; }
+    .numbered .n { flex: 0 0 28px; height: 28px; border-radius: 999px; background: var(--chip-bg); color: var(--chip-fg); font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+    .content h3.small-h { margin: 16px 0 10px; font-size: 16px; font-weight: 800; }
+    .questions { margin: 16px 0 0; color: var(--body); }
+    .cta-slot { margin-top: 8px; }
+    .cta-slot :global(.cta) { margin-bottom: 0; }
+  </style>
+
+  <section class="top">
+    <p class="eyebrow">{t.eyebrow}</p>
+    <h1>{heading}</h1>
+    <p class="intro" set:html={md(text(c.intro[0]))} />
+    <ol class="flow" aria-label={t.stepsLabel}>
+      {t.steps.map((s, i) => (
+        <li>
+          <span class="head"><span class="n">{i + 1}</span><span class="tag-word">{s.tag}</span></span>
+          <b>{s.title}</b>
+          <span class="text">{s.text}</span>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <div class="layout">
+    <nav class="toc" aria-label={t.onThisPage}>
+      <p>{t.onThisPage}</p>
+      <ol>
+        {c.sections.map((s, i) => <li><a href={`#${IDS[i]}`}>{s.title}</a></li>)}
+      </ol>
+    </nav>
+
+    <div class="content">
+      {c.intro.slice(1).map((b) => <p class="lead-p" set:html={md(text(b))} />)}
+
+      <section class="part" id={IDS[0]} aria-labelledby={`${IDS[0]}-h`}>
+        <h2 id={`${IDS[0]}-h`}>{checkin.title}</h2>
+        <div class="grid g170" style="margin-bottom: 18px">
+          {t.checkin.map((m) => (
+            <div class="card">
+              <span class="ttl"><b>{m.title}</b><span class={badge(m.plan)}>{m.plan}</span></span>
+              <span>{m.text}</span>
+            </div>
+          ))}
+        </div>
+        <ul class="rules">
+          {items(checkin.blocks[0]).slice(1).map((it) => <li set:html={md(it)} />)}
+        </ul>
+      </section>
+
+      <section class="part" id={IDS[1]} aria-labelledby={`${IDS[1]}-h`}>
+        <h2 id={`${IDS[1]}-h`}>{queue.title}</h2>
+        <div class="split">
+          <figure>
+            <figcaption>{t.exampleQueue}</figcaption>
+            <ol class="q">
+              {[14, 11, 9, 6].map((wait, i) => (
+                <li><span class="pos">{i + 1}</span><span class="who">{t.player} {'ABCD'[i]}</span><span class="wait">{wait} {t.min}</span></li>
+              ))}
+              <li class="away"><span class="pos">–</span><span class="who">{t.player} E · {t.away}</span><span class="wait">{t.notPickable}</span></li>
+            </ol>
+          </figure>
+          <ul class="rules">
+            {items(queue.blocks[0]).map((it) => <li set:html={md(it)} />)}
+          </ul>
+        </div>
+      </section>
+
+      <section class="part" id={IDS[2]} aria-labelledby={`${IDS[2]}-h`}>
+        <h2 id={`${IDS[2]}-h`}>{picking.title}</h2>
+        <p class="body-text" set:html={md(text(picking.blocks[0]))} />
+        <div class="tabs" role="tablist" aria-label={t.methodsLabel}>
+          {methods.map((m, i) => (
+            <button type="button" role="tab" id={`${m.id}-tab`} aria-controls={m.id} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1}>
+              <span class="ttl"><b>{m.name}</b><span class={badge(m.plan)}>{m.plan}</span></span>
+              <span class="who">{m.who}</span>
+            </button>
+          ))}
+        </div>
+        {methods.map((m) => (
+          <div class="panel-m" role="tabpanel" id={m.id} aria-labelledby={`${m.id}-tab`}>
+            <h3>{m.name}</h3>
+            {m.sub.blocks.map((b) =>
+              b.type === 'ul' ? <ul class="rules">{b.items.map((it) => <li set:html={md(it)} />)}</ul>
+              : b.type === 'p' && KNOWN_COST.test(b.text) ? <p class="note-warn" set:html={md(b.text)} />
+              : b.type === 'p' ? <p set:html={md(b.text)} />
+              : null)}
+          </div>
+        ))}
+      </section>
+
+      <section class="part" id={IDS[3]} aria-labelledby={`${IDS[3]}-h`}>
+        <h2 id={`${IDS[3]}-h`}>{overrides.title}</h2>
+        <div class="split" style="gap: 12px">
+          <div class="card" style="flex: 1 1 300px">
+            <h3 set:html={md(text(overrides.blocks[0]))} />
+            <ul class="rules" style="gap: 6px">
+              {items(overrides.blocks[1]).map((it) => <li set:html={proBadge(it)} />)}
+            </ul>
+          </div>
+          <div class="card refuse" style="flex: 1 1 300px">
+            <h3>{t.refusesHeading}</h3>
+            <ul class="rules" style="gap: 6px">
+              {t.refuses.map((r) => <li>{r}</li>)}
+            </ul>
+            <p style="margin-top: 6px">{t.refusesAfter}</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="part" id={IDS[4]} aria-labelledby={`${IDS[4]}-h`}>
+        <h2 id={`${IDS[4]}-h`}>{scores.title}</h2>
+        <div class="grid g220">
+          {items(scores.blocks[0]).map((it) => {
+            const { title: cardTitle, rest } = lead(it);
+            return <div class="card"><h3>{cardTitle}</h3><p set:html={md(rest)} /></div>;
+          })}
+        </div>
+        <dl class="stats-strip">
+          {t.ratingStats.map(([label, value]) => <div><dt>{label}</dt><dd>{value}</dd></div>)}
+        </dl>
+      </section>
+
+      <section class="part" id={IDS[5]} aria-labelledby={`${IDS[5]}-h`}>
+        <h2 id={`${IDS[5]}-h`}>{board.title}</h2>
+        <div class="grid g240" style="gap: 12px">
+          {items(board.blocks[0]).map((it, i) => {
+            const { title: cardTitle, rest } = lead(it);
+            return (
+              <div class="card">
+                <span class="ttl"><b>{withoutPlan(cardTitle)}</b><span class={badge(t.boardPlans[i])}>{t.boardPlans[i]}</span></span>
+                <span set:html={md(rest)} />
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <section class="part" id={IDS[6]} aria-labelledby={`${IDS[6]}-h`}>
+        <h2 id={`${IDS[6]}-h`}>{signal.title}</h2>
+        <p class="body-text" set:html={md(text(signal.blocks[0]))} />
+        <ul class="grid g240" style="list-style: none; margin: 0; padding: 0">
+          {items(signal.blocks[1]).map((it) => <li class="card" set:html={md(asCard(it))} />)}
+        </ul>
+        <p class="note-warn"><strong set:html={md(text(signal.blocks[2]))} /></p>
+      </section>
+
+      <section class="part" id={IDS[7]} aria-labelledby={`${IDS[7]}-h`}>
+        <h2 id={`${IDS[7]}-h`}>{attendance.title}</h2>
+        <div class="split" style="gap: 12px; margin-bottom: 16px">
+          {items(attendance.blocks[0]).slice(0, 2).map((it, i) => {
+            const { title: cardTitle, rest } = lead(it);
+            return (
+              <div class="card" style="flex: 1 1 260px">
+                <span class="ttl"><b>{withoutPlan(cardTitle)}</b><span class={badge(t.attendancePlans[i])}>{t.attendancePlans[i]}</span></span>
+                <p set:html={md(rest)} />
+              </div>
+            );
+          })}
+        </div>
+        <ul class="rules">
+          {items(attendance.blocks[0]).slice(2).map((it) => <li set:html={md(it)} />)}
+        </ul>
+      </section>
+
+      <section class="part" id={IDS[8]} aria-labelledby={`${IDS[8]}-h`}>
+        <h2 id={`${IDS[8]}-h`} style="margin-bottom: 12px">{payments.title}</h2>
+        <p class="body-text" style="margin: 0; font-size: 17px" set:html={md(text(payments.blocks[0]))} />
+      </section>
+
+      <section class="part" id={IDS[9]} aria-labelledby={`${IDS[9]}-h`}>
+        <div class="plans-top">
+          <h2 id={`${IDS[9]}-h`}>{plans.title}</h2>
+          <p set:html={md(text(plans.blocks[1]))} />
+        </div>
+        <div class="grid g240" style="gap: 12px">
+          {items(plans.blocks[0]).map((it) => {
+            const { title: name, rest } = lead(it);
+            const featured = name === 'Pro';
+            return (
+              <div class:list={['plan', { featured }]}>
+                <span class="ttl"><b>{name}</b>{featured && <span class="badge">{t.forOrganisers}</span>}</span>
+                <p set:html={md(rest[0].toUpperCase() + rest.slice(1))} />
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <section class="part last" id={IDS[10]} aria-labelledby={`${IDS[10]}-h`}>
+        <h2 id={`${IDS[10]}-h`} style="margin-bottom: 12px">{testing.title}</h2>
+        <p class="body-text" set:html={md(text(testing.blocks[0]))} />
+        <dl class="stats-strip" style="margin: 0 0 16px">
+          {t.testStats.map(([label, value]) => <div><dt>{label}</dt><dd>{value}</dd></div>)}
+        </dl>
+        <h3 class="small-h">{t.testRules}</h3>
+        <ol class="numbered">
+          {items(testing.blocks[1]).map((it, i) => <li><span class="n">{i + 1}</span><span set:html={md(asCard(it))} /></li>)}
+        </ol>
+        <p class="questions" set:html={md(text(testing.blocks[2]))} />
+      </section>
+
+      <div class="cta-slot">
+        <AppCta heading={t.cta.heading} text={t.cta.text} getLabel={t.cta.get} secondLabel={t.cta.second} />
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Picking methods: tabs with arrow keys. Every panel is in the HTML; the
+    // script hides all but the chosen one.
+    const tabs = [...document.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const select = (tab: HTMLButtonElement) => {
+      for (const t of tabs) {
+        const on = t === tab;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+        document.getElementById(t.getAttribute('aria-controls')!)!.hidden = !on;
+      }
+    };
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => select(tab));
+      tab.addEventListener('keydown', (e) => {
+        const step = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+        if (!step) return;
+        const next = tabs[(i + step + tabs.length) % tabs.length];
+        select(next);
+        next.focus();
+      });
+    });
+    if (tabs.length) select(tabs[0]);
+  </script>
+</Directory>

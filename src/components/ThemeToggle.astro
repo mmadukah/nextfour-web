@@ -17,7 +17,10 @@
     const root = document.documentElement;
     const isDark = () => root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
     const buttons = document.querySelectorAll('.theme-toggle');
-    const label = () => buttons.forEach((b) => b.setAttribute('aria-label', isDark() ? 'Switch to light mode' : 'Switch to dark mode'));
+    const fr = root.lang === 'fr';
+    const label = () => buttons.forEach((b) => b.setAttribute('aria-label', isDark()
+      ? (fr ? 'Passer en mode clair' : 'Switch to light mode')
+      : (fr ? 'Passer en mode sombre' : 'Switch to dark mode')));
     buttons.forEach((b) => b.addEventListener('click', () => {
       root.dataset.theme = isDark() ? 'light' : 'dark';
       try { localStorage.setItem('theme', root.dataset.theme); } catch {}

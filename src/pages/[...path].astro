@@ -3,7 +3,9 @@ import { getCollection, render } from 'astro:content';
 import Legal from '../layouts/Legal.astro';
 
 export async function getStaticPaths() {
-  const entries = await getCollection('legal');
+  // How it works has its own pages (how-it-works.astro, fr/how-it-works.astro),
+  // laid out from the same Markdown.
+  const entries = (await getCollection('legal')).filter((e) => !e.id.endsWith('/how-it-works'));
   return entries.map((entry) => {
     // entry.id is "<lang>/<slug>", e.g. "en/privacy" or "fr/privacy".
     const [lang, slug] = entry.id.split('/');

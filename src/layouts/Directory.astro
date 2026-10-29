@@ -7,6 +7,11 @@
 //
 // Every page passes its breadcrumb trail; it is drawn at the top and emitted
 // as schema.org BreadcrumbList, next to whatever JSON-LD the page supplies.
+//
+// Also the frame for How it works (en and fr): `lang` switches the chrome's
+// words, `footer: 'site'` keeps that page's own footer (with the account
+// deletion link) instead of the directory's data notes, and `languages` puts
+// the English/Français pills beside the breadcrumb.
 import Base from './Base.astro';
 import AppCta from '../components/directory/AppCta.astro';
 import ThemeToggle from '../components/ThemeToggle.astro';
@@ -21,12 +26,41 @@ interface Props {
   jsonLd?: object[];
   /** The closing "get the app" panel; pages with their own turn it off. */
   cta?: boolean;
-  /** Marks "Find badminton" as the current page in the header. */
-  finder?: boolean;
+  /** The header link marked as the current page. */
+  current?: 'finder' | 'how';
+  lang?: 'en' | 'fr';
+  footer?: 'directory' | 'site';
+  /** Language versions of this page, for the pills and hreflang links. */
+  languages?: { lang: string; label: string; href: string }[];
 }
-const { title, description, crumbs, jsonLd = [], cta = true, finder = false } = Astro.props;
+const {
+  title, description, crumbs, jsonLd = [], cta = true, current, lang = 'en', footer = 'directory', languages = [],
+} = Astro.props;
+
+const WORDS = {
+  en: {
+    home: 'NextFour home', main: 'Main', crumbs: 'Breadcrumb', foot: 'Footer', language: 'Language',
+    find: 'Find badminton', how: 'How it works', get: 'Get the app',
+    links: [['Home', '/'], ['Badminton clubs', '/badminton.html'], ['How it works', '/how-it-works.html'],
+      ['Privacy', '/privacy.html'], ['Terms', '/terms.html'], ['Support', '/support.html']],
+    deletion: ['Account and data deletion', '/delete-account.html'],
+  },
+  fr: {
+    home: 'Accueil NextFour', main: 'Principal', crumbs: 'Fil d’Ariane', foot: 'Pied de page', language: 'Langue',
+    // Short, so the header stays on one line on a phone.
+    find: 'Trouver un club', how: 'Comment ça marche', get: 'Télécharger',
+    links: [['Accueil', '/fr/'], ['Clubs de badminton', '/badminton.html'], ['Comment ça marche', '/fr/how-it-works.html'],
+      ['Politique de confidentialité', '/fr/privacy.html'], ['Conditions générales', '/fr/terms.html'], ['Assistance', '/fr/support.html']],
+    deletion: ['Suppression du compte et des données', '/fr/delete-account.html'],
+  },
+}[lang];
+const footerLinks = footer === 'site' ? [...WORDS.links, WORDS.deletion] : WORDS.links;
 
 const site = Astro.site!;
+const alternates = languages.length
+  ? [...languages.map((l) => ({ hreflang: l.lang, href: new URL(l.href, site).href })),
+    { hreflang: 'x-default', href: new URL(languages[0].href, site).href }]
+  : [];
 const breadcrumbLd = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
@@ -40,7 +74,7 @@ const breadcrumbLd = {
 const ld = [breadcrumbLd, ...jsonLd];
 ---
 
-<Base title={title} description={description}>
+<Base title={title} description={description} lang={lang} alternates={alternates}>
   {ld.map((obj) => (
     <script slot="head" type="application/ld+json" set:html={JSON.stringify(obj)} />
   ))}
@@ -120,6 +154,10 @@ const ld = [breadcrumbLd, ...jsonLd];
     nav.crumbs a { color: var(--muted); }
     nav.crumbs a:hover { color: var(--link-hover); }
     nav.crumbs .sep { margin: 0 8px; }
+    .crumb-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; }
+    .langs { display: flex; gap: 6px; padding-top: 28px; font-size: 14px; }
+    .langs a { padding: 2px 10px; border-radius: 999px; border: 1px solid var(--line-strong); text-decoration: none; color: var(--muted); }
+    .langs a[aria-current='true'] { background: var(--chip-bg); color: var(--chip-fg); border-color: var(--chip-bg); font-weight: 700; }
 
     .eyebrow { margin: 0 0 12px; font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--eyebrow); }
     h1 { margin: 0; font-weight: 800; letter-spacing: -0.03em; }
@@ -182,44 +220,48 @@ const ld = [breadcrumbLd, ...jsonLd];
 
   <header class="top">
     <div class="wrap">
-      <a class="brand" href="/" aria-label="NextFour home">
+      <a class="brand" href={lang === 'fr' ? '/fr/' : '/'} aria-label={WORDS.home}>
         <span class="tile" aria-hidden="true">
           <LogoMark size={22} />
         </span>
         <span class="word">NextFour</span>
       </a>
-      <nav aria-label="Main">
-        <a href="/badminton.html" aria-current={finder ? 'page' : undefined}>Find badminton</a>
-        <a class="hide-sm" href="/how-it-works.html">How it works</a>
+      <nav aria-label={WORDS.main}>
+        <a href="/badminton.html" aria-current={current === 'finder' ? 'page' : undefined}>{WORDS.find}</a>
+        <a class="hide-sm" href={lang === 'fr' ? '/fr/how-it-works.html' : '/how-it-works.html'} aria-current={current === 'how' ? 'page' : undefined}>{WORDS.how}</a>
         <ThemeToggle />
-        <a class="pill" href="/get.html">Get the app</a>
+        <a class="pill" href="/get.html">{WORDS.get}</a>
       </nav>
     </div>
   </header>
 
   <main class="wrap">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      {crumbs.map((c, i) => (
-        <>
-          {i > 0 && <span class="sep" aria-hidden="true">/</span>}
-          {i < crumbs.length - 1 ? <a href={c.href}>{c.name}</a> : <span aria-current="page">{c.name}</span>}
-        </>
-      ))}
-    </nav>
+    <div class="crumb-row">
+      <nav class="crumbs" aria-label={WORDS.crumbs}>
+        {crumbs.map((c, i) => (
+          <>
+            {i > 0 && <span class="sep" aria-hidden="true">/</span>}
+            {i < crumbs.length - 1 ? <a href={c.href}>{c.name}</a> : <span aria-current="page">{c.name}</span>}
+          </>
+        ))}
+      </nav>
+      {languages.length > 0 && (
+        <nav class="langs" aria-label={WORDS.language}>
+          {languages.map((l) => <a href={l.href} lang={l.lang} hreflang={l.lang} aria-current={l.lang === lang ? 'true' : undefined}>{l.label}</a>)}
+        </nav>
+      )}
+    </div>
     <slot />
     {cta && <AppCta />}
   </main>
 
   <footer class="foot">
     <div class="wrap">
-      <nav aria-label="Footer">
-        <a href="/">Home</a>
-        <a href="/badminton.html">Badminton clubs</a>
-        <a href="/how-it-works.html">How it works</a>
-        <a href="/privacy.html">Privacy</a>
-        <a href="/terms.html">Terms</a>
-        <a href="/support.html">Support</a>
+      <nav aria-label={WORDS.foot}>
+        {footerLinks.map(([label, href]) => <a href={href}>{label}</a>)}
       </nav>
+      {footer === 'directory' ? (
+      <>
       <p>
         Club times come from published information and every page says when it was last checked.
         Spotted something wrong? Email <a href="mailto:clubs@nextfour.app">clubs@nextfour.app</a>.
@@ -227,6 +269,10 @@ const ld = [breadcrumbLd, ...jsonLd];
       </p>
       <p>Council areas and postcode districts: contains OS data © Crown copyright and database right 2024; contains Royal Mail data © Royal Mail copyright and database right 2024; source: Office for National Statistics, licensed under the Open Government Licence v3.0.</p>
       <p>&copy; 2026 NextFour</p>
+      </>
+      ) : (
+        <p>&copy; 2026 NextFour. All rights reserved.</p>
+      )}
     </div>
   </footer>
 </Base>

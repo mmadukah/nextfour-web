@@ -4,13 +4,17 @@
 interface Props {
   heading?: string;
   text?: string;
-  /** The outlined "Search all clubs" button; the finder itself leaves it off. */
+  /** The outlined second button; the finder itself leaves it off. */
   search?: boolean;
+  getLabel?: string;
+  secondLabel?: string;
 }
 const {
   heading = "See who's going before you go.",
   text = 'Get the NextFour app to join a club night, or search every club by postcode, town or name.',
   search = true,
+  getLabel = 'Get the app',
+  secondLabel = 'Search all clubs',
 } = Astro.props;
 ---
 
@@ -20,8 +24,8 @@ const {
     <p>{text}</p>
   </div>
   <div class="actions">
-    <a class="go" href="/get.html">Get the app</a>
-    {search && <a class="ghost" href="/badminton.html">Search all clubs</a>}
+    <a class="go" href="/get.html">{getLabel}</a>
+    {search && <a class="ghost" href="/badminton.html">{secondLabel}</a>}
   </div>
 </section>
 

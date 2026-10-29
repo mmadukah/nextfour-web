@@ -21,6 +21,8 @@ interface Props {
   canonicalPath?: string;
   /** False for the pages that are still dark only (the app hand-off pages). */
   themed?: boolean;
+  /** Other language versions, as hreflang links (absolute URLs). */
+  alternates?: { hreflang: string; href: string }[];
 }
 const {
   title,
@@ -31,6 +33,7 @@ const {
   ogType = 'website',
   canonicalPath,
   themed = true,
+  alternates = [],
 } = Astro.props;
 
 const ogLocales: Record<string, string> = { en: 'en_GB', fr: 'fr_FR' };
@@ -61,6 +64,7 @@ const social = ogDescription ?? description;
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
     <link rel="canonical" href={canonical} />
+    {alternates.map((a) => <link rel="alternate" hreflang={a.hreflang} href={a.href} />)}
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
