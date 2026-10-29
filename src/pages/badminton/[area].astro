@@ -1,0 +1,135 @@
+---
+// One page per council area with at least two published clubs:
+// /badminton/<area>.html, written for "badminton in <town>" searches.
+//
+// One static list, never paginated. The day filter runs in the browser and
+// only hides cards, so every club is in the HTML for crawlers.
+import Directory from '../../layouts/Directory.astro';
+import {
+  getDirectory, nearbyAreas, weeklyNights, dayText, timeText, checkedText,
+  DAY_NAMES, type Area,
+} from '../../data/directory';
+
+export async function getStaticPaths() {
+  const dir = await getDirectory();
+  return dir.areas.filter((a) => a.hasPage).map((area) => ({
+    params: { area: area.slug },
+    props: { area },
+  }));
+}
+
+const { area } = Astro.props as { area: Area };
+const dir = await getDirectory();
+const nights = weeklyNights(area.clubs);
+const nearby = nearbyAreas(dir, area);
+const site = Astro.site!;
+const newest = area.clubs.map((c) => c.lastChecked?.getTime() ?? 0).reduce((a, b) => Math.max(a, b), 0);
+const checked = newest ? checkedText(new Date(newest)) : null;
+const playsOn = new Set(area.clubs.flatMap((c) => c.nights.flatMap((n) => n.days)));
+const weekOrder = [1, 2, 3, 4, 5, 6, 0];
+
+const title = `Badminton in ${area.name}: ${area.clubs.length} clubs and club nights | NextFour`;
+const description =
+  `Where to play badminton in ${area.name}: ${area.clubs.length} clubs and ${nights} club nights a week, ` +
+  `with days, times, venues, levels and visitor terms.${checked ? ` Updated ${checked}.` : ''}`;
+
+const listLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: `Badminton clubs in ${area.name}`,
+  numberOfItems: area.clubs.length,
+  itemListElement: area.clubs.map((c, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    url: new URL(c.url, site).href,
+    name: c.name,
+  })),
+};
+
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Badminton', href: '/badminton.html' },
+  { name: area.name, href: area.url },
+];
+---
+
+<Directory title={title} description={description} crumbs={crumbs} jsonLd={[listLd]}>
+  <style>
+    .days { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0; }
+    .days button {
+      font: inherit; font-weight: 700; font-size: 0.9rem; cursor: pointer;
+      background: var(--card); color: var(--ink); border: 1px solid var(--border);
+      border-radius: 999px; padding: 6px 14px;
+    }
+    .days button[aria-pressed='true'] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+    .clubs { display: grid; gap: 12px; }
+    .club h3 { font-family: var(--head); font-weight: 800; font-size: 1.1rem; margin: 0 0 4px; }
+    .club h3 a { color: var(--ink); text-decoration: none; }
+    .club h3 a:hover { color: var(--accent); }
+    .club .venue { color: var(--muted); font-size: 0.92rem; margin: 0 0 8px; }
+    .club ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; }
+    .club li { font-size: 0.95rem; display: grid; grid-template-columns: 6.5rem 1fr; gap: 0 10px; }
+    .club .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .near { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+    .near a { font-weight: 700; }
+    .empty { display: none; }
+  </style>
+
+  <h1>Badminton in {area.name}</h1>
+  <p class="lead">
+    {area.clubs.length} badminton clubs run {nights} club nights a week in {area.name}.
+    Every club below lists its nights, times, venue and level{checked ? `, checked as recently as ${checked}` : ''}.
+  </p>
+
+  <div class="days" role="group" aria-label="Show clubs that play on">
+    <button type="button" data-day="" aria-pressed="true">Any day</button>
+    {weekOrder.filter((d) => playsOn.has(d)).map((d) => (
+      <button type="button" data-day={d} aria-pressed="false">{DAY_NAMES[d]}</button>
+    ))}
+  </div>
+
+  <div class="clubs">
+    {area.clubs.map((c) => (
+      <article class="card club" data-days={[...new Set(c.nights.flatMap((n) => n.days))].join(',')}>
+        <h3><a href={c.url}>{c.name}</a></h3>
+        <p class="venue">{c.venue.name}</p>
+        <ul>
+          {c.nights.map((n) => <li><b>{dayText(n)}</b><span>{timeText(n)}<span class="muted">, {n.levels}</span></span></li>)}
+        </ul>
+        <div class="tags">
+          {c.claimed && <span class="chip lime">Runs on NextFour</span>}
+          {!c.takingNewPlayers && <span class="chip warn">Not taking new players</span>}
+          {c.visitorPolicy && <span class="chip">Visitor terms listed</span>}
+        </div>
+      </article>
+    ))}
+  </div>
+  <p class="empty muted" id="empty">No club here plays on that day. Try another day or a nearby area.</p>
+
+  {nearby.length > 0 && (
+    <>
+      <h2>Badminton near {area.name}</h2>
+      <p class="near">{nearby.map((a) => <a href={a.url}>{a.name}</a>)}</p>
+    </>
+  )}
+
+  <h2>Find a club night anywhere</h2>
+  <p class="muted">Search every club by postcode, town or name on the <a href="/badminton.html">badminton club finder</a>, or get the NextFour app to see who's going and join in.</p>
+
+  <script>
+    const buttons = document.querySelectorAll<HTMLButtonElement>('.days button');
+    const cards = document.querySelectorAll<HTMLElement>('.club');
+    const empty = document.getElementById('empty')!;
+    buttons.forEach((b) => b.addEventListener('click', () => {
+      buttons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      const day = b.dataset.day ?? '';
+      let shown = 0;
+      cards.forEach((c) => {
+        const on = day === '' || (c.dataset.days ?? '').split(',').includes(day);
+        c.hidden = !on;
+        if (on) shown++;
+      });
+      empty.style.display = shown ? 'none' : 'block';
+    }));
+  </script>
+</Directory>

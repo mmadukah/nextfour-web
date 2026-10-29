@@ -1,0 +1,226 @@
+---
+// One page per published club: /badminton/<area>/<club>.html
+//
+// Shows what a player needs before turning up (nights, times, venue, level,
+// visitor terms, whether it is taking new players) and when that was last
+// checked. Contact details stay in the app; the club's own site and social
+// pages are linked instead. The summary is written here from the facts,
+// never the stored description, which can name where the club was found.
+import Directory from '../../../layouts/Directory.astro';
+import {
+  getDirectory, dayText, timeText, clubDaysText, checkedText, townOf,
+  nearbyClubs, nextDate, DAY_NAMES, type Club,
+} from '../../../data/directory';
+import { PLAY_URL, APP_STORE_URL } from '../../../store-links';
+
+export async function getStaticPaths() {
+  const dir = await getDirectory();
+  return dir.clubs.map((club) => ({
+    params: { area: club.areaSlug, club: club.slug },
+    props: { club },
+  }));
+}
+
+const { club } = Astro.props as { club: Club };
+const dir = await getDirectory();
+const area = dir.areas.find((a) => a.slug === club.areaSlug)!;
+const town = townOf(club.venue, club.areaName);
+const days = clubDaysText(club);
+const checked = checkedText(club.lastChecked);
+const nearby = nearbyClubs(dir, club);
+const site = Astro.site!;
+const pageUrl = new URL(club.url, site).href;
+
+const venues = [...new Map(club.nights.map((n) => [n.venue.name, n.venue])).values()];
+const otherVenues = venues.filter((v) => v.name !== club.venue.name);
+
+const title = `${club.name}, ${town} | Badminton club nights and times`;
+const description = [
+  `${club.name} plays badminton at ${club.venue.name}${days ? ` on ${days}` : ''}.`,
+  'Times, levels, visitor terms and how to join.',
+  checked ? `Checked ${checked}.` : '',
+].filter(Boolean).join(' ');
+
+const summary = [
+  `${club.name} is a badminton club in ${club.areaName}.`,
+  `It plays at ${club.venue.name}${otherVenues.length ? ` and ${otherVenues.length === 1 ? otherVenues[0].name : `${otherVenues.length} other venues`}` : ''}${days ? ` on ${days}` : ''}.`,
+  club.levels !== 'All levels' ? `Sessions are for ${club.levels.toLowerCase()} players.` : '',
+  club.courts ? `It plays on ${club.courts} court${club.courts === 1 ? '' : 's'}.` : '',
+].filter(Boolean).join(' ');
+
+const playUrl = PLAY_URL
+  ? `${PLAY_URL}&referrer=${encodeURIComponent('utm_source=nextfour.app&utm_medium=directory&utm_campaign=club')}`
+  : null;
+const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${club.venue.lat},${club.venue.lng}`;
+const correction = `mailto:clubs@nextfour.app?subject=${encodeURIComponent(`Correction: ${club.name}`)}&body=${encodeURIComponent(`Page: ${pageUrl}\n\nWhat needs changing:\n`)}`;
+
+// schema.org: the club, where it plays, and each weekly night as an event
+// series with its next date (the site rebuilds nightly, so it stays true).
+const today = new Date();
+const placeLd = (v: typeof club.venue) => ({
+  '@type': 'SportsActivityLocation',
+  name: v.name,
+  ...(v.address ? { address: v.address } : {}),
+  geo: { '@type': 'GeoCoordinates', latitude: v.lat, longitude: v.lng },
+});
+const clubLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SportsClub',
+  '@id': `${pageUrl}#club`,
+  name: club.name,
+  url: pageUrl,
+  sport: 'Badminton',
+  description: summary,
+  location: placeLd(club.venue),
+  ...(club.venue.address ? { address: club.venue.address } : {}),
+  geo: { '@type': 'GeoCoordinates', latitude: club.venue.lat, longitude: club.venue.lng },
+  ...(club.links.length ? { sameAs: club.links.map((l) => l.href) } : {}),
+  areaServed: club.areaName,
+};
+const eventsLd = club.nights.filter((n) => n.days.length > 0).flatMap((n) => n.days.map((d) => ({
+  '@context': 'https://schema.org',
+  '@type': 'SportsEvent',
+  name: `${club.name}: ${DAY_NAMES[d]} club night`,
+  sport: 'Badminton',
+  startDate: `${nextDate(d, today)}T${n.start}`,
+  ...(n.end ? { endDate: `${nextDate(d, today)}T${n.end}` } : {}),
+  eventStatus: 'https://schema.org/EventScheduled',
+  eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+  eventSchedule: {
+    '@type': 'Schedule',
+    repeatFrequency: 'P1W',
+    byDay: `https://schema.org/${DAY_NAMES[d]}`,
+    startTime: n.start,
+    ...(n.end ? { endTime: n.end } : {}),
+    scheduleTimezone: 'Europe/London',
+  },
+  location: placeLd(n.venue),
+  organizer: { '@type': 'SportsOrganization', name: club.name, url: pageUrl },
+  url: pageUrl,
+})));
+
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Badminton', href: '/badminton.html' },
+  ...(area.hasPage ? [{ name: area.name, href: area.url }] : []),
+  { name: club.name, href: club.url },
+];
+---
+
+<Directory title={title} description={description} crumbs={crumbs} jsonLd={[clubLd, ...eventsLd]}>
+  <style>
+    .badges { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 18px; }
+    .nights { display: grid; gap: 10px; }
+    .night { display: grid; grid-template-columns: 1fr auto; gap: 4px 16px; align-items: start; }
+    .night .when { font-weight: 800; font-size: 1.05rem; }
+    .night .time { font-family: var(--head); font-weight: 800; color: var(--accent); white-space: nowrap; }
+    .night .meta { grid-column: 1 / -1; color: var(--muted); font-size: 0.92rem; display: flex; flex-wrap: wrap; gap: 6px 14px; }
+    .grid2 { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    dl { margin: 0; }
+    dt { font-weight: 800; margin-top: 10px; }
+    dt:first-child { margin-top: 0; }
+    dd { margin: 2px 0 0; color: var(--muted); }
+    .app { margin-top: 36px; border-color: #3d5214; background: linear-gradient(135deg, #1b2a12, var(--card)); }
+    .app h2 { margin-top: 0; }
+    .stores { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    .links a { display: inline-block; margin: 0 14px 6px 0; font-weight: 700; }
+    .nearby { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+    .nearby a { font-weight: 700; text-decoration: none; }
+    .nearby a:hover { text-decoration: underline; }
+  </style>
+
+  <h1>{club.name}</h1>
+  <p class="lead">{summary}</p>
+  <div class="badges">
+    {club.claimed && <span class="chip lime">Runs its nights on NextFour</span>}
+    {!club.takingNewPlayers && <span class="chip warn">Not taking new players right now</span>}
+    {checked && <span class="chip">Last checked {checked}</span>}
+  </div>
+
+  <h2>Club nights</h2>
+  <div class="nights">
+    {club.nights.map((n) => (
+      <div class="card night">
+        <div class="when">{dayText(n)}</div>
+        <div class="time">{timeText(n)}</div>
+        <div class="meta">
+          <span>{n.venue.name}</span>
+          <span>{n.levels}</span>
+          {n.price && <span>{n.price}</span>}
+          {club.takingNewPlayers && !n.takingNewPlayers && <span class="chip warn">Members only</span>}
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <div class="grid2" style="margin-top: 14px">
+    {(club.visitorPolicy || club.fees || !club.takingNewPlayers) && (
+      <div class="card">
+        <dl>
+          {!club.takingNewPlayers && (<><dt>New players</dt><dd>Not taking new players right now.</dd></>)}
+          {club.visitorPolicy && (<><dt>Visitors</dt><dd>{club.visitorPolicy}</dd></>)}
+          {club.fees && (<><dt>Costs</dt><dd>{club.fees}</dd></>)}
+        </dl>
+      </div>
+    )}
+    <div class="card">
+      <dl>
+        {venues.map((v) => (
+          <>
+            <dt>{v.name}</dt>
+            {v.address && <dd>{v.address}</dd>}
+          </>
+        ))}
+      </dl>
+      <p class="small" style="margin: 10px 0 0"><a href={mapsUrl} rel="noopener" target="_blank">Directions</a></p>
+    </div>
+  </div>
+
+  {club.links.length > 0 && (
+    <>
+      <h2>Contact the club</h2>
+      <p class="links">
+        {club.links.map((l) => <a href={l.href} rel="noopener" target="_blank">{l.label}</a>)}
+      </p>
+    </>
+  )}
+
+  <section class="card app">
+    {club.claimed ? (
+      <>
+        <h2>Join {club.name} in the NextFour app</h2>
+        <p class="muted">See who's going tonight, ask to join, and get your turn to pick on your phone. Find the club in the app after installing.</p>
+      </>
+    ) : (
+      <>
+        <h2>See who's going, in the NextFour app</h2>
+        <p class="muted">Follow {club.name} to hear when it adds a session, and find other club nights near you. Search for the club in the app after installing.</p>
+      </>
+    )}
+    <div class="stores">
+      {playUrl && <a class="btn primary" href={playUrl}>Get it on Google Play</a>}
+      {APP_STORE_URL && <a class="btn" href={APP_STORE_URL}>Download on the App Store</a>}
+    </div>
+    <p class="small muted" style="margin: 16px 0 0">
+      {club.claimed
+        ? <>Run this club? Edit its nights in the NextFour app.</>
+        : <>Run this club? Claim it in the app to keep these times right and run your club night with a digital pegboard. Running a pegboard night is free. <a href="/how-it-works.html">How it works</a></>}
+    </p>
+  </section>
+
+  {nearby.length > 0 && (
+    <>
+      <h2>Other badminton clubs nearby</h2>
+      <ul class="nearby">
+        {nearby.map(({ club: c, km }) => (
+          <li><a href={c.url}>{c.name}</a> <span class="muted small">{c.areaName}, {km < 1 ? 'under 1' : Math.round(km)} km</span></li>
+        ))}
+      </ul>
+      {area.hasPage && <p><a href={area.url}>All badminton in {area.name}</a></p>}
+    </>
+  )}
+
+  <p class="small muted" style="margin-top: 32px">
+    Something wrong on this page? <a href={correction}>Suggest a correction</a>.
+  </p>
+</Directory>

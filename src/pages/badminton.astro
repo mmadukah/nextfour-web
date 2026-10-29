@@ -1,0 +1,247 @@
+---
+// /badminton.html: the club finder, and the hub every area page hangs off.
+//
+// Search runs in the browser over /badminton/search-index.json. A postcode is
+// placed with /postcode-districts.json (shipped with the site, OGL), so it
+// never leaves the visitor's device; "Near me" uses the browser's location
+// prompt. Below the finder, every area is a plain link, so crawlers reach
+// every page without running any script.
+import Directory from '../layouts/Directory.astro';
+import { getDirectory, weeklyNights } from '../data/directory';
+
+const dir = await getDirectory();
+const withPage = dir.areas.filter((a) => a.hasPage);
+const single = dir.areas.filter((a) => !a.hasPage).flatMap((a) => a.clubs);
+const nations = ['England', 'Scotland', 'Wales', 'Northern Ireland']
+  .map((n) => ({ name: n, areas: withPage.filter((a) => a.nation === n) }))
+  .filter((n) => n.areas.length > 0);
+const nights = weeklyNights(dir.clubs);
+const site = Astro.site!;
+
+const title = 'Badminton clubs near you: find a club night | NextFour';
+const description =
+  `Find badminton near you: ${dir.clubs.length} clubs and ${nights} weekly club nights across the UK, ` +
+  'with days, times, venues, levels and visitor terms. Search by postcode or town.';
+
+const siteLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'Badminton clubs in the UK',
+  url: new URL('/badminton.html', site).href,
+  description,
+};
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Badminton', href: '/badminton.html' },
+];
+---
+
+<Directory title={title} description={description} crumbs={crumbs} jsonLd={[siteLd]}>
+  <style>
+    form.find { display: grid; gap: 10px; margin: 20px 0 8px; }
+    .row { display: flex; flex-wrap: wrap; gap: 10px; }
+    .row > * { flex: 1 1 160px; }
+    input[type='search'], select {
+      font: inherit; color: var(--ink); background: var(--card);
+      border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; min-width: 0;
+    }
+    input[type='search'] { flex: 3 1 260px; font-size: 1.05rem; }
+    input[type='search']:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .btn { cursor: pointer; font: inherit; font-weight: 800; }
+    label.check { display: flex; align-items: center; gap: 8px; color: var(--muted); flex: 0 1 auto; }
+    #status { color: var(--muted); min-height: 1.5em; margin: 6px 0 12px; }
+    #results { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+    #results li a { display: block; text-decoration: none; color: var(--ink); }
+    #results li a:hover strong { color: var(--accent); }
+    #results strong { font-family: var(--head); font-weight: 800; font-size: 1.05rem; }
+    #results .sub { color: var(--muted); font-size: 0.92rem; }
+    .areas { columns: 3 200px; column-gap: 24px; padding: 0; margin: 0; list-style: none; }
+    .areas li { break-inside: avoid; margin: 0 0 6px; }
+    .areas a { text-decoration: none; font-weight: 700; }
+    .areas a:hover { text-decoration: underline; }
+    .areas .muted { font-size: 0.85rem; }
+  </style>
+
+  <h1>Find badminton near you</h1>
+  <p class="lead">
+    {dir.clubs.length} badminton clubs and {nights} club nights a week across the UK, each with its days,
+    times, venue and level. Search by postcode, town or club name.
+  </p>
+
+  <form class="find" id="find" role="search" onsubmit="return false">
+    <div class="row">
+      <input type="search" id="q" name="q" placeholder="Postcode, town or club name" aria-label="Postcode, town or club name" autocomplete="postal-code" />
+      <button type="button" class="btn" id="near">Near me</button>
+    </div>
+    <div class="row">
+      <select id="day" aria-label="Day">
+        <option value="">Any day</option>
+        <option value="1">Monday</option><option value="2">Tuesday</option>
+        <option value="3">Wednesday</option><option value="4">Thursday</option>
+        <option value="5">Friday</option><option value="6">Saturday</option>
+        <option value="0">Sunday</option>
+      </select>
+      <select id="level" aria-label="Level">
+        <option value="">Any level</option>
+        <option value="1">Beginner</option><option value="2">Intermediate</option>
+        <option value="3">Upper intermediate</option><option value="4">Advanced</option>
+      </select>
+      <label class="check"><input type="checkbox" id="open" /> Taking new players</label>
+    </div>
+  </form>
+  <p id="status" aria-live="polite"></p>
+  <ul id="results"></ul>
+
+  {nations.map((n) => (
+    <>
+      <h2>Badminton in {n.name}</h2>
+      <ul class="areas">
+        {n.areas.map((a) => (
+          <li><a href={a.url}>{a.name}</a> <span class="muted">{a.clubs.length} clubs</span></li>
+        ))}
+      </ul>
+    </>
+  ))}
+
+  {single.length > 0 && (
+    <>
+      <h2>More clubs</h2>
+      <ul class="areas">
+        {single.map((c) => (
+          <li><a href={c.url}>{c.name}</a> <span class="muted">{c.areaName}</span></li>
+        ))}
+      </ul>
+    </>
+  )}
+
+  <script>
+    type Row = { n: string; u: string; a: string; v: string; lat: number; lng: number; d: number[]; l: [number, number]; o: number; x: number };
+    const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const POSTCODE = /^([A-Z]{1,2}\d[A-Z\d]?)(\s*\d[A-Z]{2})?$/i;
+    const RADIUS_KM = 25;
+
+    const q = document.getElementById('q') as HTMLInputElement;
+    const day = document.getElementById('day') as HTMLSelectElement;
+    const level = document.getElementById('level') as HTMLSelectElement;
+    const open = document.getElementById('open') as HTMLInputElement;
+    const status = document.getElementById('status')!;
+    const results = document.getElementById('results')!;
+
+    let rows: Row[] | null = null;
+    let districts: [string, number, number, string][] | null = null;
+    let origin: { lat: number; lng: number; label: string } | null = null;
+
+    async function index(): Promise<Row[]> {
+      rows ??= await (await fetch('/badminton/search-index.json')).json();
+      return rows!;
+    }
+    async function postcodes() {
+      districts ??= await (await fetch('/postcode-districts.json')).json();
+      return districts!;
+    }
+    function km(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
+      const r = Math.PI / 180;
+      const h = Math.sin(((b.lat - a.lat) * r) / 2) ** 2 +
+        Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(((b.lng - a.lng) * r) / 2) ** 2;
+      return 12742 * Math.asin(Math.sqrt(h));
+    }
+    function norm(s: string) { return s.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, ' ').trim(); }
+    function esc(s: string) {
+      return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
+    }
+
+    /**
+     * Where the text points: a postcode district, a council area with clubs,
+     * or a locality the district table names ("Croydon, Addiscombe, ...").
+     */
+    async function place(text: string) {
+      const t = text.trim();
+      const m = POSTCODE.exec(t.replace(/\s+/g, ' '));
+      const list = await postcodes();
+      if (m) {
+        const hit = list.find((d) => d[0] === m[1].toUpperCase());
+        if (hit) return { lat: hit[1], lng: hit[2], label: hit[0] };
+      }
+      const inArea = (await index()).filter((r) => norm(r.a) === norm(t));
+      if (inArea.length) {
+        return {
+          lat: inArea.reduce((s, r) => s + r.lat, 0) / inArea.length,
+          lng: inArea.reduce((s, r) => s + r.lng, 0) / inArea.length,
+          label: inArea[0].a,
+        };
+      }
+      const town = list.filter((d) => d[3].split(',').some((part) => norm(part) === norm(t)));
+      if (town.length) {
+        return {
+          lat: town.reduce((s, d) => s + d[1], 0) / town.length,
+          lng: town.reduce((s, d) => s + d[2], 0) / town.length,
+          label: t.replace(/\b\w/g, (c) => c.toUpperCase()),
+        };
+      }
+      return null;
+    }
+
+    function passes(r: Row) {
+      if (day.value !== '' && !r.d.includes(Number(day.value))) return false;
+      if (level.value !== '') {
+        const l = Number(level.value);
+        if (l < r.l[0] || l > r.l[1]) return false;
+      }
+      return !open.checked || r.o === 1;
+    }
+
+    function render(list: { r: Row; dist?: number }[], heading: string) {
+      status.textContent = heading;
+      results.innerHTML = list.slice(0, 40).map(({ r, dist }) => `
+        <li class="card"><a href="${esc(r.u)}">
+          <strong>${esc(r.n)}</strong>
+          <div class="sub">${esc(r.v)}, ${esc(r.a)}${dist != null ? ` · ${dist < 1 ? 'under 1' : Math.round(dist)} km` : ''}</div>
+          <div class="sub">${r.d.map((d) => DAYS[d]).join(', ')}${r.o ? '' : ' · not taking new players'}${r.x ? ' · runs on NextFour' : ''}</div>
+        </a></li>`).join('');
+    }
+
+    async function run() {
+      const all = await index();
+      const text = q.value.trim();
+      if (!text && !origin) { status.textContent = ''; results.innerHTML = ''; return; }
+      const where = origin ?? (text ? await place(text) : null);
+      if (where) {
+        const near = all.filter(passes)
+          .map((r) => ({ r, dist: km(where, r) }))
+          .filter((x) => x.dist <= RADIUS_KM)
+          .sort((a, b) => a.dist - b.dist);
+        render(near, near.length
+          ? `${near.length} club${near.length === 1 ? '' : 's'} within ${RADIUS_KM} km of ${where.label}`
+          : `No clubs within ${RADIUS_KM} km of ${where.label} match. Try fewer filters.`);
+        return;
+      }
+      const words = norm(text).split(' ').filter(Boolean);
+      const found = all.filter(passes).filter((r) => {
+        const hay = norm(`${r.n} ${r.v} ${r.a}`);
+        return words.every((w) => hay.includes(w));
+      }).map((r) => ({ r }));
+      render(found, found.length
+        ? `${found.length} club${found.length === 1 ? '' : 's'} matching “${text}”`
+        : `Nothing matches “${text}”. Try a postcode or a nearby town.`);
+    }
+
+    let timer: number | undefined;
+    q.addEventListener('input', () => {
+      origin = null;
+      clearTimeout(timer);
+      timer = window.setTimeout(run, 250);
+    });
+    [day, level, open].forEach((el) => el.addEventListener('change', run));
+    document.getElementById('near')!.addEventListener('click', () => {
+      if (!navigator.geolocation) { status.textContent = 'Your browser cannot share its location.'; return; }
+      status.textContent = 'Finding you…';
+      navigator.geolocation.getCurrentPosition(
+        (p) => { origin = { lat: p.coords.latitude, lng: p.coords.longitude, label: 'you' }; q.value = ''; run(); },
+        () => { status.textContent = 'Location was not shared. Try a postcode instead.'; },
+        { maximumAge: 600000, timeout: 10000 },
+      );
+    });
+    const initial = new URLSearchParams(location.search).get('q');
+    if (initial) { q.value = initial; run(); }
+  </script>
+</Directory>

@@ -41,6 +41,8 @@ type Strings = {
     body: string;
     night: string;
     calloutHead: string;
+    /** Link text for the badminton club finder (English-only pages). */
+    find: string;
     calloutBody: string;
     shot: Shot;
   };
@@ -59,7 +61,7 @@ type Strings = {
   steps: Step[];
   closingHead: string;
   closingSub: string;
-  nav: { howItWorks: string; support: string; privacy: string; terms: string; delete: string };
+  nav: { clubs: string; howItWorks: string; support: string; privacy: string; terms: string; delete: string };
   questions: string;
   copyright: string;
 };
@@ -88,6 +90,7 @@ const content: Record<string, Strings> = {
       body: 'Search club nights and sessions near you by sport, on a list or a map. See the day, the time and the venue before you turn up, and follow the ones you like.',
       night: 'On the night, check in from your phone, see who’s on and who’s next and, on pegboard nights, get a nudge when it’s your turn to pick.',
       calloutHead: 'Your club might already be here.',
+      find: 'Find badminton clubs near you',
       calloutBody: 'We list club nights that aren’t on NextFour yet. If yours is one of them, show your organiser: they can claim it and run the night from the app.',
       shot: { src: '/screens/map.webp', alt: 'The Discover map with session pins across south London' },
     },
@@ -147,7 +150,7 @@ const content: Record<string, Strings> = {
     ],
     closingHead: 'Less faff at the door. More time on court.',
     closingSub: 'Be one of the first clubs to run their nights on NextFour.',
-    nav: { howItWorks: 'How it works', support: 'Support', privacy: 'Privacy', terms: 'Terms', delete: 'Account & Data Deletion' },
+    nav: { clubs: 'Badminton clubs', howItWorks: 'How it works', support: 'Support', privacy: 'Privacy', terms: 'Terms', delete: 'Account & Data Deletion' },
     questions: 'Questions? Email',
     copyright: '© 2026 NextFour. All rights reserved.',
   },
@@ -174,6 +177,7 @@ const content: Record<string, Strings> = {
       body: 'Cherchez les soirées de club et les sessions près de chez vous par sport, en liste ou sur une carte. Voyez le jour, l’heure et le lieu avant de venir, et suivez celles qui vous plaisent.',
       night: 'Le soir venu, enregistrez-vous depuis votre téléphone, voyez qui joue et qui suit et, les soirs de tableau, recevez une notification quand c’est à vous de choisir.',
       calloutHead: 'Votre club y est peut-être déjà.',
+      find: 'Trouver un club de badminton au Royaume-Uni',
       calloutBody: 'Nous répertorions des soirées de club qui ne sont pas encore sur NextFour. Si la vôtre en fait partie, montrez-la à la personne qui l’organise : elle peut la revendiquer et gérer la soirée depuis l’application.',
       shot: { src: '/screens/map.webp', alt: 'La carte Découvrir avec des sessions dans le sud de Londres' },
     },
@@ -233,7 +237,7 @@ const content: Record<string, Strings> = {
     ],
     closingHead: 'Moins de tracas à l’entrée. Plus de temps sur le terrain.',
     closingSub: 'Soyez parmi les premiers clubs à gérer leurs soirées avec NextFour.',
-    nav: { howItWorks: 'Comment ça marche', support: 'Assistance', privacy: 'Confidentialité', terms: 'Conditions', delete: 'Suppression du compte et des données' },
+    nav: { clubs: 'Clubs de badminton', howItWorks: 'Comment ça marche', support: 'Assistance', privacy: 'Confidentialité', terms: 'Conditions', delete: 'Suppression du compte et des données' },
     questions: 'Des questions ? Écrivez à',
     copyright: '© 2026 NextFour. Tous droits réservés.',
   },
@@ -602,6 +606,7 @@ const alternates = [
         <div class="callout">
           <strong>{s.players.calloutHead}</strong>
           <p>{s.players.calloutBody}</p>
+          <p><a href="/badminton.html">{s.players.find}</a></p>
         </div>
       </div>
     </div>
@@ -717,6 +722,7 @@ const alternates = [
       <div class="cols">
         <div class="brand">NextFour</div>
         <nav>
+          <a href="/badminton.html">{s.nav.clubs}</a>
           <a href={getRelativeLocaleUrl(lang, 'how-it-works.html')}>{s.nav.howItWorks}</a>
           <a href={getRelativeLocaleUrl(lang, 'support.html')}>{s.nav.support}</a>
           <a href={getRelativeLocaleUrl(lang, 'privacy.html')}>{s.nav.privacy}</a>
