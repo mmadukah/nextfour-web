@@ -80,7 +80,7 @@ const content: Record<string, Strings> = {
   en: {
     title: 'NextFour: Find a game, run your club night',
     description:
-      'NextFour is the app for racket sport club nights. Find badminton, squash, tennis, padel and table tennis sessions near you, or run your club night with live courts, a digital pegboard and fair picks.',
+      'NextFour is the app for racket sport club nights. Find badminton, squash, tennis, padel and table tennis near you, or run your night with a digital pegboard.',
     ogDescription:
       'Find a game near you, or run your club night: live courts, a digital pegboard and fair picks, all in one app.',
     heroLine1: 'Find a game.',
@@ -175,7 +175,7 @@ const content: Record<string, Strings> = {
   fr: {
     title: 'NextFour : Trouvez un match, gérez votre soirée de club',
     description:
-      'NextFour est l’application des soirées de club de sports de raquette. Trouvez des sessions de badminton, squash, tennis, padel et tennis de table près de chez vous, ou gérez votre soirée de club avec des terrains en direct, un tableau numérique et des sélections équitables.',
+      'NextFour, l’appli des soirées de club de raquette : trouvez du badminton, du squash ou du padel près de chez vous, ou gérez la soirée sur un tableau numérique.',
     ogDescription:
       'Trouvez un match près de chez vous, ou gérez votre soirée de club : terrains en direct, tableau numérique et sélections équitables, dans une seule application.',
     heroLine1: 'Trouvez un match.',
@@ -271,6 +271,8 @@ const content: Record<string, Strings> = {
 
 const s = content[lang] ?? content.en;
 const fr = lang === 'fr';
+// Each store's badge in the page's language (Apple's French one is still to come).
+const playBadge = fr ? '/badges/google-play-fr.png' : '/badges/google-play.png';
 const localeHome = (loc: string) => (loc === 'en' ? '/' : `/${loc}/`);
 const languages = locales.map((loc) => ({ lang: loc, label: localeNames[loc], href: localeHome(loc) }));
 const site = Astro.site!;
@@ -334,7 +336,7 @@ const siteLd = {
       </div>
       <div class="stores">
         {appStore && <a href={appStore} aria-label={s.ctaAppStore}><img class="apple" src="/badges/app-store.svg" alt="" width="162" height="54" /></a>}
-        {play && <a href={play} aria-label={s.ctaPlay}><img class="google" src="/badges/google-play.png" alt="" width="207" height="80" /></a>}
+        {play && <a href={play} aria-label={s.ctaPlay}><img class="google" src={playBadge} alt="" width="207" height="80" /></a>}
       </div>
       <div class="built">
         <p>{s.sportsLead}</p>
@@ -442,7 +444,7 @@ const siteLd = {
         <p>{s.closingSub}</p>
         <div class="stores">
           {appStore && <a href={appStore} aria-label={s.ctaAppStore}><img class="apple" src="/badges/app-store.svg" alt="" width="162" height="54" loading="lazy" /></a>}
-          {play && <a href={play} aria-label={s.ctaPlay}><img class="google" src="/badges/google-play.png" alt="" width="207" height="80" loading="lazy" /></a>}
+          {play && <a href={play} aria-label={s.ctaPlay}><img class="google" src={playBadge} alt="" width="207" height="80" loading="lazy" /></a>}
         </div>
       </div>
       <figure class="qr">

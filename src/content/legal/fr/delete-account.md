@@ -1,6 +1,7 @@
 ---
 title: Suppression du compte et des données
 meta: "Dernière mise à jour : 10 octobre 2026"
+description: "Comment supprimer votre compte NextFour et vos données, dans l’application ou par e-mail, ce qui est effacé, et résilier un abonnement avant."
 ---
 
 Cette page explique comment supprimer définitivement votre compte NextFour et toutes les données personnelles associées. NextFour respecte votre droit à l'effacement au titre du Règlement général sur la protection des données du Royaume-Uni (UK GDPR).

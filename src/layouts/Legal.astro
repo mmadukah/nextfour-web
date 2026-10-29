@@ -10,10 +10,11 @@ import { getRelativeLocaleUrl } from 'astro:i18n';
 interface Props {
   title: string;
   meta: string;
+  description?: string;
   lang: string;
   slug: string;
 }
-const { title, meta, lang, slug } = Astro.props;
+const { title, meta, description, lang, slug } = Astro.props;
 const fr = lang === 'fr';
 const fullTitle = fr ? `NextFour : ${title}` : `NextFour: ${title}`;
 
@@ -27,7 +28,7 @@ const languages = [
 ];
 ---
 
-<Directory title={fullTitle} crumbs={crumbs} cta={false} lang={fr ? 'fr' : 'en'} footer="site" languages={languages}>
+<Directory title={fullTitle} description={description} crumbs={crumbs} cta={false} lang={fr ? 'fr' : 'en'} footer="site" languages={languages}>
   <style>
     .page { padding: 28px 0 56px; max-width: 720px; }
     .page .eyebrow { margin: 0 0 10px; }

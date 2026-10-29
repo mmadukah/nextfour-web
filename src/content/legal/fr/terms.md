@@ -1,6 +1,7 @@
 ---
 title: Conditions générales
 meta: "Dernière mise à jour : 10 octobre 2026"
+description: "Les conditions d’utilisation de NextFour : votre compte, les abonnements et paiements, l’usage acceptable, les clubs et sessions, et nous contacter."
 ---
 
 Les présentes Conditions générales (« Conditions ») régissent votre utilisation de l'application mobile NextFour et de tout service associé (ensemble, le « Service ») fourni par NextFour Ltd, société immatriculée en Angleterre et au pays de Galles sous le numéro 17355223, dont le siège social se situe au 167-169 Great Portland Street, 5th Floor, Londres, W1W 5PF, Royaume-Uni (« NextFour », « nous », « notre »). En créant un compte ou en utilisant le Service, vous acceptez les présentes Conditions. Si vous ne les acceptez pas, n'utilisez pas le Service.

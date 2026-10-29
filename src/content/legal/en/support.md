@@ -1,6 +1,7 @@
 ---
 title: Support
 meta: The racket sport club manager.
+description: "Help with NextFour: getting started, clubs, subscriptions and billing, and your account and data, with how to contact our support team."
 ---
 
 Need a hand with NextFour? Most questions are answered below. If you're still stuck, email us and we'll get back to you.

@@ -1,6 +1,7 @@
 ---
 title: Terms & Conditions
 meta: "Last updated: 10 October 2026"
+description: "The terms for using NextFour: your account, subscriptions and payments, acceptable use, club and session features, and how to contact us."
 ---
 
 These Terms & Conditions ("Terms") govern your use of the NextFour mobile application and any related services (together, the "Service") provided by NextFour Ltd, a company registered in England and Wales under company number 17355223, whose registered office is at 167-169 Great Portland Street, 5th Floor, London, W1W 5PF, United Kingdom ("NextFour", "we", "us", "our"). By creating an account or using the Service, you agree to these Terms. If you do not agree, do not use the Service.

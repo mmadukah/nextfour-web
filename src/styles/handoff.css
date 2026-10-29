@@ -1,0 +1,85 @@
+/*
+ * The app hand-off pages (/join, /claim, /club-claim): a single centred card
+ * that gets someone from a link to the app. In the site's colours, light or
+ * dark from the visitor's setting or the toggle's saved choice (Base's
+ * ThemeHead applies it before paint). Imported by each of the three pages.
+ */
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 400 800;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url(/fonts/archivo-latin.woff2) format('woff2');
+}
+:root {
+  color-scheme: light;
+  --bg: #F3F5EF; --surface: #FFFFFF; --line-strong: #B9C4B4;
+  --ink: #12261C; --muted: #50605A; --body: #33443B;
+  --hl-bg: #C8F135; --hl-fg: #12261C; --logo-bg: #12261C; --logo-fg: #C8F135;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --bg: #0F1720; --surface: #18212B; --line-strong: #3E4D5E;
+    --ink: #EEF2F5; --muted: #9EABB8; --body: #C6CFD8;
+    --logo-bg: #C8F135; --logo-fg: #0F1720;
+  }
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #0F1720; --surface: #18212B; --line-strong: #3E4D5E;
+  --ink: #EEF2F5; --muted: #9EABB8; --body: #C6CFD8;
+  --logo-bg: #C8F135; --logo-fg: #0F1720;
+}
+
+body {
+  margin: 0;
+  font-family: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  box-sizing: border-box;
+}
+.card { width: 100%; max-width: 420px; text-align: center; }
+h1 { font-size: 1.75rem; font-weight: 800; font-stretch: 108%; letter-spacing: -0.01em; line-height: 1.15; margin: 0 0 10px; }
+p { color: var(--body); line-height: 1.5; margin: 0 0 24px; }
+.code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: 0.35em;
+  /* Trailing letter-spacing would push it off-centre. */
+  text-indent: 0.35em;
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  margin-bottom: 8px;
+  word-break: break-all;
+}
+.hint { font-size: 0.85rem; color: var(--muted); margin-bottom: 24px; }
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  box-sizing: border-box;
+  padding: 0 20px;
+  border-radius: 999px;
+  background: var(--hl-bg);
+  color: var(--hl-fg);
+  font-weight: 800;
+  text-decoration: none;
+  margin-bottom: 12px;
+}
+.btn:hover { opacity: 0.92; }
+.btn-secondary { background: transparent; color: var(--ink); border: 1.5px solid var(--ink); font-weight: 700; }
+.pending { font-size: 0.95rem; color: var(--ink); margin: 0 0 12px; }
+.steps { margin-top: 24px; font-size: 0.85rem; color: var(--muted); text-align: left; line-height: 1.5; }
+.steps li { margin-bottom: 6px; }
+[hidden] { display: none !important; }

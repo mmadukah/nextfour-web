@@ -1,6 +1,7 @@
 ---
 title: Assistance
 meta: Le gestionnaire de club de sports de raquette.
+description: "Aide pour NextFour : premiers pas, clubs, abonnements et facturation, votre compte et vos données, et comment contacter notre assistance."
 ---
 
 Besoin d'aide avec NextFour ? La plupart des questions trouvent leur réponse ci-dessous. Si vous êtes toujours bloqué, écrivez-nous et nous vous répondrons.

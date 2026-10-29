@@ -19,6 +19,6 @@ const { entry, lang, slug } = Astro.props;
 const { Content } = await render(entry);
 ---
 
-<Legal title={entry.data.title} meta={entry.data.meta} lang={lang} slug={slug}>
+<Legal title={entry.data.title} meta={entry.data.meta} description={entry.data.description} lang={lang} slug={slug}>
   <Content />
 </Legal>

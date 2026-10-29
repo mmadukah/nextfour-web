@@ -10,6 +10,8 @@ const legal = defineCollection({
     // Text shown in the small line under the page heading
     // (e.g. "Last updated: 7 May 2026").
     meta: z.string(),
+    // The page's search result snippet (meta description), 160 characters at most.
+    description: z.string().max(160).optional(),
   }),
 });
 

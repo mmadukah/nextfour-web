@@ -1,6 +1,7 @@
 ---
 title: Politique de confidentialité
 meta: "Dernière mise à jour : 24 octobre 2026"
+description: "Comment NextFour collecte, utilise et protège vos données personnelles selon le RGPD britannique, et comment les consulter, modifier ou supprimer."
 ---
 
 La présente Politique de confidentialité explique comment NextFour (« nous », « notre ») collecte, utilise, conserve et partage vos données personnelles lorsque vous utilisez l'application mobile NextFour et les services associés (le « Service »). Le Service est fourni par NextFour Ltd, société immatriculée en Angleterre et au pays de Galles, et nous nous conformons au Règlement général sur la protection des données du Royaume-Uni (UK GDPR) ainsi qu'au Data Protection Act 2018.

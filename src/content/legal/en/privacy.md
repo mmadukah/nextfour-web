@@ -1,6 +1,7 @@
 ---
 title: Privacy Policy
 meta: "Last updated: 24 October 2026"
+description: "How NextFour collects, uses and protects your personal data under UK GDPR, and how to see, change or delete what we hold about you."
 ---
 
 This Privacy Policy explains how NextFour ("we", "us", "our") collects, uses, stores, and shares your personal data when you use the NextFour mobile application and related services (the "Service"). The Service is provided by NextFour Ltd, a company registered in England and Wales, and we comply with the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018.

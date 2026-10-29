@@ -1,6 +1,7 @@
 ---
 title: Account & Data Deletion
 meta: "Last updated: 10 October 2026"
+description: "How to delete your NextFour account and data, in the app or by email, what is removed, and how to cancel a subscription first."
 ---
 
 This page explains how to permanently delete your NextFour account and all associated personal data. NextFour respects your right to erasure under the UK General Data Protection Regulation (UK GDPR).
