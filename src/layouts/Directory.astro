@@ -8,14 +8,15 @@
 // Every page passes its breadcrumb trail; it is drawn at the top and emitted
 // as schema.org BreadcrumbList, next to whatever JSON-LD the page supplies.
 //
-// Also the frame for How it works (en and fr): `lang` switches the chrome's
-// words, `footer: 'site'` keeps that page's own footer (with the account
-// deletion link) instead of the directory's data notes, and `languages` puts
-// the English/Français pills beside the breadcrumb.
+// Also the frame for the rest of the site (home, How it works, the legal
+// pages, /get.html): `lang` switches the chrome's words, `languages` adds the
+// English/Français pills to the footer, and every page shares one footer (SiteFooter);
+// `footer: 'directory'` adds the directory's data and licence notes to it.
 import Base from './Base.astro';
 import AppFeaturesCompact from '../components/directory/AppFeaturesCompact.astro';
 import ThemeToggle from '../components/ThemeToggle.astro';
 import LogoMark from '../components/LogoMark.astro';
+import SiteFooter from '../components/SiteFooter.astro';
 import '../styles/club-card.css';
 import { getDirectory } from '../data/directory';
 
@@ -31,11 +32,11 @@ interface Props {
   /** The header link marked as the current page. */
   current?: 'finder' | 'how';
   lang?: 'en' | 'fr';
-  /** 'custom' takes the page's own footer from its "footer" slot (the home page). */
-  footer?: 'directory' | 'site' | 'custom';
+  /** 'directory' adds the directory's data and licence notes to the shared footer (SiteFooter). */
+  footer?: 'directory' | 'site';
   /** Full-width main, for a page that lays out its own bands (the home page). */
   bare?: boolean;
-  /** Language versions of this page, for the pills and hreflang links. */
+  /** Language versions of this page, for the footer's pills and the hreflang links. */
   languages?: { lang: string; label: string; href: string }[];
   /** A shorter line for link previews (Base's og:description). */
   ogDescription?: string;
@@ -48,23 +49,16 @@ const WORDS = {
   en: {
     home: 'NextFour home', main: 'Main', crumbs: 'Breadcrumb', foot: 'Footer', language: 'Language',
     homeLink: 'Home', find: 'Find sessions', findShort: 'Find sessions', how: 'How it works', get: 'Get the app',
-    links: [['Home', '/'], ['Badminton clubs', '/badminton.html'], ['How it works', '/how-it-works.html'],
-      ['Privacy', '/privacy.html'], ['Terms', '/terms.html'], ['Support', '/support.html']],
-    deletion: ['Account and data deletion', '/delete-account.html'],
   },
   fr: {
     home: 'Accueil NextFour', main: 'Principal', crumbs: 'Fil d’Ariane', foot: 'Pied de page', language: 'Langue',
     // Short, so the header stays on one line on a phone.
     homeLink: 'Accueil', find: 'Trouver des sessions', findShort: 'Sessions', how: 'Comment ça marche', get: 'Télécharger',
-    links: [['Accueil', '/fr/'], ['Clubs de badminton', '/badminton.html'], ['Comment ça marche', '/fr/how-it-works.html'],
-      ['Politique de confidentialité', '/fr/privacy.html'], ['Conditions générales', '/fr/terms.html'], ['Assistance', '/fr/support.html']],
-    deletion: ['Suppression du compte et des données', '/fr/delete-account.html'],
   },
 }[lang];
 // Drop-in data is the operators' OpenActive feeds, under CC BY 4.0: the footer
 // credits each one, links the licence and says what was changed.
 const operators = footer === 'directory' ? (await getDirectory()).operators : [];
-const footerLinks = footer === 'site' ? [...WORDS.links, WORDS.deletion] : WORDS.links;
 
 const site = Astro.site!;
 const alternates = languages.length
@@ -174,9 +168,6 @@ const ld = crumbs.length > 1 ? [breadcrumbLd, ...jsonLd] : jsonLd;
     nav.crumbs a:hover { color: var(--link-hover); }
     nav.crumbs .sep { margin: 0 8px; }
     .crumb-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; }
-    .langs { display: flex; gap: 6px; padding-top: 28px; font-size: 14px; }
-    .langs a { padding: 2px 10px; border-radius: 999px; border: 1px solid var(--line-strong); text-decoration: none; color: var(--muted); }
-    .langs a[aria-current='true'] { background: var(--chip-bg); color: var(--chip-fg); border-color: var(--chip-bg); font-weight: 700; }
 
     .eyebrow { margin: 0 0 12px; font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--eyebrow); }
     h1 { margin: 0; font-weight: 800; letter-spacing: -0.03em; }
@@ -222,12 +213,6 @@ const ld = crumbs.length > 1 ? [breadcrumbLd, ...jsonLd] : jsonLd;
 
     .note { margin: 20px 0 0; display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); }
 
-    footer.foot { border-top: 1px solid var(--line); }
-    footer.foot .wrap { padding-top: 32px; padding-bottom: 40px; display: flex; flex-direction: column; gap: 16px; font-size: 13px; color: var(--muted); }
-    footer.foot nav { display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 14px; font-weight: 600; }
-    footer.foot nav a { color: var(--body); text-decoration: none; }
-    footer.foot p { margin: 0; max-width: 760px; }
-    footer.foot p a { color: var(--muted); }
 
     @media (max-width: 640px) {
       .stats > div { padding: 14px 12px 12px; }
@@ -270,44 +255,29 @@ const ld = crumbs.length > 1 ? [breadcrumbLd, ...jsonLd] : jsonLd;
           </>
         ))}
       </nav>
-      {languages.length > 0 && (
-        <nav class="langs" aria-label={WORDS.language}>
-          {languages.map((l) => <a href={l.href} lang={l.lang} hreflang={l.lang} aria-current={l.lang === lang ? 'true' : undefined}>{l.label}</a>)}
-        </nav>
-      )}
     </div>
     )}
     <slot />
     {cta && <AppFeaturesCompact />}
   </main>
 
-  {footer === 'custom' ? <slot name="footer" /> : (
-  <footer class="foot">
-    <div class="wrap">
-      <nav aria-label={WORDS.foot}>
-        {footerLinks.map(([label, href]) => <a href={href}>{label}</a>)}
-      </nav>
-      {footer === 'directory' ? (
+  <SiteFooter lang={lang} languages={languages}>
+    {footer === 'directory' && (
       <>
-      <p>
-        Club times come from published information and every page says when it was last checked.
-        Spotted something wrong? Email <a href="mailto:clubs@nextfour.app">clubs@nextfour.app</a>.
-        Clubs can ask for their page to be corrected or removed at the same address.
-      </p>
-      {operators.length > 0 && (
         <p>
-          Drop-in sessions: data from {operators.join(', ')}, published through OpenActive and licensed under
-          {' '}<a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a>.
-          Session titles are shortened and sessions grouped by venue.
+          Club times come from published information and every page says when it was last checked.
+          Spotted something wrong? Email <a href="mailto:clubs@nextfour.app">clubs@nextfour.app</a>.
+          Clubs can ask for their page to be corrected or removed at the same address.
         </p>
-      )}
-      <p>Council areas and postcode districts: contains OS data © Crown copyright and database right 2024; contains Royal Mail data © Royal Mail copyright and database right 2024; source: Office for National Statistics, licensed under the Open Government Licence v3.0.</p>
-      <p>&copy; 2026 NextFour</p>
+        {operators.length > 0 && (
+          <p>
+            Drop-in sessions: data from {operators.join(', ')}, published through OpenActive and licensed under
+            {' '}<a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a>.
+            Session titles are shortened and sessions grouped by venue.
+          </p>
+        )}
+        <p>Council areas and postcode districts: contains OS data © Crown copyright and database right 2024; contains Royal Mail data © Royal Mail copyright and database right 2024; source: Office for National Statistics, licensed under the Open Government Licence v3.0.</p>
       </>
-      ) : (
-        <p>&copy; 2026 NextFour. All rights reserved.</p>
-      )}
-    </div>
-  </footer>
-  )}
+    )}
+  </SiteFooter>
 </Base>

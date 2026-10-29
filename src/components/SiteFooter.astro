@@ -1,0 +1,73 @@
+---
+// The one footer every page shares (through layouts/Directory.astro): the
+// links, the support email and copyright, the social buttons, and the
+// language pills on pages that have a French version. A page adds notes of
+// its own through the slot (the directory's data and licence lines).
+import { INSTAGRAM_URL, FACEBOOK_URL } from '../social-links';
+
+interface Props {
+  lang?: 'en' | 'fr';
+  /** Language versions of this page; pills show when there is more than one. */
+  languages?: { lang: string; label: string; href: string }[];
+}
+const { lang = 'en', languages = [] } = Astro.props;
+
+const WORDS = {
+  en: {
+    label: 'Footer', language: 'Language', questions: 'Questions? Email', copyright: '© 2026 NextFour. All rights reserved.',
+    links: [['Home', '/'], ['Badminton clubs', '/badminton.html'], ['How it works', '/how-it-works.html'], ['Support', '/support.html'],
+      ['Privacy', '/privacy.html'], ['Terms', '/terms.html'], ['Account and data deletion', '/delete-account.html']],
+  },
+  fr: {
+    label: 'Pied de page', language: 'Langue', questions: 'Des questions ? Écrivez à', copyright: '© 2026 NextFour. Tous droits réservés.',
+    links: [['Accueil', '/fr/'], ['Clubs de badminton', '/badminton.html'], ['Comment ça marche', '/fr/how-it-works.html'], ['Assistance', '/fr/support.html'],
+      ['Confidentialité', '/fr/privacy.html'], ['Conditions', '/fr/terms.html'], ['Suppression du compte et des données', '/fr/delete-account.html']],
+  },
+}[lang];
+---
+
+<footer class="foot">
+  <div class="wrap foot-row">
+    <div class="foot-left">
+      <nav aria-label={WORDS.label}>
+        {WORDS.links.map(([label, href]) => <a href={href}>{label}</a>)}
+      </nav>
+      <slot />
+      <p>{WORDS.questions} <a href="mailto:support@nextfour.app">support@nextfour.app</a>. {WORDS.copyright}</p>
+    </div>
+    <div class="foot-right">
+      {INSTAGRAM_URL && (
+        <a class="social" href={INSTAGRAM_URL} rel="noopener" aria-label="NextFour on Instagram">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"></circle></svg>
+        </a>
+      )}
+      {FACEBOOK_URL && (
+        <a class="social" href={FACEBOOK_URL} rel="noopener" aria-label="NextFour on Facebook">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 8.5V6.8c0-.8.2-1.3 1.4-1.3H17V2.3c-.3 0-1.3-.1-2.4-.1-2.4 0-4 1.4-4 4.1v2.2H8v3.6h2.6V22h3.4V12.1h2.6l.4-3.6z"></path></svg>
+        </a>
+      )}
+      {languages.length > 1 && (
+        <nav class="langs-foot" aria-label={WORDS.language}>
+          {languages.map((l) => <a href={l.href} lang={l.lang} hreflang={l.lang} aria-current={l.lang === lang ? 'true' : undefined}>{l.label}</a>)}
+        </nav>
+      )}
+    </div>
+  </div>
+</footer>
+
+<style>
+  .foot { border-top: 1px solid var(--line); }
+  .foot-row { padding-top: 32px; padding-bottom: 40px; display: flex; flex-wrap: wrap; gap: 20px 40px; justify-content: space-between; align-items: flex-start; }
+  .foot-left { display: flex; flex-direction: column; gap: 14px; flex: 999 1 420px; min-width: 0; font-size: 13px; color: var(--muted); }
+  .foot-left nav { display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 14px; font-weight: 600; }
+  .foot-left nav a { color: var(--body); text-decoration: none; }
+  .foot-left nav a:hover { color: var(--link-hover); }
+  .foot-left :global(p) { margin: 0; max-width: 760px; }
+  .foot-left :global(p a) { color: var(--muted); }
+  .foot-right { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .social { width: 44px; height: 44px; border-radius: 999px; border: 1px solid var(--line-strong); display: flex; align-items: center; justify-content: center; color: var(--ink); }
+  .social:hover { border-color: var(--muted); color: var(--ink); }
+  .langs-foot { display: flex; gap: 6px; margin-left: 8px; }
+  .langs-foot a { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line-strong); text-decoration: none; color: var(--muted); font-size: 13px; }
+  .langs-foot a[aria-current='true'] { background: var(--chip-bg); color: var(--chip-fg); border-color: var(--chip-bg); font-weight: 700; }
+</style>
