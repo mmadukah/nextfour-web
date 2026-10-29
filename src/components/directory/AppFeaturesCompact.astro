@@ -1,0 +1,121 @@
+---
+// The app block's compact version (REDESIGN-BRIEF, "Compact version"): area
+// and club pages, which are long already. One card in the banner colour: the
+// message and buttons on the left, the four features on the right as rows,
+// each row one link to its part of How it works. No illustrations. The full
+// version (AppFeatures) stays on the finder and /get.html.
+//
+// Row text is the full block's, shortened but still accurate, plans included.
+interface Props {
+  /** players: area pages; unclaimed and claimed: club pages. */
+  variant?: 'players' | 'unclaimed' | 'claimed';
+  clubName?: string;
+  /** Where the visitor is, for the "Get the app" link's ?src= (tracking). */
+  src?: string;
+  /** On a club page, passed on to /get.html so it can name the club. */
+  clubId?: string;
+}
+const { variant = 'players', clubName = '', src = 'area', clubId } = Astro.props;
+const getHref = `/get.html?${new URLSearchParams({ src, ...(clubId ? { club: clubId } : {}) })}`;
+
+const banner = {
+  players: {
+    heading: "See who's going before you go.",
+    body: 'Get the NextFour app to join a club night, or search every club by postcode, town or name.',
+    search: true,
+  },
+  unclaimed: {
+    heading: 'Run your club night on NextFour.',
+    body: 'Free to start. Players can follow the club for new sessions.',
+    search: true,
+  },
+  claimed: {
+    heading: `Join ${clubName} in the app.`,
+    body: "See who's going tonight, ask to join, and get your turn to pick on your phone.",
+    search: false,
+  },
+}[variant];
+
+const features = [
+  {
+    title: 'Your turn to pick', plans: [['Free', false]], href: '/how-it-works.html#picking',
+    text: 'A digital pegboard on your phone, with a nudge when it’s your pick.',
+    icon: '<path d="m4 7 2 2 3-3M4 15l2 2 3-3M13 8h7M13 16h7"></path>',
+  },
+  {
+    title: 'Even games', plans: [['Pro', true]], href: '/how-it-works.html#picking',
+    text: 'Skill-based picking, and King of the Court keeps the winners on.',
+    icon: '<path d="M12 3v18M5 7h14M5 7l-3 6a3 3 0 0 0 6 0zM19 7l-3 6a3 3 0 0 0 6 0zM8 21h8"></path>',
+  },
+  {
+    title: 'Your stats', plans: [['Free', false], ['More on Player', true]], href: '/how-it-works.html#scores',
+    text: 'Games played and win rate; match history, partners and rivals on Player.',
+    icon: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path>',
+  },
+  {
+    title: 'The board in the hall', plans: [['Free', false]], href: '/how-it-works.html#board',
+    text: 'Any tablet becomes a courtside board: every court, who’s next, how long everyone has waited.',
+    icon: '<rect x="2" y="5" width="20" height="14" rx="2"></rect><path d="M8 5v14M14 9h5M14 13h5"></path>',
+  },
+] as const;
+---
+
+<section class="appc" aria-labelledby="appc-h">
+  <div class="msg">
+    <p class="eyebrow-c">The NextFour app</p>
+    <h2 id="appc-h">{banner.heading}</h2>
+    <p class="body">{banner.body}</p>
+    <div class="acts">
+      <a class="go" href={getHref}>Get the app</a>
+      {banner.search && <a class="ghost" href="/badminton.html">Search all clubs</a>}
+    </div>
+  </div>
+  <ul class="feats">
+    {features.map((f) => (
+      <li>
+        <a class="feat" href={f.href}>
+          <span class="icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" set:html={f.icon} /></span>
+          <span class="words">
+            <span class="ttl">
+              <b>{f.title}</b>
+              {f.plans.map(([label, paid]) => <span class:list={['badge', { paid }]}>{label}</span>)}
+            </span>
+            <span class="text">{f.text}</span>
+          </span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .appc {
+    margin: 48px 0 56px; border-radius: 24px; background: var(--cta-bg); color: var(--cta-ink);
+    padding: clamp(24px, 4vw, 40px); display: flex; flex-wrap: wrap; gap: 28px 40px; align-items: center;
+  }
+  .msg { flex: 1 1 340px; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+  .eyebrow-c { margin: 0; font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--cta-body); }
+  h2 { margin: 0; font-size: clamp(26px, 3.4vw, 34px); line-height: 1.1; font-weight: 800; font-stretch: 112%; letter-spacing: -0.02em; color: var(--cta-head); }
+  .body { margin: 0; font-size: 16px; color: var(--cta-body); }
+  .acts { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px; }
+  .go, .ghost { display: inline-flex; align-items: center; min-height: 48px; box-sizing: border-box; border-radius: 999px; text-decoration: none; }
+  .go { padding: 0 24px; background: var(--cta-btn-bg); color: var(--cta-btn-fg); font-weight: 800; }
+  .ghost { padding: 0 22px; border: 1.5px solid var(--cta-btn2); color: var(--cta-btn2); font-weight: 700; }
+  .go:hover { color: var(--cta-btn-fg); opacity: 0.92; }
+  .ghost:hover { color: var(--cta-btn2); opacity: 0.85; }
+  .feats { flex: 1.4 1 440px; min-width: 0; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr)); gap: 8px; }
+  /* Each row is one link: the whole row is the target. */
+  .feat {
+    display: flex; gap: 12px; align-items: flex-start; height: 100%; box-sizing: border-box; min-height: 44px; padding: 14px;
+    border-radius: 16px; background: var(--cta-tile); border: 1px solid var(--cta-line); text-decoration: none; transition: background 0.15s;
+  }
+  .feat:hover { background: var(--cta-tile-hover); }
+  .feat:focus-visible { outline: 2px solid var(--cta-head); outline-offset: 2px; }
+  .icon { flex: 0 0 36px; height: 36px; border-radius: 10px; background: var(--cta-icon-bg); color: var(--cta-icon-fg); display: flex; align-items: center; justify-content: center; }
+  .words { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+  .ttl { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .ttl b { font-weight: 800; font-size: 16px; color: var(--cta-ink); }
+  .badge { font-size: 10px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; background: var(--cta-free-bg); color: var(--cta-free-fg); }
+  .badge.paid { background: var(--cta-paid-bg); color: var(--cta-paid-fg); }
+  .text { font-size: 14px; line-height: 1.4; color: var(--cta-body); }
+</style>

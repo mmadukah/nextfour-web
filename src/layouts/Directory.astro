@@ -13,7 +13,7 @@
 // deletion link) instead of the directory's data notes, and `languages` puts
 // the English/Français pills beside the breadcrumb.
 import Base from './Base.astro';
-import AppFeatures from '../components/directory/AppFeatures.astro';
+import AppFeaturesCompact from '../components/directory/AppFeaturesCompact.astro';
 import ThemeToggle from '../components/ThemeToggle.astro';
 import LogoMark from '../components/LogoMark.astro';
 import '../styles/club-card.css';
@@ -25,7 +25,7 @@ interface Props {
   description: string;
   crumbs: Crumb[];
   jsonLd?: object[];
-  /** The closing app block (AppFeatures, players' banner); pages with their own turn it off. */
+  /** The closing app block (the compact one, players' banner); pages with their own turn it off. */
   cta?: boolean;
   /** The header link marked as the current page. */
   current?: 'finder' | 'how';
@@ -102,6 +102,9 @@ const ld = [breadcrumbLd, ...jsonLd];
       --alert-bg: #FDE6E1; --alert-fg: #9A3324; --warn-bg: #FFF4D6; --warn-fg: #6A4A00;
       --btn-bg: #12261C; --btn-fg: #F3F5EF; --logo-bg: #12261C; --logo-fg: #C8F135; --empty-day: #5D6B64;
       --cta-bg: #12261C; --cta-head: #C8F135; --cta-body: #D5DDD3; --cta-btn-bg: #C8F135; --cta-btn-fg: #12261C; --cta-btn2: #F3F5EF;
+      /* Things drawn on the banner colour (AppFeaturesCompact). */
+      --cta-ink: #F3F5EF; --cta-tile: rgba(255, 255, 255, 0.06); --cta-tile-hover: rgba(255, 255, 255, 0.11); --cta-line: rgba(255, 255, 255, 0.14);
+      --cta-icon-bg: #C8F135; --cta-icon-fg: #12261C; --cta-free-bg: #ECEFEA; --cta-free-fg: #50605A; --cta-paid-bg: #E9F7C2; --cta-paid-fg: #2C4A12;
       --font: 'Archivo', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
       --pad: clamp(16px, 4vw, 40px);
     }
@@ -116,6 +119,8 @@ const ld = [breadcrumbLd, ...jsonLd];
         --alert-bg: #3A1F1C; --alert-fg: #FFB4A8; --warn-bg: #3A2F12; --warn-fg: #F2D589;
         --btn-bg: #C8F135; --btn-fg: #0F1720; --logo-bg: #C8F135; --logo-fg: #0F1720; --empty-day: #7F8C99;
         --cta-bg: #C8F135; --cta-head: #0F1720; --cta-body: #2A3A1A; --cta-btn-bg: #0F1720; --cta-btn-fg: #C8F135; --cta-btn2: #0F1720;
+        --cta-ink: #0F1720; --cta-tile: rgba(15, 23, 32, 0.06); --cta-tile-hover: rgba(15, 23, 32, 0.11); --cta-line: rgba(15, 23, 32, 0.16);
+        --cta-icon-bg: #0F1720; --cta-icon-fg: #C8F135; --cta-free-bg: rgba(15, 23, 32, 0.12); --cta-free-fg: #0F1720; --cta-paid-bg: #0F1720; --cta-paid-fg: #C8F135;
       }
     }
     :root[data-theme='dark'] {
@@ -127,6 +132,8 @@ const ld = [breadcrumbLd, ...jsonLd];
       --alert-bg: #3A1F1C; --alert-fg: #FFB4A8; --warn-bg: #3A2F12; --warn-fg: #F2D589;
       --btn-bg: #C8F135; --btn-fg: #0F1720; --logo-bg: #C8F135; --logo-fg: #0F1720; --empty-day: #7F8C99;
       --cta-bg: #C8F135; --cta-head: #0F1720; --cta-body: #2A3A1A; --cta-btn-bg: #0F1720; --cta-btn-fg: #C8F135; --cta-btn2: #0F1720;
+        --cta-ink: #0F1720; --cta-tile: rgba(15, 23, 32, 0.06); --cta-tile-hover: rgba(15, 23, 32, 0.11); --cta-line: rgba(15, 23, 32, 0.16);
+        --cta-icon-bg: #0F1720; --cta-icon-fg: #C8F135; --cta-free-bg: rgba(15, 23, 32, 0.12); --cta-free-fg: #0F1720; --cta-paid-bg: #0F1720; --cta-paid-fg: #C8F135;
     }
     * { box-sizing: border-box; }
     body {
@@ -260,7 +267,7 @@ const ld = [breadcrumbLd, ...jsonLd];
       )}
     </div>
     <slot />
-    {cta && <AppFeatures />}
+    {cta && <AppFeaturesCompact />}
   </main>
 
   <footer class="foot">
