@@ -57,12 +57,13 @@
   border-radius: 999px; background: var(--hl-bg); color: var(--hl-fg); font-weight: 800; font-size: 15px; text-decoration: none;
 }
 .di-join:hover { color: var(--hl-fg); opacity: 0.92; }
-/* The whole card opens the venue's page: its title's link stretches over the
-   card. Join in the app sits above it, so it stays its own button. */
-.club-card.dropin { position: relative; transition: border-color 0.15s; }
-.club-card.dropin .cc-name a::after { content: ''; position: absolute; inset: 0; border-radius: inherit; }
-.club-card.dropin:hover { border-color: var(--line-strong); }
-.club-card.dropin:hover .cc-name a { color: var(--link-hover); }
-.club-card.dropin .cc-name a:focus-visible { outline: none; }
-.club-card.dropin:has(.cc-name a:focus-visible) { outline: 2px solid var(--ink); outline-offset: 2px; }
-.club-card.dropin .di-join { position: relative; z-index: 1; }
+/* The whole card opens its page (the club's, or a drop-in's venue): the
+   title's link stretches over the card. The card's other links sit above it,
+   so Join in the app stays its own button. */
+.club-card { position: relative; transition: border-color 0.15s; }
+.club-card .cc-name a::after { content: ''; position: absolute; inset: 0; border-radius: inherit; }
+.club-card:has(.cc-name a):hover { border-color: var(--line-strong); }
+.club-card:hover .cc-name a { color: var(--link-hover); }
+.club-card .cc-name a:focus-visible { outline: none; }
+.club-card:has(.cc-name a:focus-visible) { outline: 2px solid var(--ink); outline-offset: 2px; }
+.club-card .cc-more, .club-card .di-join { position: relative; z-index: 1; }
