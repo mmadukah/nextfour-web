@@ -47,7 +47,7 @@ const {
 const WORDS = {
   en: {
     home: 'NextFour home', main: 'Main', crumbs: 'Breadcrumb', foot: 'Footer', language: 'Language',
-    homeLink: 'Home', find: 'Find badminton', how: 'How it works', get: 'Get the app',
+    homeLink: 'Home', find: 'Find sessions', findShort: 'Find sessions', how: 'How it works', get: 'Get the app',
     links: [['Home', '/'], ['Badminton clubs', '/badminton.html'], ['How it works', '/how-it-works.html'],
       ['Privacy', '/privacy.html'], ['Terms', '/terms.html'], ['Support', '/support.html']],
     deletion: ['Account and data deletion', '/delete-account.html'],
@@ -55,7 +55,7 @@ const WORDS = {
   fr: {
     home: 'Accueil NextFour', main: 'Principal', crumbs: 'Fil d’Ariane', foot: 'Pied de page', language: 'Langue',
     // Short, so the header stays on one line on a phone.
-    homeLink: 'Accueil', find: 'Trouver un club', how: 'Comment ça marche', get: 'Télécharger',
+    homeLink: 'Accueil', find: 'Trouver des sessions', findShort: 'Sessions', how: 'Comment ça marche', get: 'Télécharger',
     links: [['Accueil', '/fr/'], ['Clubs de badminton', '/badminton.html'], ['Comment ça marche', '/fr/how-it-works.html'],
       ['Politique de confidentialité', '/fr/privacy.html'], ['Conditions générales', '/fr/terms.html'], ['Assistance', '/fr/support.html']],
     deletion: ['Suppression du compte et des données', '/fr/delete-account.html'],
@@ -165,6 +165,7 @@ const ld = crumbs.length > 1 ? [breadcrumbLd, ...jsonLd] : jsonLd;
     header.top nav { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 28px; font-weight: 600; font-size: 15px; }
     header.top nav a { text-decoration: none; white-space: nowrap; }
     header.top nav a[aria-current='page'] { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 2px; }
+    header.top nav .show-sm { display: none; }
     header.top nav a.pill { background: var(--btn-bg); color: var(--btn-fg); padding: 10px 18px; border-radius: 999px; }
     header.top nav a.pill:hover { opacity: 0.9; }
 
@@ -232,6 +233,7 @@ const ld = crumbs.length > 1 ? [breadcrumbLd, ...jsonLd] : jsonLd;
       .stats > div { padding: 14px 12px 12px; }
       header.top nav { gap: 8px 14px; }
       header.top nav .hide-sm { display: none; }
+      header.top nav .show-sm { display: inline; }
     }
     @media (max-width: 400px) {
       .brand .word { display: none; }
@@ -249,7 +251,7 @@ const ld = crumbs.length > 1 ? [breadcrumbLd, ...jsonLd] : jsonLd;
       <nav aria-label={WORDS.main}>
         <!-- Phones keep one text link: the logo already goes home there. -->
         <a class="hide-sm" href={lang === 'fr' ? '/fr/' : '/'}>{WORDS.homeLink}</a>
-        <a href="/badminton.html" aria-current={current === 'finder' ? 'page' : undefined}>{WORDS.find}</a>
+        <a href="/badminton.html" aria-current={current === 'finder' ? 'page' : undefined}>{WORDS.find === WORDS.findShort ? WORDS.find : <><span class="hide-sm">{WORDS.find}</span><span class="show-sm">{WORDS.findShort}</span></>}</a>
         <a class="hide-sm" href={lang === 'fr' ? '/fr/how-it-works.html' : '/how-it-works.html'} aria-current={current === 'how' ? 'page' : undefined}>{WORDS.how}</a>
         <ThemeToggle />
         <a class="pill" href="/get.html?src=header">{WORDS.get}</a>
