@@ -158,7 +158,7 @@ const allHeading = `${plural(area.clubs.length, 'club')}, ${plural(nights, 'nigh
     </div>
     <dl class="stats" style={`--cells: ${(area.clubs.length > 0 ? 2 : 0) + (dropIns > 0 ? 1 : 0) + (newest ? 1 : 0)}`}>
       {area.clubs.length > 0 && <div><dt>Clubs</dt><dd>{area.clubs.length}</dd></div>}
-      {area.clubs.length > 0 && <div><dt>Nights a week</dt><dd>{nights}</dd></div>}
+      {area.clubs.length > 0 && <div><dt>Nights</dt><dd>{nights}</dd></div>}
       {dropIns > 0 && <div><dt>Drop-ins</dt><dd>{dropIns}</dd></div>}
       {newest && <div><dt>Checked</dt><dd class="date">{newest.getDate()} {MONTHS[newest.getMonth()]}<br />{newest.getFullYear()}</dd></div>}
     </dl>
