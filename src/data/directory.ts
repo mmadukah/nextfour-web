@@ -55,6 +55,29 @@ interface RawClub {
   sessions: RawSession[];
 }
 
+/** A session with no club, from a leisure operator's feed (web_directory().sessions). */
+interface RawDropIn {
+  id: string;
+  title: string;
+  sport: string;
+  claimed: boolean;
+  operator: string | null;
+  booking_url: string | null;
+  days: number[] | null;
+  recurring: boolean;
+  date: string | null;
+  start: string;
+  end: string | null;
+  price: number | null;
+  currency: string | null;
+  levels: string[];
+  accepting_new_players: boolean;
+  venue: RawVenue;
+  last_checked: string | null;
+}
+
+interface RawDirectory { generated_at: string; clubs: RawClub[]; sessions?: RawDropIn[] }
+
 // ---------------------------------------------------------------------------
 // What the pages use
 // ---------------------------------------------------------------------------
@@ -93,13 +116,39 @@ export interface Club {
   nights: Night[];
 }
 
+/** One drop-in session: a leisure operator's session anyone can book onto. */
+export interface DropIn {
+  id: string;
+  /** The operator's title, without the day and time some feeds add to it. */
+  title: string;
+  /** Claimed by its organiser, who now runs it on NextFour. */
+  claimed: boolean;
+  bookingUrl: string | null;
+  night: Night;
+}
+
+/** A venue's drop-in sessions: drop-ins are listed by venue, not by club. */
+export interface DropInVenue {
+  id: string;
+  name: string;
+  /** Who runs them ("Everyone Active"), for the card and the attribution. */
+  operators: string[];
+  venue: RawVenue;
+  areaSlug: string;
+  areaName: string;
+  /** In-page anchor on the area page. */
+  anchor: string;
+  sessions: DropIn[];
+}
+
 export interface Area {
   slug: string;
   name: string;
   nation: string;
   url: string;
   clubs: Club[];
-  /** Mean position of its clubs, for "nearby areas". */
+  dropIns: DropInVenue[];
+  /** Mean position of its listings, for "nearby areas". */
   lat: number;
   lng: number;
   hasPage: boolean;
@@ -108,7 +157,10 @@ export interface Area {
 export interface Directory {
   generatedAt: Date;
   clubs: Club[];
+  dropIns: DropInVenue[];
   areas: Area[];
+  /** Operators whose feed data the site shows, for the CC BY attribution. */
+  operators: string[];
 }
 
 export const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -119,7 +171,8 @@ function levelRange(levels: string[]): [number, number] {
   const ranks = levels.map((l) => LEVEL_ORDER.indexOf(l) + 1).filter((r) => r > 0);
   return ranks.length ? [Math.min(...ranks), Math.max(...ranks)] : [1, ALL_LEVELS];
 }
-const MIN_CLUBS_FOR_AREA_PAGE = 2;
+/** An area gets its own page at two listings: clubs and drop-in venues together. */
+const MIN_LISTINGS_FOR_AREA_PAGE = 2;
 
 let cached: Directory | null = null;
 
@@ -131,7 +184,7 @@ export async function getDirectory(): Promise<Directory> {
   return cached;
 }
 
-async function loadRaw(): Promise<{ generated_at: string; clubs: RawClub[] }> {
+async function loadRaw(): Promise<RawDirectory> {
   const url = process.env.DIRECTORY_URL;
   const secret = process.env.DIRECTORY_SECRET;
   // From the project root: the build bundles this file into dist/, so a path
@@ -205,8 +258,8 @@ function linksOf(c: RawClub): { label: string; href: string }[] {
   return links;
 }
 
-function shape(raw: { generated_at: string; clubs: RawClub[] }): Directory {
-  const byArea = new Map<string, { name: string; code: string; clubs: Club[] }>();
+function shape(raw: RawDirectory): Directory {
+  const byArea = new Map<string, { name: string; code: string; clubs: Club[]; dropIns: DropInVenue[] }>();
 
   for (const c of raw.clubs) {
     if (c.sport.toLowerCase() !== 'badminton') continue;
@@ -249,13 +302,26 @@ function shape(raw: { generated_at: string; clubs: RawClub[] }): Directory {
       lastChecked: c.last_checked ? new Date(c.last_checked) : null,
       nights,
     };
-    const entry = byArea.get(areaSlug) ?? { name, code: district.code, clubs: [] };
+    const entry = byArea.get(areaSlug) ?? { name, code: district.code, clubs: [], dropIns: [] };
     entry.clubs.push(club);
     byArea.set(areaSlug, entry);
   }
 
+  for (const v of dropInVenues(raw.sessions ?? [])) {
+    const district = districtAt(v.venue.lat, v.venue.lng);
+    if (!district) continue;
+    const name = areaName(district.name);
+    const areaSlug = slugify(name);
+    v.areaSlug = areaSlug;
+    v.areaName = name;
+    const entry = byArea.get(areaSlug) ?? { name, code: district.code, clubs: [], dropIns: [] };
+    entry.dropIns.push(v);
+    byArea.set(areaSlug, entry);
+  }
+
   const areas: Area[] = [];
-  for (const [slug, { name, code, clubs }] of byArea) {
+  for (const [slug, { name, code, clubs, dropIns }] of byArea) {
+    dropIns.sort((a, b) => a.name.localeCompare(b.name));
     clubs.sort((a, b) => a.name.localeCompare(b.name));
     // Slugs are unique within an area; a namesake gets a number.
     const used = new Set<string>();
@@ -266,20 +332,71 @@ function shape(raw: { generated_at: string; clubs: RawClub[] }): Directory {
       club.slug = s;
       club.url = `/badminton/${slug}/${s}.html`;
     }
+    const points = [...clubs.map((c) => c.venue), ...dropIns.map((d) => d.venue)];
     areas.push({
       slug,
       name,
       nation: nationOf(code),
       url: `/badminton/${slug}.html`,
       clubs,
-      lat: clubs.reduce((t, c) => t + c.venue.lat, 0) / clubs.length,
-      lng: clubs.reduce((t, c) => t + c.venue.lng, 0) / clubs.length,
-      hasPage: clubs.length >= MIN_CLUBS_FOR_AREA_PAGE,
+      dropIns,
+      lat: points.reduce((t, p) => t + p.lat, 0) / points.length,
+      lng: points.reduce((t, p) => t + p.lng, 0) / points.length,
+      hasPage: clubs.length + dropIns.length >= MIN_LISTINGS_FOR_AREA_PAGE,
     });
   }
   areas.sort((a, b) => a.name.localeCompare(b.name));
   const clubs = areas.flatMap((a) => a.clubs).sort((a, b) => a.name.localeCompare(b.name));
-  return { generatedAt: new Date(raw.generated_at), clubs, areas };
+  const dropIns = areas.flatMap((a) => a.dropIns);
+  const operators = [...new Set(dropIns.flatMap((d) => d.operators))].sort();
+  return { generatedAt: new Date(raw.generated_at), clubs, dropIns, areas, operators };
+}
+
+/** "Everyone Active (UK)" reads as "Everyone Active". */
+function operatorName(raw: string | null): string | null {
+  return raw ? raw.replace(/\s*\((UK|England)\)$/i, '').trim() : null;
+}
+
+/** "Badminton Snr Thu 10:00" reads as "Badminton Snr": the row shows the day and time. */
+function dropInTitle(raw: string): string {
+  return raw.replace(/\s+(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\w*\s+\d{1,2}:?\d{2}\s*$/i, '').trim() || raw.trim();
+}
+
+/** Badminton drop-ins grouped by venue, one card each. */
+function dropInVenues(raw: RawDropIn[]): DropInVenue[] {
+  const byVenue = new Map<string, DropInVenue>();
+  for (const s of raw) {
+    if (s.sport.toLowerCase() !== 'badminton' || !s.venue) continue;
+    const key = `${s.venue.name}|${s.venue.lat}|${s.venue.lng}`;
+    let v = byVenue.get(key);
+    if (!v) {
+      v = { id: s.id, name: s.venue.name.trim(), operators: [], venue: s.venue, areaSlug: '', areaName: '', anchor: '', sessions: [] };
+      byVenue.set(key, v);
+    }
+    const operator = operatorName(s.operator);
+    if (operator && !v.operators.includes(operator)) v.operators.push(operator);
+    v.sessions.push({
+      id: s.id,
+      title: dropInTitle(s.title),
+      claimed: s.claimed,
+      bookingUrl: s.booking_url && /^https?:\/\//i.test(s.booking_url) ? s.booking_url : null,
+      night: {
+        id: s.id,
+        days: s.recurring ? (s.days ?? []) : [],
+        date: s.recurring ? null : s.date,
+        start: s.start,
+        end: s.end,
+        price: priceText(s.price, s.currency),
+        levels: levelsText(s.levels),
+        levelRange: levelRange(s.levels),
+        takingNewPlayers: s.accepting_new_players,
+        venue: s.venue,
+      },
+    });
+  }
+  const venues = [...byVenue.values()];
+  for (const v of venues) v.anchor = `drop-in-${slugify(v.name)}`;
+  return venues;
 }
 
 // ---------------------------------------------------------------------------
@@ -544,4 +661,56 @@ export function sessionCountText(club: Club): string | null {
   if (rows.length < 3) return null;
   const nights = new Set(rows.map((r) => r.day)).size;
   return `${rows.length} sessions a week, ${nights} night${nights === 1 ? '' : 's'}`;
+}
+
+// ---------------------------------------------------------------------------
+// Drop-in sessions on the page
+// ---------------------------------------------------------------------------
+
+/** One row on a drop-in card: sessions with the same title, time and price share it, like a club's rows. */
+export interface DropInRow {
+  days: number[];
+  /** A one-off's date in place of the day strip. */
+  label: string | null;
+  session: DropIn;
+}
+
+export function dropInRows(v: DropInVenue): DropInRow[] {
+  const rows: DropInRow[] = [];
+  const byKey = new Map<string, DropInRow>();
+  for (const s of v.sessions) {
+    const n = s.night;
+    if (n.days.length === 0) {
+      const date = n.date ? new Date(`${n.date}T12:00:00`) : null;
+      rows.push({
+        days: date ? [date.getDay()] : [],
+        label: date ? date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) : 'One-off',
+        session: s,
+      });
+      continue;
+    }
+    const key = [s.title, n.start, n.end ?? '', n.price ?? '', s.claimed].join('|');
+    let row = byKey.get(key);
+    if (!row) {
+      row = { days: [], label: null, session: s };
+      byKey.set(key, row);
+      rows.push(row);
+    }
+    for (const d of n.days) if (!row.days.includes(d)) row.days.push(d);
+  }
+  for (const row of rows) row.days.sort((a, b) => mondayFirst(a) - mondayFirst(b));
+  const rank = (row: DropInRow) => (row.label || row.days.length === 0 ? 7 : mondayFirst(row.days[0]));
+  return rows.sort((a, b) => rank(a) - rank(b) || a.session.night.start.localeCompare(b.session.night.start));
+}
+
+/** Drop-in sessions on each weekday, indexed 0 Sunday .. 6 Saturday. */
+export function dropInsPerDay(venues: DropInVenue[]): number[] {
+  const counts = [0, 0, 0, 0, 0, 0, 0];
+  for (const row of venues.flatMap(dropInRows)) for (const d of row.days) counts[d]++;
+  return counts;
+}
+
+/** Weekly drop-in sessions: one on two weekdays counts as two. */
+export function weeklyDropIns(venues: DropInVenue[]): number {
+  return venues.reduce((t, v) => t + v.sessions.reduce((u, s) => u + Math.max(s.night.days.length, 1), 0), 0);
 }

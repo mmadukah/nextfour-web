@@ -9,7 +9,7 @@
 // the other countries once the script runs.
 import Directory from '../layouts/Directory.astro';
 import AppCta from '../components/directory/AppCta.astro';
-import { getDirectory, weeklyNights, TINTS as COURT_TINTS, type Area } from '../data/directory';
+import { getDirectory, weeklyNights, weeklyDropIns, TINTS as COURT_TINTS, type Area } from '../data/directory';
 
 const dir = await getDirectory();
 const withPage = dir.areas.filter((a) => a.hasPage);
@@ -51,6 +51,8 @@ const crumbs = [
 ];
 const NIGHTS = [['', 'Any night'], ['1', 'Mon'], ['2', 'Tue'], ['3', 'Wed'], ['4', 'Thu'], ['5', 'Fri'], ['6', 'Sat'], ['0', 'Sun']];
 const LEVELS = [['', 'Any level'], ['1', 'Beginner'], ['2', 'Intermediate'], ['3', 'Upper intermediate'], ['4', 'Advanced']];
+const KINDS = [['', 'Any'], ['club', 'Clubs'], ['dropin', 'Drop-in']];
+const dropInCount = weeklyDropIns(dir.dropIns);
 ---
 
 <Directory title={title} description={description} crumbs={crumbs} jsonLd={[siteLd]} cta={false} current="finder">
@@ -156,7 +158,7 @@ const LEVELS = [['', 'Any level'], ['1', 'Beginner'], ['2', 'Intermediate'], ['3
   <section class="top">
     <p class="eyebrow">Badminton club finder</p>
     <h1>Find badminton near you</h1>
-    <p class="intro">{dir.clubs.length} clubs and {nights} club nights a week across the UK, each with its days, times, venue and level.</p>
+    <p class="intro">{dir.clubs.length} clubs and {nights} club nights a week across the UK, each with its days, times, venue and level{dropInCount > 0 ? `, plus ${dropInCount} drop-in sessions you can book` : ''}.</p>
 
     <form class="panel" id="find" role="search">
       <div class="query">
@@ -186,6 +188,12 @@ const LEVELS = [['', 'Any level'], ['1', 'Beginner'], ['2', 'Intermediate'], ['3
           <legend>Level</legend>
           <div class="pills" data-filter="level">
             {LEVELS.map(([v, label]) => <button type="button" class="pill" data-value={v} aria-pressed={v === '' ? 'true' : 'false'}>{label}</button>)}
+          </div>
+        </fieldset>
+        <fieldset class="kinds">
+          <legend>Type</legend>
+          <div class="pills" data-filter="kind">
+            {KINDS.map(([v, label]) => <button type="button" class="pill" data-value={v} aria-pressed={v === '' ? 'true' : 'false'}>{label}</button>)}
           </div>
         </fieldset>
         <div class="switch-row">
@@ -232,7 +240,7 @@ const LEVELS = [['', 'Any level'], ['1', 'Beginner'], ['2', 'Intermediate'], ['3
               <div class="letter" aria-hidden="true">{g.letter}</div>
               <ul>
                 {g.areas.map((a) => (
-                  <li><a href={a.url}><span>{a.name}</span><span class="count" aria-label={`${a.clubs.length} clubs`}>{a.clubs.length}</span></a></li>
+                  <li><a href={a.url}><span>{a.name}</span><span class="count" aria-label={`${a.clubs.length} clubs${a.dropIns.length ? `, ${a.dropIns.length} drop-in venues` : ''}`}>{a.clubs.length + a.dropIns.length}</span></a></li>
                 ))}
               </ul>
             </div>
@@ -264,7 +272,9 @@ const LEVELS = [['', 'Any level'], ['1', 'Beginner'], ['2', 'Intermediate'], ['3
   <script>
     /** A grouped session row: days, one-off date, days in words, time, duration, level bars, level words, other venue. */
     type Line = [number[], string | null, string, string, string | null, [number, number], string, string | null];
-    type Row = { n: string; u: string; a: string; v: string; lat: number; lng: number; d: number[]; l: [number, number]; o: number; x: number; t: number; p: number; s: Line[]; k: string | null };
+    /** A drop-in row: days, one-off date, days in words, time, duration, title, price, booking link, claimed. */
+    type DropLine = [number[], string | null, string, string, string | null, string, string | null, string | null, number];
+    type Row = { y?: 'd'; n: string; u: string | null; a: string; v: string; lat: number; lng: number; d: number[]; l: [number, number]; o: number; x: number; t: number; p: number; s: Line[] | DropLine[]; k: string | null };
     const WEEK = [1, 2, 3, 4, 5, 6, 0];
     const LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
     const POSTCODE = /^([A-Z]{1,2}\d[A-Z\d]?)(\s*\d[A-Z]{2})?$/i;
@@ -278,7 +288,7 @@ const LEVELS = [['', 'Any level'], ['1', 'Beginner'], ['2', 'Intermediate'], ['3
     // The area lists are for browsing; a search hides them (they stay in the
     // HTML, so crawlers still follow every link).
     const browse = document.getElementById('browse')!;
-    const filter = { day: '', level: '' };
+    const filter = { day: '', level: '', kind: '' };
 
     let rows: Row[] | null = null;
     let districts: [string, number, number, string][] | null = null;
@@ -335,7 +345,11 @@ const LEVELS = [['', 'Any level'], ['1', 'Beginner'], ['2', 'Intermediate'], ['3
     }
 
     function passes(r: Row) {
+      if (filter.kind === 'club' && r.y === 'd') return false;
+      if (filter.kind === 'dropin' && r.y !== 'd') return false;
       if (filter.day !== '' && !r.d.includes(Number(filter.day))) return false;
+      // Drop-ins publish no level, so a level filter leaves them out.
+      if (filter.level !== '' && r.y === 'd') return false;
       if (filter.level !== '') {
         const l = Number(filter.level);
         if (l < r.l[0] || l > r.l[1]) return false;
@@ -392,15 +406,74 @@ const LEVELS = [['', 'Any level'], ['1', 'Beginner'], ['2', 'Intermediate'], ['3
               ${r.t ? '<span class="tag ok">Visitor terms listed</span>' : '<span class="tag">No visitor info yet</span>'}
             </div>
           </div>
-          <ul class="cc-lines">${(r.s ?? []).map(line).join('')}</ul>
+          <ul class="cc-lines">${((r.s ?? []) as Line[]).map(line).join('')}</ul>
           <a class="cc-more" href="${esc(r.u)}">Club details and visitor info ${ARROW}</a>
         </div>
       </article></li>`;
     }
 
+    const TICKET = '<svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9a3 3 0 0 0 0 6v3a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3a3 3 0 0 0 0-6V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1z"></path><path d="M14 5v2M14 11v2M14 17v2"></path></svg>';
+    const OUT = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"></path></svg>';
+
+    /** A drop-in row, as DropInCard.astro draws it. */
+    function dropLine([days, label, daysText, time, duration, title, price, booking, claimed]: DropLine) {
+      const picked = filter.day === '' ? null : Number(filter.day);
+      const state = picked == null ? '' : days.includes(picked) ? ' hl' : ' dim';
+      const strip = label
+        ? `<span class="nl-day">${esc(label)}</span>`
+        : `<span class="day-strip" role="img" aria-label="${esc(daysText)}">${WEEK.map((d) => {
+          const on = days.includes(d);
+          return `<span class="ds-cell${on ? ' on' : ''}${on && d === picked ? ' hl' : ''}" aria-hidden="true">${LETTERS[d]}</span>`;
+        }).join('')}</span>`;
+      const act = claimed
+        ? '<a class="di-book" href="/get.html">Join in the app</a>'
+        : booking ? `<a class="di-book" href="${esc(booking)}" rel="noopener nofollow" target="_blank">Book${OUT}</a>` : '';
+      return `<li class="night-line${state}">
+        ${strip}
+        <span class="nl-time"><b>${esc(time)}</b>${duration ? `<small>${esc(duration)}</small>` : ''}</span>
+        <span class="di-what">${esc(title)}${price ? `<b> · ${esc(price)}</b>` : ''}</span>
+        ${act}
+      </li>`;
+    }
+
+    /** A venue's drop-ins, as DropInCard.astro draws them, with the distance from the search. */
+    function dropCard(r: Row, dist?: number) {
+      const lines = r.s as DropLine[];
+      const unclaimed = lines.some((l) => !l[8]);
+      return `<li><article class="club-card dropin">
+        <div class="cc-slot di-slot">${TICKET}</div>
+        <div class="cc-body">
+          <div class="cc-top">
+            <div class="cc-who">
+              <h3 class="cc-name">${r.u ? `<a href="${esc(r.u)}">${esc(r.n)}</a>` : esc(r.n)}</h3>
+              <p class="cc-venue">${PIN}${r.v ? `Run by ${esc(r.v)}, ` : ''}${esc(r.a)}</p>
+            </div>
+            <div class="cc-tags">
+              ${dist != null ? `<span class="tag">${dist < 1 ? 'Under 1' : Math.round(dist)} km away</span>` : ''}
+              <span class="tag">Drop-in</span>
+              ${r.x ? '<span class="tag lime">Runs on NextFour</span>' : ''}
+            </div>
+          </div>
+          <ul class="cc-lines">${lines.map(dropLine).join('')}</ul>
+          ${unclaimed ? '<p class="di-claim">Run one of these sessions? <a href="/get.html">Claim it in the NextFour app</a> to take sign-ups and run the night with a digital pegboard.</p>' : ''}
+        </div>
+      </article></li>`;
+    }
+
+    /** "12 clubs and 3 drop-in venues": each kind counted on its own. */
+    function counted(list: { r: Row }[]) {
+      const venues = list.filter((x) => x.r.y === 'd').length;
+      const clubs = list.length - venues;
+      const parts = [
+        clubs ? `${clubs} club${clubs === 1 ? '' : 's'}` : '',
+        venues ? `${venues} drop-in venue${venues === 1 ? '' : 's'}` : '',
+      ].filter(Boolean);
+      return parts.join(' and ');
+    }
+
     function render(list: { r: Row; dist?: number }[], heading: string) {
       status.textContent = heading;
-      results.innerHTML = list.slice(0, 40).map(({ r, dist }) => card(r, dist)).join('');
+      results.innerHTML = list.slice(0, 40).map(({ r, dist }) => (r.y === 'd' ? dropCard(r, dist) : card(r, dist))).join('');
     }
 
     async function run() {
@@ -415,8 +488,8 @@ const LEVELS = [['', 'Any level'], ['1', 'Beginner'], ['2', 'Intermediate'], ['3
           .filter((x) => x.dist <= RADIUS_KM)
           .sort((a, b) => a.dist - b.dist);
         render(near, near.length
-          ? `${near.length} club${near.length === 1 ? '' : 's'} within ${RADIUS_KM} km of ${where.label}`
-          : `No clubs within ${RADIUS_KM} km of ${where.label} match. Try fewer filters.`);
+          ? `${counted(near)} within ${RADIUS_KM} km of ${where.label}`
+          : `Nothing within ${RADIUS_KM} km of ${where.label} matches. Try fewer filters.`);
         return;
       }
       const words = norm(text).split(' ').filter(Boolean);
@@ -425,7 +498,7 @@ const LEVELS = [['', 'Any level'], ['1', 'Beginner'], ['2', 'Intermediate'], ['3
         return words.every((w) => hay.includes(w));
       }).map((r) => ({ r }));
       render(found, found.length
-        ? `${found.length} club${found.length === 1 ? '' : 's'} matching “${text}”`
+        ? `${counted(found)} matching “${text}”`
         : `Nothing matches “${text}”. Try a postcode or a nearby town.`);
     }
 
@@ -439,7 +512,7 @@ const LEVELS = [['', 'Any level'], ['1', 'Beginner'], ['2', 'Intermediate'], ['3
 
     // Night and level pills: one pressed per group.
     document.querySelectorAll<HTMLElement>('.pills').forEach((group) => {
-      const key = group.dataset.filter as 'day' | 'level';
+      const key = group.dataset.filter as 'day' | 'level' | 'kind';
       group.querySelectorAll<HTMLButtonElement>('.pill').forEach((b) => b.addEventListener('click', () => {
         group.querySelectorAll('.pill').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
         filter[key] = b.dataset.value ?? '';

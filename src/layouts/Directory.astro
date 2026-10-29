@@ -17,6 +17,7 @@ import AppCta from '../components/directory/AppCta.astro';
 import ThemeToggle from '../components/ThemeToggle.astro';
 import LogoMark from '../components/LogoMark.astro';
 import '../styles/club-card.css';
+import { getDirectory } from '../data/directory';
 
 interface Crumb { name: string; href: string }
 interface Props {
@@ -54,6 +55,9 @@ const WORDS = {
     deletion: ['Suppression du compte et des données', '/fr/delete-account.html'],
   },
 }[lang];
+// Drop-in data is the operators' OpenActive feeds, under CC BY 4.0: the footer
+// credits each one, links the licence and says what was changed.
+const operators = footer === 'directory' ? (await getDirectory()).operators : [];
 const footerLinks = footer === 'site' ? [...WORDS.links, WORDS.deletion] : WORDS.links;
 
 const site = Astro.site!;
@@ -182,7 +186,8 @@ const ld = [breadcrumbLd, ...jsonLd];
     .hero { padding: 28px 0 40px; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 32px; }
     .hero > div { flex: 999 1 520px; min-width: 0; }
     .stats {
-      flex: 1 1 300px; margin: 0; display: grid; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column;
+      /* About 105px a cell (--cells, set by the page when it isn't 3), so a fourth cell widens the card. */
+      flex: 1 1 calc(var(--cells, 3) * 105px); margin: 0; display: grid; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column;
       border: 1px solid var(--line); border-radius: 16px; background: var(--surface); overflow: hidden;
     }
     .stats > div { padding: 18px 18px 16px; }
@@ -210,6 +215,7 @@ const ld = [breadcrumbLd, ...jsonLd];
     footer.foot p a { color: var(--muted); }
 
     @media (max-width: 640px) {
+      .stats > div { padding: 14px 12px 12px; }
       header.top nav { gap: 8px 14px; }
       header.top nav .hide-sm { display: none; }
     }
@@ -267,6 +273,13 @@ const ld = [breadcrumbLd, ...jsonLd];
         Spotted something wrong? Email <a href="mailto:clubs@nextfour.app">clubs@nextfour.app</a>.
         Clubs can ask for their page to be corrected or removed at the same address.
       </p>
+      {operators.length > 0 && (
+        <p>
+          Drop-in sessions: data from {operators.join(', ')}, published through OpenActive and licensed under
+          {' '}<a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a>.
+          Session titles are shortened and sessions grouped by venue.
+        </p>
+      )}
       <p>Council areas and postcode districts: contains OS data © Crown copyright and database right 2024; contains Royal Mail data © Royal Mail copyright and database right 2024; source: Office for National Statistics, licensed under the Open Government Licence v3.0.</p>
       <p>&copy; 2026 NextFour</p>
       </>

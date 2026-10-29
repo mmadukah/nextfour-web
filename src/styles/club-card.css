@@ -46,3 +46,13 @@
 .nl-segs i.on { background: var(--seg-on); }
 .nl-level-text { font-size: 14px; color: var(--body); }
 .nl-extra { flex: 1 1 100%; font-size: 14px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+/* Drop-in cards (DropInCard.astro): the club card with a ticket in the slot. */
+.di-slot { background: var(--sel-bg); color: var(--sel-fg); min-height: 120px; }
+.di-what { flex: 1 1 200px; font-size: 14px; color: var(--body); min-width: 0; }
+.di-what b { color: var(--ink); font-weight: 700; }
+.di-book {
+  flex: 0 0 auto; display: inline-flex; align-items: center; gap: 4px; min-height: 36px; padding: 0 14px;
+  border-radius: 999px; border: 1.5px solid var(--ink); font-weight: 700; font-size: 14px; text-decoration: none;
+}
+.di-claim { margin: 0; font-size: 14px; color: var(--muted); }
