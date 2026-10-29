@@ -1,29 +1,34 @@
 ---
 // The one footer every page shares (through layouts/Directory.astro): the
-// links, the support email and copyright, the social buttons, and the
-// language pills on pages that have a French version. A page adds notes of
-// its own through the slot (the directory's data and licence lines).
+// links, the support email and copyright, the social buttons, and a language
+// menu on pages that have other language versions. A page adds notes of its
+// own through the slot (the directory's data and licence lines).
+//
+// The language menu is a <details> disclosure of plain links, so it works
+// without script and grows to any number of languages; a little script only
+// closes it on an outside click or Escape.
 import { INSTAGRAM_URL, FACEBOOK_URL } from '../social-links';
 
 interface Props {
   lang?: 'en' | 'fr';
-  /** Language versions of this page; pills show when there is more than one. */
+  /** Language versions of this page; the menu shows when there is more than one. */
   languages?: { lang: string; label: string; href: string }[];
 }
 const { lang = 'en', languages = [] } = Astro.props;
 
 const WORDS = {
   en: {
-    label: 'Footer', language: 'Language', questions: 'Questions? Email', copyright: '© 2026 NextFour. All rights reserved.',
+    label: 'Footer', language: 'Language', choose: 'Choose a language', questions: 'Questions? Email', copyright: '© 2026 NextFour. All rights reserved.',
     links: [['Home', '/'], ['Badminton clubs', '/badminton.html'], ['How it works', '/how-it-works.html'], ['Support', '/support.html'],
       ['Privacy', '/privacy.html'], ['Terms', '/terms.html'], ['Account and data deletion', '/delete-account.html']],
   },
   fr: {
-    label: 'Pied de page', language: 'Langue', questions: 'Des questions ? Écrivez à', copyright: '© 2026 NextFour. Tous droits réservés.',
+    label: 'Pied de page', language: 'Langue', choose: 'Choisir une langue', questions: 'Des questions ? Écrivez à', copyright: '© 2026 NextFour. Tous droits réservés.',
     links: [['Accueil', '/fr/'], ['Clubs de badminton', '/badminton.html'], ['Comment ça marche', '/fr/how-it-works.html'], ['Assistance', '/fr/support.html'],
       ['Confidentialité', '/fr/privacy.html'], ['Conditions', '/fr/terms.html'], ['Suppression du compte et des données', '/fr/delete-account.html']],
   },
 }[lang];
+const current = languages.find((l) => l.lang === lang) ?? languages[0];
 ---
 
 <footer class="foot">
@@ -47,9 +52,21 @@ const WORDS = {
         </a>
       )}
       {languages.length > 1 && (
-        <nav class="langs-foot" aria-label={WORDS.language}>
-          {languages.map((l) => <a href={l.href} lang={l.lang} hreflang={l.lang} aria-current={l.lang === lang ? 'true' : undefined}>{l.label}</a>)}
-        </nav>
+        <details class="lang-menu">
+          <summary aria-label={`${WORDS.choose}: ${current.label}`}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"></path></svg>
+            <span>{current.label}</span>
+            <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 15 6-6 6 6"></path></svg>
+          </summary>
+          <ul aria-label={WORDS.language}>
+            {languages.map((l) => (
+              <li><a href={l.href} lang={l.lang} hreflang={l.lang} aria-current={l.lang === lang ? 'true' : undefined}>
+                {l.label}
+                {l.lang === lang && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg>}
+              </a></li>
+            ))}
+          </ul>
+        </details>
       )}
     </div>
   </div>
@@ -67,7 +84,36 @@ const WORDS = {
   .foot-right { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
   .social { width: 44px; height: 44px; border-radius: 999px; border: 1px solid var(--line-strong); display: flex; align-items: center; justify-content: center; color: var(--ink); }
   .social:hover { border-color: var(--muted); color: var(--ink); }
-  .langs-foot { display: flex; gap: 6px; margin-left: 8px; }
-  .langs-foot a { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line-strong); text-decoration: none; color: var(--muted); font-size: 13px; }
-  .langs-foot a[aria-current='true'] { background: var(--chip-bg); color: var(--chip-fg); border-color: var(--chip-bg); font-weight: 700; }
+  .lang-menu { position: relative; margin-left: 8px; }
+  .lang-menu summary {
+    list-style: none; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px;
+    border-radius: 999px; border: 1px solid var(--line-strong); color: var(--ink); font-size: 14px; font-weight: 700; cursor: pointer;
+  }
+  .lang-menu summary::-webkit-details-marker { display: none; }
+  .lang-menu summary:hover { border-color: var(--muted); }
+  .lang-menu summary:focus-visible { outline: 2px solid var(--eyebrow); outline-offset: 2px; }
+  .lang-menu .chev { transition: transform 0.15s; transform: rotate(180deg); }
+  .lang-menu[open] .chev { transform: none; }
+  /* Opens upwards: the footer is the bottom of the page. */
+  .lang-menu ul {
+    position: absolute; right: 0; bottom: calc(100% + 8px); z-index: 10; min-width: 180px; margin: 0; padding: 6px; list-style: none;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 16px 32px -16px rgba(0, 0, 0, 0.35);
+  }
+  .lang-menu a {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 0 12px;
+    border-radius: 10px; color: var(--ink); text-decoration: none; font-size: 15px; font-weight: 600;
+  }
+  .lang-menu a:hover { background: var(--row); color: var(--ink); }
+  .lang-menu a[aria-current='true'] { color: var(--eyebrow); }
 </style>
+
+<script is:inline>
+  // Close the language menu on a click elsewhere, or on Escape.
+  document.addEventListener('click', (e) => {
+    document.querySelectorAll('.lang-menu[open]').forEach((m) => { if (!m.contains(e.target)) m.open = false; });
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    document.querySelectorAll('.lang-menu[open]').forEach((m) => { m.open = false; m.querySelector('summary').focus(); });
+  });
+</script>
