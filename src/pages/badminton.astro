@@ -286,7 +286,7 @@ const dropInCount = weeklyDropIns(dir.dropIns);
 
   <script>
     /** A grouped session row: days, one-off date, days in words, time, duration, level bars, level words, other venue. */
-    type Line = [number[], string | null, string, string, string | null, [number, number], string, string | null];
+    type Line = [number[], string | null, string, string, string | null, [number, number], string, string | null, string | null];
     /** A drop-in row: days, one-off date, days in words, time, duration, price, level bars and words (or null). */
     type DropLine = [number[], string | null, string, string, string | null, string | null, [number, number] | null, string | null];
     type Row = { y?: 'd'; n: string; w?: string; j?: string | null; u: string | null; a: string; v: string; lat: number; lng: number; d: number[]; l: [number, number]; o: number; x: number; t: number; p: number; s: Line[] | DropLine[]; k: string | null };
@@ -385,7 +385,7 @@ const dropInCount = weeklyDropIns(dir.dropIns);
     const ARROW = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>';
 
     /** One grouped row, as NightLine.astro draws it; a picked night dims rows without it and lights its cell. */
-    function line([days, oneOff, daysText, time, duration, bars, levels, venue]: Line) {
+    function line([days, oneOff, daysText, time, duration, bars, levels, venue, grade]: Line) {
       const picked = filter.day === '' ? null : Number(filter.day);
       const state = picked == null ? '' : days.includes(picked) ? ' hl' : ' dim';
       const strip = oneOff
@@ -399,6 +399,7 @@ const dropInCount = weeklyDropIns(dir.dropIns);
         ${strip}
         <span class="nl-time"><b>${esc(time)}</b>${duration ? `<small>${esc(duration)}</small>` : ''}</span>
         <span class="nl-level"><span class="nl-segs" aria-hidden="true">${segs}</span><span class="nl-level-text">${esc(levels)}</span></span>
+        ${grade ? `<span class="nl-grade">${esc(grade)}</span>` : ''}
         ${venue ? `<span class="nl-note">${PIN_SMALL}At ${esc(venue)}</span>` : ''}
       </li>`;
     }

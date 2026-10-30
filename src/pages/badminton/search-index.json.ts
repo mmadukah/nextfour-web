@@ -24,11 +24,11 @@ export const GET: APIRoute = async () => {
     p: tintIndex(c.id),
     // The card's grouped session rows, as the area pages draw them: days
     // (Monday first), a one-off's date label, the strip's text alternative,
-    // time, duration, level bars, level words, and the venue when it is not
-    // the club's usual one.
+    // time, duration, level bars, level words, the venue when it is not
+    // the club's usual one, and the club's grade for the night.
     s: groupedRows(c).map((r) => [
       r.days, r.label, daysPlural(r.days), timeRange(r.night), durationText(r.night), levelBars(r.night), r.night.levels,
-      r.night.venue.name !== c.venue.name ? r.night.venue.name : null,
+      r.night.venue.name !== c.venue.name ? r.night.venue.name : null, r.night.grade,
     ]),
     k: sessionCountText(c),
   }));

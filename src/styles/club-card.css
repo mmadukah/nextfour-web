@@ -42,6 +42,11 @@
 .nl-time { flex: 1 1 150px; display: flex; align-items: baseline; gap: 8px; font-variant-numeric: tabular-nums; }
 .nl-time b { font-size: 17px; font-weight: 700; white-space: nowrap; }
 .nl-time small { font-size: 13px; color: var(--muted); white-space: nowrap; }
+/* The club's grade for the night: its own word for who the night is for. */
+.nl-grade {
+  flex: 0 1 auto; max-width: 100%; font-size: 13px; font-weight: 700; padding: 4px 10px; border-radius: 999px;
+  background: var(--tag2-bg); color: var(--tag2-fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 .nl-level { flex: 1 1 220px; display: flex; align-items: center; gap: 10px; }
 .nl-segs { display: flex; gap: 3px; }
 .nl-segs i { display: block; width: 22px; height: 8px; border-radius: 2px; background: var(--seg-off); }

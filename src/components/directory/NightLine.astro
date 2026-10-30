@@ -1,7 +1,8 @@
 ---
-// One row of sessions that share a time, level and venue: a 7-day strip of
+// One row of sessions that share a time, level, grade and venue: a 7-day strip of
 // the days they run (or the row's label instead: a one-off's date, or the
-// day name on the club page), the time and how long, the level, and a pin
+// day name on the club page), the time and how long, the level, the club's
+// grade for it (after the level, so rows with and without one line up), and a pin
 // line when the venue is not the club's usual one. A night filter dims rows that don't include that day (.dim) and lights
 // its cell (.hl). Styles: src/styles/club-card.css, shared with the finder's
 // results, which build the same markup in its script. On the club page the
@@ -38,6 +39,7 @@ const membersOnly = detail && clubTakesNewPlayers && !n.takingNewPlayers;
     )}
   <span class="nl-time"><b>{timeRange(n)}</b>{duration && <small>{duration}</small>}</span>
   <LevelBars range={levelBars(n)} label={n.levels} />
+  {n.grade && <span class="nl-grade">{n.grade}</span>}
   {(price || membersOnly) && (
     <span class="nl-extra">
       {price}

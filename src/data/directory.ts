@@ -34,6 +34,8 @@ interface RawSession {
   price: number | null;
   currency: string | null;
   levels: string[];
+  /** The club's grades the night is for, in the club's order (20261030000000). */
+  grades?: string[];
   accepting_new_players: boolean;
   venue: RawVenue | null;
 }
@@ -93,6 +95,8 @@ export interface Night {
   levels: string;
   /** Lowest and highest level, 1 Beginner .. 5 Professional. */
   levelRange: [number, number];
+  /** The club's grade for the night ("Grade 3", "Feathers"), or null. */
+  grade: string | null;
   takingNewPlayers: boolean;
   venue: RawVenue;
 }
@@ -270,6 +274,21 @@ function nationOf(code: string): string {
   return { E: 'England', W: 'Wales', S: 'Scotland', N: 'Northern Ireland' }[code[0]] ?? 'United Kingdom';
 }
 
+/**
+ * A night's grades as one label. A bare code ("B+", "3") says nothing on its
+ * own, so it gets the word: "Grade B+", "Grades C and C+". A name that already
+ * reads as one ("Grade 1", "Feathers", "Intermediate and above") is left as
+ * the club wrote it, as the seed's grade_names does.
+ */
+function gradeText(grades: string[]): string | null {
+  const names = grades.map((g) => g.trim()).filter(Boolean);
+  if (names.length === 0) return null;
+  if (names.every((g) => /^(?:[A-Za-z][+-]?|\d+)$/.test(g))) {
+    return `${names.length > 1 ? 'Grades' : 'Grade'} ${listText(names)}`;
+  }
+  return listText(names);
+}
+
 function levelsText(levels: string[]): string {
   if (levels.length === 0 || levels.length >= ALL_LEVELS) return 'All levels';
   if (levels.length === 1) return levels[0];
@@ -314,6 +333,7 @@ function shape(raw: RawDirectory): Directory {
       price: priceText(s.price, s.currency),
       levels: levelsText(s.levels),
       levelRange: levelRange(s.levels),
+      grade: gradeText(s.grades ?? []),
       takingNewPlayers: s.accepting_new_players,
       venue: s.venue ?? venue,
     }));
@@ -474,6 +494,7 @@ function dropInVenues(raw: RawDropIn[]): DropInVenue[] {
         price: priceText(s.price, s.currency),
         levels: levelsText(s.levels),
         levelRange: levelRange(s.levels),
+        grade: null,
         takingNewPlayers: s.accepting_new_players,
         venue: s.venue,
       },
@@ -709,8 +730,8 @@ export function clubDaysShort(club: Club): string {
 // ---------------------------------------------------------------------------
 
 /**
- * One row for sessions that differ only in their day: same start, end, level
- * and venue (and price and membership rule, so a merged row never shows the
+ * One row for sessions that differ only in their day: same start, end, level,
+ * grade and venue (and price and membership rule, so a merged row never shows the
  * wrong price). A one-off keeps its own row, labelled with its date.
  */
 export interface GroupRow {
@@ -737,7 +758,7 @@ export function groupedRows(club: Club): GroupRow[] {
       rows.push({ days: r.day == null ? [] : [r.day], label: r.label, night: n });
       continue;
     }
-    const key = [n.start, n.end ?? '', n.levels, n.venue.name, n.price ?? '', n.takingNewPlayers].join('|');
+    const key = [n.start, n.end ?? '', n.levels, n.grade ?? '', n.venue.name, n.price ?? '', n.takingNewPlayers].join('|');
     let row = byKey.get(key);
     if (!row) {
       row = { days: [], label: null, night: n };
