@@ -1,0 +1,113 @@
+---
+// Open a club or session in the app: https://nextfour.app/open?club=<id> or
+// ?session=<id> (racket-manager-app, docs/plans/WEB_APP_LINKS.md).
+//
+// Like /join, reached in two situations:
+//
+//   * The app is installed. The App Link (Android) or universal link (iPhone)
+//     hands the URL to the app, which opens the club or session, and this
+//     page is never rendered. Until an app release registers /open, the
+//     "I already have the app" button does the same through the app's own
+//     scheme, which every installed version understands.
+//   * The app is not installed. The store buttons carry the id through the
+//     install: Google Play as the referrer (club=<id> or session=<id>), the
+//     App Store button by copying this link for the app to offer to paste.
+//
+// One static page for every id, so the id is in the query string; the name
+// shown comes from /open-names.json, built at deploy time and fetched after
+// the page works without it.
+import Base from '../layouts/Base.astro';
+import { PLAY_URL, APP_STORE_URL } from '../store-links';
+import '../styles/handoff.css';
+
+const anyStoreLive = PLAY_URL !== null || APP_STORE_URL !== null;
+---
+
+<Base
+  title="Open in the NextFour app"
+  description="Open this club or session in the NextFour app."
+  ogDescription="See who's going, and join in the NextFour app."
+>
+  <meta slot="head" name="robots" content="noindex" />
+
+  <main class="card" id="open">
+    <h1 id="title">Get the NextFour app</h1>
+    <p id="intro">Install NextFour to see who's going, take your turn to pick and join club nights.</p>
+
+    {PLAY_URL && <a id="play" class="btn" href={PLAY_URL}>Get it on Google Play</a>}
+    {APP_STORE_URL && (
+      <a id="appstore" class="btn btn-secondary" href={APP_STORE_URL}>
+        Download on the App Store
+      </a>
+    )}
+    {!anyStoreLive && (
+      <p class="pending">Search for <strong>NextFour</strong> in your app store.</p>
+    )}
+    <a id="open-app" class="btn btn-secondary" href="#" hidden>I already have the app</a>
+
+    <ol class="steps" id="steps" hidden>
+      <li>Install the app. You can look around before creating an account.</li>
+      <li class="carried" hidden>On Android it opens <span class="what"></span> by itself. On iPhone, the App Store button copies this link, so tap Paste when the app offers.</li>
+      <li class="not-carried">Then open the app and find <span class="what"></span> in Discover.</li>
+      <li>Already have the app? Tap "I already have the app".</li>
+    </ol>
+  </main>
+
+  <script is:inline>
+    // Whether the installed app can pick the club or session up after an
+    // install (Play referrer club=/session=, the pasted /open link). Not until
+    // the app release in phase 2 of WEB_APP_LINKS.md: set true then. Before
+    // it, the app would answer a pasted /open link with "That isn't a
+    // NextFour link", so the App Store button copies nothing.
+    const CARRIED = false;
+    const params = new URLSearchParams(location.search);
+    const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    // A club wins when both are given, as in the app.
+    const kind = uuid.test(params.get('club') || '') ? 'club' : uuid.test(params.get('session') || '') ? 'session' : null;
+    const id = kind ? params.get(kind).toLowerCase() : null;
+    const src = (params.get('src') || 'open').replace(/[^a-z0-9-]/gi, '').slice(0, 40) || 'open';
+
+    const play = document.getElementById('play');
+    const appStore = document.getElementById('appstore');
+    const tracking = 'utm_source=nextfour_web&utm_campaign=' + src;
+    if (play) play.href += '&referrer=' + encodeURIComponent((id ? kind + '=' + id + '&' : '') + tracking);
+    if (appStore) appStore.href += '?ct=' + encodeURIComponent(src);
+
+    // Words for the club or session, named once its name arrives. The app
+    // knows the id even when the names file does not (a club published since
+    // the last deploy), so the hand-off works either way.
+    const describe = (name) => {
+      const what = name || (kind === 'club' ? 'the club' : 'the session');
+      document.getElementById('title').textContent = name ? 'Open ' + name + ' in NextFour' : 'Open in NextFour';
+      document.getElementById('intro').textContent = kind === 'club'
+        ? 'Install NextFour to see ' + (name ? name + "'s" : "the club's") + " sessions and who's going, then join in."
+        : "Install NextFour to see who's going to " + what + ', then join in.';
+      document.querySelectorAll('#steps .what').forEach((el) => { el.textContent = what; });
+    };
+
+    if (id) {
+      describe(null);
+      fetch('/open-names.json').then((r) => r.json()).then((names) => {
+        const name = names[kind] && names[kind][id];
+        if (name) describe(name);
+      }).catch(() => {});
+      document.getElementById('steps').hidden = false;
+      document.querySelector('#steps .carried').hidden = !CARRIED;
+      document.querySelector('#steps .not-carried').hidden = CARRIED;
+      const openApp = document.getElementById('open-app');
+      openApp.href = 'app.nextfour.mobile://app/' + (kind === 'club' ? 'clubs/' : 'sessions/') + id;
+      openApp.hidden = false;
+      if (appStore && CARRIED) appStore.addEventListener('click', async (event) => {
+        event.preventDefault();
+        const link = location.origin + '/open?' + kind + '=' + id;
+        try {
+          await Promise.race([
+            navigator.clipboard.writeText(link),
+            new Promise((resolve) => setTimeout(resolve, 800)),
+          ]);
+        } catch (_) {}
+        location.href = appStore.href;
+      });
+    }
+  </script>
+</Base>

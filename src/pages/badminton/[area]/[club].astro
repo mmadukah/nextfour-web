@@ -13,7 +13,7 @@ import CourtArt from '../../../components/directory/CourtArt.astro';
 import VenueMap from '../../../components/directory/VenueMap.astro';
 import {
   getDirectory, clubDaysText, checkedText, shortDate, townOf, nearbyClubs, nextDate, sortedRows, dayRows,
-  addressLines, clubTint, clubTimeText, clubDaysShort, fitTitle, fitDescription, slugify, DAY_NAMES, SHORT_DAYS, WEEK_ORDER, type Club,
+  addressLines, clubTint, clubTimeText, clubDaysShort, fitTitle, fitDescription, slugify, openLink, DAY_NAMES, SHORT_DAYS, WEEK_ORDER, type Club,
 } from '../../../data/directory';
 
 export async function getStaticPaths() {
@@ -281,12 +281,16 @@ const crumbs = [
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11 21 3l-8 18-2-8-8-2z"></path></svg>
           Directions
         </a>
+        <a class="act" href={openLink('club', club.id, 'club-open')}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"></rect><path d="M11 18h2"></path></svg>
+          Open in the app
+        </a>
         <button type="button" class="act soft" id="follow" aria-expanded="false" aria-controls="follow-note">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>
           Follow club
         </button>
         <p class="follow-note" id="follow-note" hidden>
-          Follow {club.name} in the NextFour app to hear when it adds a session. <a href={`/get.html?src=follow&club=${club.id}`}>Get the app</a>, then search for the club.
+          Follow {club.name} in the NextFour app to hear when it adds a session. <a href={openLink('club', club.id, 'follow')}>Open it in the app</a> and tap Follow.
         </p>
       </div>
     </div>
@@ -306,7 +310,7 @@ const crumbs = [
           ))}
         </ol>
         <ul class="lines">
-          {dayRows(club).map((row) => <NightLine row={row} clubVenue={several ? '' : club.venue.name} detail clubTakesNewPlayers={club.takingNewPlayers} />)}
+          {dayRows(club).map((row) => <NightLine row={row} clubVenue={several ? '' : club.venue.name} detail clubTakesNewPlayers={club.takingNewPlayers} openHref={club.claimed ? openLink('session', row.night.id, 'night') : undefined} />)}
         </ul>
         <p class="note">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg>
@@ -393,7 +397,7 @@ const crumbs = [
               <li><span class="n">2</span><span><strong>Find this club and tap Claim</strong><span class="muted">We check each claim by hand before handing the club over.</span></span></li>
               <li><span class="n">3</span><span><strong>Update your listing</strong><span class="muted">Changes show on this page.</span></span></li>
             </ol>
-            <a class="claim-get" href={`/get.html?src=claim&club=${club.id}`}>Get the app to claim</a>
+            <a class="claim-get" href={openLink('club', club.id, 'claim')}>Get the app to claim</a>
           </div>
           <p class="small">Not the organiser? <a href="/how-it-works.html">How claiming works</a></p>
         </section>

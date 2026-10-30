@@ -541,6 +541,21 @@ export function nearbyAreas(dir: Directory, area: { lat: number; lng: number; sl
     .map((x) => x.a);
 }
 
+/**
+ * The link that opens a club or session in the app (racket-manager-app,
+ * docs/plans/WEB_APP_LINKS.md): an App Link when the app is installed, the
+ * /open page with the store buttons when not. `src` is the button, for the
+ * install tracking /get.html also does.
+ */
+export function openLink(kind: 'club' | 'session', id: string, src: string): string {
+  return `/open?${new URLSearchParams({ [kind]: id, src })}`;
+}
+
+/** A claimed session at the listing, the one its Join in the app opens. */
+export function claimedSessionId(v: DropInVenue): string | null {
+  return v.sessions.find((s) => s.claimed)?.id ?? null;
+}
+
 /** The nearest other venues and clubs, for the venue page. */
 export function nearbyPlaces(dir: Directory, venue: Venue, count = 4): ({ venue: Venue; km: number } | { club: Club; km: number })[] {
   const from = venue.venue;

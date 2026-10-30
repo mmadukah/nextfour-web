@@ -289,7 +289,7 @@ const dropInCount = weeklyDropIns(dir.dropIns);
     type Line = [number[], string | null, string, string, string | null, [number, number], string, string | null];
     /** A drop-in row: days, one-off date, days in words, time, duration, price, level bars and words (or null). */
     type DropLine = [number[], string | null, string, string, string | null, string | null, [number, number] | null, string | null];
-    type Row = { y?: 'd'; n: string; w?: string; u: string | null; a: string; v: string; lat: number; lng: number; d: number[]; l: [number, number]; o: number; x: number; t: number; p: number; s: Line[] | DropLine[]; k: string | null };
+    type Row = { y?: 'd'; n: string; w?: string; j?: string | null; u: string | null; a: string; v: string; lat: number; lng: number; d: number[]; l: [number, number]; o: number; x: number; t: number; p: number; s: Line[] | DropLine[]; k: string | null };
     const WEEK = [1, 2, 3, 4, 5, 6, 0];
     const LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
     const POSTCODE = /^([A-Z]{1,2}\d[A-Z\d]?)(\s*\d[A-Z]{2})?$/i;
@@ -468,7 +468,7 @@ const dropInCount = weeklyDropIns(dir.dropIns);
             </div>
           </div>
           <ul class="cc-lines">${lines.map(dropLine).join('')}</ul>
-          <a class="di-join" href="/get.html?src=dropin">Join in the app</a>
+          ${r.j ? `<a class="di-join" href="/open?session=${encodeURIComponent(r.j)}&amp;src=dropin">Join in the app</a>` : ''}
         </div>
       </article></li>`;
     }

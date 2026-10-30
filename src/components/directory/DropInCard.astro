@@ -8,15 +8,17 @@
 // venue's page, which has the booking links and the clubs in the same hall.
 import LevelBars from './LevelBars.astro';
 import {
-  dropInRows, durationText, timeRange, daysPlural, levelBars, clubTint, DAY_LETTERS, WEEK_ORDER, type DropInVenue,
+  dropInRows, durationText, timeRange, daysPlural, levelBars, clubTint, openLink, claimedSessionId, DAY_LETTERS, WEEK_ORDER, type DropInVenue,
 } from '../../data/directory';
 
 interface Props { venue: DropInVenue }
 const { venue } = Astro.props;
 const rows = dropInRows(venue);
 const days = [...new Set(rows.flatMap((r) => r.days))];
-const claimed = venue.sessions.some((s) => s.claimed);
-const getHref = '/get.html?src=dropin';
+// Join in the app only where someone runs the session on NextFour: nobody
+// can join one nobody runs. Otherwise the card opens the venue page, with Book.
+const claimedId = claimedSessionId(venue);
+const claimed = claimedId !== null;
 ---
 
 <article class="club-card dropin" id={venue.anchor} data-days={days.join(',')}>
@@ -59,6 +61,6 @@ const getHref = '/get.html?src=dropin';
         );
       })}
     </ul>
-    <a class="di-join" href={getHref}>Join in the app</a>
+    {claimedId && <a class="di-join" href={openLink('session', claimedId, 'dropin')}>Join in the app</a>}
   </div>
 </article>

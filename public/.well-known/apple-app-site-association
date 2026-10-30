@@ -6,7 +6,8 @@
         "components": [
           { "/": "/join", "comment": "Session invite: /join?c=CODE" },
           { "/": "/claim", "comment": "Guest profile claim: /claim?c=CODE" },
-          { "/": "/club-claim", "comment": "Club claim invite: /club-claim?t=TOKEN" }
+          { "/": "/club-claim", "comment": "Club claim invite: /club-claim?t=TOKEN" },
+          { "/": "/open", "comment": "Open a club or session: /open?club=ID or /open?session=ID" }
         ]
       }
     ]

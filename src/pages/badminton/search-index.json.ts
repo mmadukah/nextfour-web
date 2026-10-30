@@ -3,7 +3,7 @@
 // prices and visitor terms stay on the club pages. Drop-in venues come after
 // the clubs, marked y: 'd', with their own row shape.
 import type { APIRoute } from 'astro';
-import { getDirectory, tintIndex, groupedRows, sessionCountText, daysPlural, timeRange, durationText, levelBars, dropInRows } from '../../data/directory';
+import { getDirectory, tintIndex, groupedRows, sessionCountText, daysPlural, timeRange, durationText, levelBars, dropInRows, claimedSessionId } from '../../data/directory';
 
 export const GET: APIRoute = async () => {
   const dir = await getDirectory();
@@ -47,6 +47,8 @@ export const GET: APIRoute = async () => {
       lng: Math.round(v.venue.lng * 1000) / 1000,
       d: [...new Set(rowsOf.flatMap((r) => r.days))].sort(),
       x: v.sessions.some((s) => s.claimed) ? 1 : 0,
+      // The claimed session its Join in the app opens; null hides the button.
+      j: claimedSessionId(v),
       o: 1,
       // Drop-in rows: days, one-off date label, days in words, time,
       // duration, price, and the level bars and words when the feed gave a level.

@@ -6,6 +6,8 @@
 // version (AppFeatures) stays on the finder and /get.html.
 //
 // Row text is the full block's, shortened but still accurate, plans included.
+import { openLink } from '../../data/directory';
+
 interface Props {
   /** players: area pages; unclaimed and claimed: club pages. */
   variant?: 'players' | 'unclaimed' | 'claimed';
@@ -16,7 +18,8 @@ interface Props {
   clubId?: string;
 }
 const { variant = 'players', clubName = '', src = 'area', clubId } = Astro.props;
-const getHref = `/get.html?${new URLSearchParams({ src, ...(clubId ? { club: clubId } : {}) })}`;
+// On a club's page, the button opens that club in the app (or installs it).
+const getHref = clubId ? openLink('club', clubId, src) : `/get.html?${new URLSearchParams({ src })}`;
 
 const banner = {
   players: {

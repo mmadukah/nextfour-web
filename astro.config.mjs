@@ -25,9 +25,9 @@ export default defineConfig({
   site: 'https://nextfour.app',
   integrations: [
     sitemap({
-      // The app hand-off pages do nothing without the code an invite carries
-      // (and club-claim is noindex), so they stay out of the sitemap.
-      filter: (page) => !/\/(claim|club-claim|join)\/?$/.test(new URL(page).pathname),
+      // The app hand-off pages do nothing without the code or id their link
+      // carries (and club-claim and open are noindex), so they stay out of the sitemap.
+      filter: (page) => !/\/(claim|club-claim|join|open)\/?$/.test(new URL(page).pathname),
       serialize: (item) => ({ ...item, url: toPublicUrl(item.url) }),
     }),
   ],

@@ -10,7 +10,7 @@ import CourtArt from '../../../../components/directory/CourtArt.astro';
 import VenueMap from '../../../../components/directory/VenueMap.astro';
 import {
   getDirectory, nearbyPlaces, townOf, nextDate, addressLines, clubTint, clubDaysShort, fitTitle, fitDescription, checkedText,
-  durationText, timeRange, listText, DAY_NAMES, DAY_LETTERS, WEEK_ORDER, type Venue, type DropIn,
+  durationText, timeRange, listText, openLink, DAY_NAMES, DAY_LETTERS, WEEK_ORDER, type Venue, type DropIn,
 } from '../../../../data/directory';
 
 export async function getStaticPaths() {
@@ -299,7 +299,7 @@ const ARROW = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" strok
                   {n.price && <span class="cost"><b>{n.price.replace(' a session', '')}</b><small>per session</small></span>}
                   <span class="go">
                     {r.s.claimed
-                      ? <a class="join" href="/get.html?src=venue">Join in the app</a>
+                      ? <a class="join" href={openLink('session', r.s.id, 'venue')}>Join in the app</a>
                       : r.s.bookingUrl && (
                         <a class="book" href={r.s.bookingUrl} target="_blank" rel="noopener nofollow"
                           aria-label={`Book ${r.s.title} on ${r.label}${r.s.operator ? ` with ${r.s.operator}` : ''} (opens in a new tab)`}>

@@ -8,11 +8,12 @@
 // and what the app does.
 //
 // Every link that leads here says where it came from (?src=area, finder,
-// club-unclaimed, club-claimed, how-it-works, header, follow, claim, dropin,
-// qr), and that is passed on to the stores as campaign data so installs can
-// be traced to each button: App Store `ct`, Google Play's install referrer.
-// From a club page, ?club={id} names the club on the page. The app has no
-// club deep link yet, so the page never says the club will open by itself.
+// how-it-works, header, qr), and that is passed on to the stores as campaign
+// data so installs can be traced to each button: App Store `ct`, Google
+// Play's install referrer. Buttons about one club or session (club-open,
+// club-unclaimed, club-claimed, follow, claim, night, venue, dropin) go to
+// /open instead, which opens it in the app and tracks the same way. A ?club={id}
+// from an old link still names the club on the page.
 //
 // Not an App Links path: nothing in the app handles /get.
 import Directory from '../layouts/Directory.astro';
