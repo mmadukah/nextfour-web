@@ -5,7 +5,6 @@
 // words are the table's; the design only adds the short labels marked below.
 import Directory from '../layouts/Directory.astro';
 import { PLAY_URL, APP_STORE_URL } from '../store-links';
-import { getDirectory, weeklyNights } from '../data/directory';
 import { INSTAGRAM_URL, FACEBOOK_URL } from '../social-links';
 
 interface Props {
@@ -28,8 +27,8 @@ type Strings = {
   ogDescription: string;
   /** The live board on a tablet, shown beside the organisers' section. */
   heroBoard: Shot;
-  /** The link to the club finder, with the live count of weekly club nights. */
-  listed: (nights: number) => string;
+  /** The link to the session finder. */
+  listed: string;
   ctaPlay: string;
   ctaAppStore: string;
   note: string;
@@ -74,13 +73,13 @@ type Strings = {
 
 const content: Record<string, Strings> = {
   en: {
-    title: 'NextFour: Find a game, run your club night',
+    title: 'NextFour: Find a game, run your session',
     description:
-      'NextFour is the app for racket sport club nights. Find badminton, squash, tennis, padel and table tennis near you, or run your night with a digital pegboard.',
+      'NextFour is the app for finding and running racket sport sessions. Find badminton, squash, tennis, padel and table tennis near you, or run your night with a digital pegboard.',
     ogDescription:
-      'Find a game near you, or run your club night: live courts, a digital pegboard and fair picks, all in one app.',
+      'Find a game near you, or run your session: live courts, a digital pegboard and fair picks, all in one app.',
     heroBoard: { src: '/screens/board-tablet.webp', alt: 'The live board on a tablet, with three courts in play' },
-    listed: (n) => `Find one of ${n} badminton club nights a week`,
+    listed: 'Find sessions near you',
     ctaPlay: 'Get it on Google Play',
     ctaAppStore: 'Download on the App Store',
     note: 'Free to get started. Built for badminton, squash, tennis, padel & table tennis.',
@@ -103,9 +102,9 @@ const content: Record<string, Strings> = {
       shot: { src: '/screens/pick-sheet.webp', alt: 'The picker choosing three players for their court' },
     },
     story: {
-      head: 'Your club night.',
+      head: 'The whole night.',
       accent: 'One app.',
-      sub: 'This is a club night on NextFour, the app for racket sport club nights.',
+      sub: 'This is a night on court with NextFour, the app for finding and running racket sport sessions.',
       beats: [
         {
           time: '7:00pm',
@@ -130,7 +129,7 @@ const content: Record<string, Strings> = {
           time: '8:30pm',
           title: 'Nobody loses their place',
           body: 'The queue goes by how long you’ve waited, and everyone can see who’s next on their phone or the courtside board.',
-          shot: { src: '/screens/loop-smart-pick.webp', alt: 'Smart pick filling a court on the tablet board' },
+          shot: { src: '/screens/loop-waiting.webp', alt: 'The waiting queue on the tablet board, in order, with how long each player has waited' },
           device: 'tablet',
         },
       ],
@@ -167,13 +166,13 @@ const content: Record<string, Strings> = {
     endingTitle: 'Everyone played',
   },
   fr: {
-    title: 'NextFour : Trouvez un match, gérez votre soirée de club',
+    title: 'NextFour : Trouvez un match, gérez votre session',
     description:
-      'NextFour, l’appli des soirées de club de raquette : trouvez du badminton, du squash ou du padel près de chez vous, ou gérez la soirée sur un tableau numérique.',
+      'NextFour, l’appli pour trouver et gérer des sessions de raquette : trouvez du badminton, du squash ou du padel près de chez vous, ou gérez la soirée sur un tableau numérique.',
     ogDescription:
-      'Trouvez un match près de chez vous, ou gérez votre soirée de club : terrains en direct, tableau numérique et sélections équitables, dans une seule application.',
+      'Trouvez un match près de chez vous, ou gérez votre session : terrains en direct, tableau numérique et sélections équitables, dans une seule application.',
     heroBoard: { src: '/screens/board-tablet.webp', alt: 'Le tableau en direct sur une tablette, avec trois terrains en jeu' },
-    listed: (n) => `Trouver une des ${n} soirées de badminton par semaine (Royaume-Uni, en anglais)`,
+    listed: 'Trouver des sessions près de chez vous (Royaume-Uni, en anglais)',
     ctaPlay: 'Disponible sur Google Play',
     ctaAppStore: 'Télécharger dans l’App Store',
     note: 'Gratuit pour commencer. Conçu pour le badminton, le squash, le tennis, le padel et le tennis de table.',
@@ -196,9 +195,9 @@ const content: Record<string, Strings> = {
       shot: { src: '/screens/pick-sheet.webp', alt: 'Le joueur qui choisit trois joueurs pour son terrain' },
     },
     story: {
-      head: 'Votre soirée de club.',
+      head: 'Toute la soirée.',
       accent: 'Une appli.',
-      sub: 'Voici une soirée de club avec NextFour, l’application des soirées de club de sports de raquette.',
+      sub: 'Voici une soirée sur le terrain avec NextFour, l’application pour trouver et gérer des sessions de sports de raquette.',
       beats: [
         {
           time: '19h00',
@@ -223,7 +222,7 @@ const content: Record<string, Strings> = {
           time: '20h30',
           title: 'Personne ne perd sa place',
           body: 'La file suit le temps d’attente, et chacun voit qui passe ensuite sur son téléphone ou sur le tableau au bord du terrain.',
-          shot: { src: '/screens/loop-smart-pick.webp', alt: 'La sélection intelligente qui remplit un terrain sur la tablette' },
+          shot: { src: '/screens/loop-waiting.webp', alt: 'La file d’attente sur la tablette, dans l’ordre, avec le temps d’attente de chaque joueur' },
           device: 'tablet',
         },
       ],
@@ -262,8 +261,6 @@ const content: Record<string, Strings> = {
 };
 
 const s = content[lang] ?? content.en;
-// The real count, from the directory build: the one number the page shows.
-const nights = weeklyNights((await getDirectory()).clubs);
 const fr = lang === 'fr';
 // Each store's badge in the page's language (Apple's French one is still to come).
 const playBadge = fr ? '/badges/google-play-fr.png' : '/badges/google-play.png';
@@ -355,7 +352,7 @@ const siteLd = {
       </li>
     </ol>
     <div class="hero-links">
-      <a class="arrow" href="/badminton.html">{s.listed(nights)}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+      <a class="arrow" href="/badminton.html">{s.listed}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
       <a class="arrow" href={fr ? '/fr/how-it-works.html' : '/how-it-works.html'}>{s.storyLink}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
     </div>
   </section>
