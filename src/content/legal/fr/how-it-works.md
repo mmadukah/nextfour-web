@@ -1,6 +1,6 @@
 ---
 title: Comment ça marche
-meta: Les règles derrière la file, les sélections et le tableau d’une soirée de club NextFour.
+meta: Les règles derrière la file, les sélections et le tableau d’une session NextFour.
 ---
 
 Cette page explique comment NextFour décide qui joue ensuite, pour que les organisateurs et les joueurs puissent vérifier par eux-mêmes qu’une soirée est équitable. Elle couvre la file, chaque mode de sélection, ce que l’organisateur peut modifier, les scores et les classements, le tableau au bord du terrain, et ce qui se passe quand le réseau coupe.
@@ -27,7 +27,7 @@ Chaque action en direct (s’enregistrer, choisir, terminer un match) est calcul
 
 L’organisateur en choisit un pour chaque session.
 
-| Mode | Qui choisit les quatre | Formule |
+| Mode | Qui choisit | Formule |
 |---|---|---|
 | Pegboard (tableau) | Le joueur dont c’est le tour | Gratuit |
 | Manuel | L’organisateur | Gratuit |
@@ -36,16 +36,16 @@ L’organisateur en choisit un pour chaque session.
 
 ### Pegboard (tableau)
 
-La version numérique du tableau de club.
+La version numérique du pegboard que beaucoup de clubs utilisent déjà.
 
 - **Un joueur a la main.** Quand un terrain se libère, il reçoit une notification et choisit trois joueurs pour le rejoindre. Le premier choisi est son partenaire.
 - **Parmi qui :** les joueurs suivants dans la file. L’organisateur règle jusqu’où le joueur voit dans la file (par défaut, les sept suivants).
 - **Choisir à l’avance :** quand tous les terrains sont occupés, le joueur peut quand même composer son match. Il attend son tour et passe sur le prochain terrain libre, dans l’ordre.
 - **Passer la main :** après une sélection, la main passe au joueur suivant dans la file qui n’a pas été choisi et n’est pas absent. Si personne n’attend, elle revient à celui qui attend depuis le plus longtemps dès qu’un match se termine, qu’un terrain est réinitialisé ou qu’un joueur revient de pause.
 - **Passer un joueur :** l’organisateur peut passer quelqu’un qui n’est pas prêt. Il reste deuxième dans la file et ne perd pas sa place.
-- **Éviter le même match deux fois :** si les quatre choisis ont déjà joué ensemble ce soir dans les mêmes équipes, l’application le signale et propose en une touche de les répartir dans les équipes qui ont le moins joué ensemble. Dans nos simulations, l’accepter à chaque fois réduit les matchs répétés de 60 à 100 %.
+- **Éviter le même match deux fois :** si les quatre choisis ont déjà joué ensemble pendant cette session dans les mêmes équipes, l’application le signale et propose en une touche de les répartir dans les équipes qui ont le moins joué ensemble. Dans nos simulations, l’accepter à chaque fois réduit les matchs répétés de 60 à 100 %.
 - **Sélection intelligente :** une touche compose le match le plus équilibré parmi la liste du joueur, d’après les classements. Le joueur peut toujours changer chacun des trois.
-- **Les dames choisissent partout** (option) : la liste d’une joueuse inclut aussi les joueuses plus loin dans la file qui sont sorties du terrain depuis au moins cinq minutes, mais seulement autant qu’il en faut pour son match. Avec l’option, la sélection intelligente compose un match de dames pour une joueuse et un match d’hommes pour un joueur dès que la liste en compte trois de plus. Dans nos simulations de vraies soirées, l’attente moyenne des hommes est restée à moins d’une minute de l’habitude.
+- **Les dames choisissent partout** (option) : la liste d’une joueuse inclut aussi les joueuses plus loin dans la file qui sont sorties du terrain depuis au moins cinq minutes, mais seulement autant qu’il en faut pour son match. Avec l’option, la sélection intelligente compose un match de dames pour une joueuse et un match d’hommes pour un joueur dès que la liste en compte trois de plus. Dans nos simulations de vraies sessions, l’attente moyenne des hommes est restée à moins d’une minute de l’habitude.
 
 ### Par niveau
 
@@ -140,7 +140,7 @@ Les prix s’affichent dans l’application avant tout abonnement. Les abonnemen
 
 ## Comment nous le testons
 
-Avant qu’un changement de la sélection soit mis en service, nous simulons des soirées de club entières : 32 joueurs pendant trois heures, de trois à sept terrains, avec des retardataires, des pauses, des départs anticipés, des binômes et des soirées mixtes. Certaines règles doivent tenir à chaque simulation, sans exception :
+Avant qu’un changement de la sélection soit mis en service, nous simulons des sessions entières : 32 joueurs pendant trois heures, de trois à sept terrains, avec des retardataires, des pauses, des départs anticipés, des binômes et des soirées mixtes. Certaines règles doivent tenir à chaque simulation, sans exception :
 
 - personne n’est choisi pendant une absence, avant son arrivée ou après son départ ;
 - personne n’est sur deux terrains à la fois ;

@@ -10,6 +10,8 @@ interface Props {
   secondLabel?: string;
   /** Where the visitor is, for the "Get the app" link's ?src= (tracking). */
   src?: string;
+  /** A plain surface instead of the solid banner, for a page that should end on its own content. */
+  quiet?: boolean;
 }
 const {
   heading = "See who's going before you go.",
@@ -18,10 +20,11 @@ const {
   getLabel = 'Get the app',
   secondLabel = 'Search all clubs',
   src = 'banner',
+  quiet = false,
 } = Astro.props;
 ---
 
-<section class="cta" aria-labelledby="cta-h">
+<section class:list={['cta', { quiet }]} aria-labelledby="cta-h">
   <div class="copy">
     <h2 id="cta-h">{heading}</h2>
     <p>{text}</p>
@@ -49,6 +52,12 @@ const {
   .ghost { color: var(--cta-btn2); font-weight: 700; padding: 0 22px; border: 1.5px solid var(--cta-btn2); }
   .go:hover { color: var(--cta-btn-fg); opacity: 0.92; }
   .ghost:hover { color: var(--cta-btn2); opacity: 0.85; }
+  .quiet { background: var(--surface); border: 1px solid var(--line); }
+  .quiet h2 { color: var(--ink); font-size: clamp(24px, 3vw, 30px); }
+  .quiet p { color: var(--body); text-wrap: pretty; }
+  .quiet .go { background: var(--hl-bg); color: var(--hl-fg); }
+  .quiet .go:hover { color: var(--hl-fg); }
+  .quiet .ghost, .quiet .ghost:hover { color: var(--ink); border-color: var(--line-strong); }
   @media (max-width: 640px) {
     .actions { justify-content: flex-start; }
   }

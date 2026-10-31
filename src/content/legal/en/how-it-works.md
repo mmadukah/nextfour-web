@@ -1,6 +1,6 @@
 ---
 title: How it works
-meta: The rules behind the queue, the picks and the board on a NextFour club night.
+meta: The rules behind the queue, the picks and the board in a NextFour session.
 ---
 
 This page sets out how NextFour decides who plays next, so organisers and players can check for themselves that a night is fair. It covers the queue, each way of picking, what the organiser can override, scores and ratings, the courtside board, and what happens when the signal drops.
@@ -27,7 +27,7 @@ Every live action (checking in, picking, finishing a game) is worked out and sav
 
 The organiser chooses one of four for each session.
 
-| Method | Who chooses the four | Plan |
+| Method | Who chooses | Plan |
 |---|---|---|
 | Pegboard | The player whose turn it is | Free |
 | Manual | The organiser | Free |
@@ -36,16 +36,16 @@ The organiser chooses one of four for each session.
 
 ### Pegboard
 
-The digital version of the club pegboard.
+The digital version of the pegboard many clubs already use.
 
 - **One player holds the pick.** When a court comes free, they get a nudge on their phone and choose three players to join them. The first player they choose is their partner.
 - **Who they can choose:** the players waiting next in the queue. The organiser sets how far down the queue the picker can see (by default the next seven).
 - **Picking ahead:** while every court is busy, the picker can still make their game. It waits in line and goes on the next free court, in order.
 - **Passing the pick on:** after a pick, the pick moves to the next player in the queue who wasn't just picked and isn't away. If nobody is waiting, the pick goes to whoever has waited longest as soon as a game ends, a court is reset or a player comes back from a break.
 - **Skipping a picker:** the organiser can skip someone who isn't ready. They stay second in the queue, so they don't lose their place.
-- **Avoiding the same game twice:** if the four chosen have already played tonight on the same sides, the app says so and offers one tap to re-split them into the teams that have played together least. In our simulations, taking it every time cut exact repeats by 60 to 100%.
+- **Avoiding the same game twice:** if the four chosen have already played this session on the same sides, the app says so and offers one tap to re-split them into the teams that have played together least. In our simulations, taking it every time cut exact repeats by 60 to 100%.
 - **Smart pick:** one tap builds the most even game from the picker's list, using players' ratings. The picker can still change any of the three.
-- **Ladies pick from anywhere** (optional): a lady's list also includes ladies further back who have been off court for at least five minutes, but only enough to make up the game she needs. With it on, Smart pick makes a ladies' game for a lady and a men's game for a man whenever the list has three more of each. In simulations of real club nights, this left the men's average wait within a minute of the usual.
+- **Ladies pick from anywhere** (optional): a lady's list also includes ladies further back who have been off court for at least five minutes, but only enough to make up the game she needs. With it on, Smart pick makes a ladies' game for a lady and a men's game for a man whenever the list has three more of each. In simulations of real sessions, this left the men's average wait within a minute of the usual.
 
 ### Skill-based
 
@@ -140,7 +140,7 @@ You'll see the prices in the app before you subscribe. Subscriptions are billed 
 
 ## How we test it
 
-We play out whole club nights in software before a change to the picking goes live: 32 players over three hours, three to seven courts, late arrivals, breaks, early leavers, pairs and mixed nights. Some rules must hold in every run, with no exceptions:
+We play out whole sessions in software before a change to the picking goes live: 32 players over three hours, three to seven courts, late arrivals, breaks, early leavers, pairs and mixed nights. Some rules must hold in every run, with no exceptions:
 
 - nobody is picked while away, before they arrive or after they leave;
 - nobody is on two courts at once;

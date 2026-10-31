@@ -19,13 +19,32 @@ const badge = (plan: string) => `badge${FREE.has(plan) ? '' : ' paid'}`;
 
 // Ways of picking: the table's rows become tabs, each opening its ### section.
 const table = picking.blocks.find((b) => b.type === 'table') as Extract<Block, { type: 'table' }>;
+// Each method has a stable link (#pegboard and so on, the same in both
+// languages, in the table's order) that opens its tab.
+const SLUGS = ['pegboard', 'manual', 'skill-based', 'king-of-the-court'];
 const methods = table.rows.map(([name, who, plan], i) => ({
-  id: `method-${i}`, name, who, plan, sub: picking.subs.find((s) => s.title === name)!,
+  id: SLUGS[i] ?? `method-${i}`, name, who, plan, sub: picking.subs.find((s) => s.title === name)!,
 }));
+// "**Fairness mode** (the organiser picks one):" and its list: one choice, shown as a card.
+const CHOICE = /\s*\((the organiser picks one|l’organisateur en choisit un)\)\s*:\s*$/;
+type Part = { kind: 'choices'; items: { label: string; list: string[] }[] } | { kind: 'block'; block: Block };
+const parts = (blocks: Block[]): Part[] => {
+  const out: Part[] = [];
+  for (let i = 0; i < blocks.length; i++) {
+    const b = blocks[i], next = blocks[i + 1];
+    if (b.type === 'p' && CHOICE.test(b.text) && next?.type === 'ul') {
+      const choice = { label: b.text.replace(CHOICE, ''), list: next.items };
+      const last = out[out.length - 1];
+      if (last?.kind === 'choices') last.items.push(choice); else out.push({ kind: 'choices', items: [choice] });
+      i++;
+    } else out.push({ kind: 'block', block: b });
+  }
+  return out;
+};
 const KNOWN_COST = /^\*\*(Known costs|Les coûts connus)/;
 
-// "pair two players so they play together (Pro);": the badge stands in for "(Pro)".
-const proBadge = (item: string) => md(item).replace(/\s*\(Pro\)/, ' <span class="badge paid">Pro</span>');
+// "pair two players so they play together (Pro);": the badge stands in for "(Pro)", after the punctuation.
+const proBadge = (item: string) => md(item).replace(/\s*\(Pro\)([;.]?)/, '$1 <span class="badge paid">Pro</span>');
 // A rule from a list as a card: sentence case, no trailing ";" or ".".
 const asCard = (item: string) => { const s = item.replace(/[;.]\s*$/, ''); return s[0].toUpperCase() + s.slice(1); };
 
@@ -37,7 +56,7 @@ const languages = [
   { lang: 'fr', label: 'Français', href: '/fr/how-it-works.html' },
 ];
 const title = lang === 'fr' ? `NextFour : ${c.title}` : `NextFour: ${c.title}`;
-const heading = c.meta.replace(/\s+(on a NextFour club night|d’une soirée de club NextFour)\.$/, '');
+const heading = c.meta.replace(/\s+(in a NextFour session|d’une session NextFour)\.$/, '');
 ---
 
 <Directory title={title} description={c.meta} crumbs={crumbs} cta={false} current="how" lang={lang} languages={languages}>
@@ -45,20 +64,37 @@ const heading = c.meta.replace(/\s+(on a NextFour club night|d’une soirée de 
     .top { padding: 28px 0 40px; }
     h1 { max-width: 860px; font-size: clamp(38px, 6vw, 72px); line-height: 1; font-stretch: 114%; }
     .intro { max-width: 640px; }
-    .flow { list-style: none; margin: 36px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+    .flow { list-style: none; margin: 36px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); gap: 10px; }
     .flow li { display: flex; flex-direction: column; gap: 10px; padding: 18px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); }
-    .flow .head { display: flex; align-items: center; justify-content: space-between; }
     .flow .n { width: 32px; height: 32px; border-radius: 999px; background: var(--hl-bg); color: var(--hl-fg); display: flex; align-items: center; justify-content: center; font-weight: 800; }
-    .flow .tag-word { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
     .flow b { font-size: 18px; font-weight: 800; }
     .flow span.text { font-size: 14px; color: var(--body); }
 
     .layout { display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start; padding: 8px 0 48px; border-top: 1px solid var(--line); }
+    /* The contents: grouped, and on a wide screen it stays in view and marks where you are. */
     .toc { flex: 1 1 220px; min-width: 0; padding-top: 32px; }
-    .toc p { margin: 0 0 10px; font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
-    .toc ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; border-left: 2px solid var(--line); }
-    .toc a { display: block; padding: 6px 0 6px 14px; margin-left: -2px; border-left: 2px solid transparent; text-decoration: none; font-size: 15px; color: var(--body); }
-    .toc a:hover { border-left-color: var(--eyebrow); color: var(--ink); }
+    .toc summary { font-size: 15px; font-weight: 800; color: var(--ink); cursor: pointer; min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .toc summary .chev { transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+    .toc details[open] summary .chev { transform: rotate(180deg); }
+    .toc-g { margin-top: 14px; }
+    .toc-gh { margin: 0 0 6px; font-size: 14px; font-weight: 700; color: var(--muted); }
+    .toc ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1px; border-left: 2px solid var(--line); }
+    .toc ol.sub { border-left: 0; margin: 0 0 4px 14px; }
+    .toc a { display: block; padding: 5px 0 5px 14px; margin-left: -2px; border-left: 2px solid transparent; text-decoration: none; font-size: 15px; color: var(--body); }
+    .toc ol.sub a { padding: 3px 0 3px 12px; margin-left: 0; font-size: 14px; color: var(--muted); }
+    .toc a:hover { border-left-color: var(--line-strong); color: var(--ink); }
+    .toc a[aria-current='true'] { border-left-color: var(--eyebrow); color: var(--ink); font-weight: 700; }
+    @media (min-width: 900px) {
+      .toc { position: sticky; top: 0; align-self: flex-start; max-height: 100vh; overflow-y: auto; padding-bottom: 24px; }
+      .toc summary { pointer-events: none; list-style: none; }
+      .toc summary .chev { display: none; }
+      .toc summary::-webkit-details-marker { display: none; }
+    }
+    @media (max-width: 899px) {
+      .toc { padding: 4px 18px 12px; margin-top: 24px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); }
+    }
+    h2, h3 { text-wrap: balance; }
+    .card p, .card span, .body-text, .panel-m p, .lead-p { text-wrap: pretty; }
     .content { flex: 999 1 600px; min-width: 0; display: flex; flex-direction: column; }
     .lead-p { margin: 32px 0 0; font-size: 17px; color: var(--body); max-width: 62ch; }
 
@@ -69,8 +105,8 @@ const heading = c.meta.replace(/\s+(on a NextFour club night|d’une soirée de 
     .rules { margin: 0; padding-left: 20px; max-width: 64ch; display: flex; flex-direction: column; gap: 8px; color: var(--body); text-wrap: pretty; }
     .rules :global(strong), .card :global(strong) { color: var(--ink); }
     .grid { display: grid; gap: 10px; }
-    .g170 { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
-    .g220 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    /* Four cards: four across, or two by two on a phone, never three and one. */
+    .g170 { grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr)); }
     /* Four cards sit 2 by 2 in the content column, never 3 and a straggler. */
     .g240 { grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); }
     .card { padding: 18px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 6px; color: var(--body); font-size: 15px; }
@@ -90,11 +126,12 @@ const heading = c.meta.replace(/\s+(on a NextFour club night|d’une soirée de 
     figcaption { font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 10px; }
     .q { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
     .q li { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; background: var(--row); }
-    .q li.away { opacity: 0.5; }
+    .q li.away .who { color: var(--muted); }
+    .q .tag { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--surface); color: var(--muted); border: 1px solid var(--line); }
     .q .pos { width: 22px; font-size: 13px; font-weight: 800; color: var(--muted); font-variant-numeric: tabular-nums; }
     .q .who { flex: 1 1 auto; font-weight: 700; }
     .q .wait { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
-    .split .rules { flex: 999 1 300px; min-width: 0; }
+    .split > .rules { flex: 999 1 300px; min-width: 0; }
 
     .tabs { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin-top: 4px; }
     .tabs button {
@@ -108,32 +145,28 @@ const heading = c.meta.replace(/\s+(on a NextFour club night|d’une soirée de 
     .panel-m { margin-top: 12px; padding: 22px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); }
     .panel-m[hidden] { display: none; }
     .panel-m h3 { margin: 0 0 12px; font-size: 20px; font-weight: 800; }
-    .panel-m > p { margin: 0 0 10px; color: var(--body); }
+    .panel-m p { margin: 0 0 10px; color: var(--body); }
+    .panel-m p.in-short { font-size: 17px; font-weight: 600; color: var(--ink); }
+    .with-shot { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+    .with-shot > div { flex: 999 1 340px; min-width: 0; }
+    .with-shot .shot { flex: 0 1 180px; margin: 0; padding: 0; border: 0; background: none; }
+    .with-shot .shot img { display: block; width: 100%; height: auto; border-radius: 22px; border: 6px solid #0B0F14; box-sizing: border-box; }
+    .choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 10px; margin: 4px 0 16px; }
+    .choice { padding: 14px 16px; border-radius: 14px; background: var(--row); }
+    .choice b { display: block; margin-bottom: 8px; color: var(--ink); }
+    .choice .rules { padding-left: 18px; }
     .panel-m > .rules { margin-bottom: 14px; }
     .panel-m > .rules:last-child { margin-bottom: 0; }
 
     .refuse { background: var(--row); border-style: dashed; border-color: var(--line-strong); }
-    .stats-strip {
-      margin: 12px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: var(--surface);
-    }
-    .stats-strip > div { padding: 16px 18px; box-shadow: 1px 0 0 var(--line), 0 1px 0 var(--line); }
-    .stats-strip dt { font-size: 13px; color: var(--muted); }
-    .stats-strip dd { margin: 4px 0 0; font-size: 26px; font-weight: 800; font-stretch: 112%; line-height: 1.1; font-variant-numeric: tabular-nums; }
-    .plans-top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 16px; }
-    .plans-top h2 { margin: 0; font-size: 28px; font-weight: 800; font-stretch: 108%; letter-spacing: -0.01em; }
-    .plans-top p { margin: 0; font-size: 14px; color: var(--muted); max-width: 420px; }
-    .plan { padding: 20px; border-radius: 18px; display: flex; flex-direction: column; gap: 10px; background: var(--surface); border: 1.5px solid var(--line); color: var(--body); font-size: 15px; }
-    .plan .ttl { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-    .plan .ttl b { font-size: 22px; font-weight: 800; font-stretch: 112%; color: var(--ink); }
-    .plan p { margin: 0; }
-    .plan.featured { background: var(--sel-bg); color: var(--sel-fg); border-color: var(--sel-bg); }
-    .plan.featured .ttl b { color: inherit; }
-    .plan.featured .badge { background: var(--hl-bg); color: var(--hl-fg); }
-    .numbered { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
-    .numbered li { display: flex; gap: 12px; padding: 16px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); font-size: 15px; font-weight: 600; }
-    .numbered .n { flex: 0 0 28px; height: 28px; border-radius: 999px; background: var(--chip-bg); color: var(--chip-fg); font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center; }
-    .content h3.small-h { margin: 16px 0 10px; font-size: 16px; font-weight: 800; }
+    /* The organisers' sections are quieter: smaller headings, plain lists. */
+    section.part.org > h2 { font-size: 22px; }
+    .note-small { margin: 12px 0 0; font-size: 14px; color: var(--muted); }
+    /* The four rules that hold in every run: the page's proof, two by two. */
+    .holds { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 10px; }
+    .holds li { display: flex; gap: 12px; align-items: flex-start; padding: 16px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); font-size: 15px; font-weight: 600; color: var(--ink); }
+    .holds svg { flex: 0 0 auto; margin-top: 1px; color: var(--eyebrow); }
+    .content h3.small-h { margin: 8px 0 10px; font-size: 16px; font-weight: 800; }
     .questions { margin: 16px 0 0; color: var(--body); }
     .cta-slot { margin-top: 8px; }
     .cta-slot :global(.cta) { margin-bottom: 0; }
@@ -145,7 +178,7 @@ const heading = c.meta.replace(/\s+(on a NextFour club night|d’une soirée de 
     <ol class="flow" aria-label={t.stepsLabel}>
       {t.steps.map((s, i) => (
         <li>
-          <span class="head"><span class="n">{i + 1}</span><span class="tag-word">{s.tag}</span></span>
+          <span class="n">{i + 1}</span>
           <b>{s.title}</b>
           <span class="text">{s.text}</span>
         </li>
@@ -155,10 +188,22 @@ const heading = c.meta.replace(/\s+(on a NextFour club night|d’une soirée de 
 
   <div class="layout">
     <nav class="toc" aria-label={t.onThisPage}>
-      <p>{t.onThisPage}</p>
-      <ol>
-        {c.sections.map((s, i) => <li><a href={`#${IDS[i]}`}>{s.title}</a></li>)}
-      </ol>
+      <details open>
+        <summary>{t.onThisPage}<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></summary>
+        {t.groups.map(([name, idx]) => (
+          <div class="toc-g">
+            {name && <p class="toc-gh">{name}</p>}
+            <ol>
+              {idx.map((i) => (
+                <li>
+                  <a href={`#${IDS[i]}`}>{c.sections[i].title}</a>
+                  {i === 2 && <ol class="sub">{methods.map((m) => <li><a href={`#${m.id}`}>{m.name}</a></li>)}</ol>}
+                </li>
+              ))}
+            </ol>
+          </div>
+        ))}
+      </details>
     </nav>
 
     <div class="content">
@@ -188,7 +233,7 @@ const heading = c.meta.replace(/\s+(on a NextFour club night|d’une soirée de 
               {[14, 11, 9, 6].map((wait, i) => (
                 <li><span class="pos">{i + 1}</span><span class="who">{t.player} {'ABCD'[i]}</span><span class="wait">{wait} {t.min}</span></li>
               ))}
-              <li class="away"><span class="pos">–</span><span class="who">{t.player} E · {t.away}</span><span class="wait">{t.notPickable}</span></li>
+              <li class="away"><span class="pos"></span><span class="who">{t.player} E</span><span class="tag">{t.away}</span></li>
             </ol>
           </figure>
           <ul class="rules">
@@ -211,11 +256,18 @@ const heading = c.meta.replace(/\s+(on a NextFour club night|d’une soirée de 
         {methods.map((m) => (
           <div class="panel-m" role="tabpanel" id={m.id} aria-labelledby={`${m.id}-tab`}>
             <h3>{m.name}</h3>
-            {m.sub.blocks.map((b) =>
-              b.type === 'ul' ? <ul class="rules">{b.items.map((it) => <li set:html={md(it)} />)}</ul>
-              : b.type === 'p' && KNOWN_COST.test(b.text) ? <p class="note-warn" set:html={md(b.text)} />
-              : b.type === 'p' ? <p set:html={md(b.text)} />
-              : null)}
+            <div class={m.id === 'pegboard' ? 'with-shot' : undefined}>
+              <div>
+                {parts(m.sub.blocks).map((part, pi) =>
+                  part.kind === 'choices'
+                    ? <div class="choices">{part.items.map((ch) => <div class="choice"><b set:html={md(ch.label)} /><ul class="rules">{ch.list.map((it) => <li set:html={md(it)} />)}</ul></div>)}</div>
+                    : part.block.type === 'ul' ? <ul class="rules">{part.block.items.map((it) => <li set:html={md(it)} />)}</ul>
+                    : part.block.type === 'p' && KNOWN_COST.test(part.block.text) ? <p class="note-warn" set:html={md(part.block.text)} />
+                    : part.block.type === 'p' ? <p class={pi === 0 ? 'in-short' : undefined} set:html={md(part.block.text)} />
+                    : null)}
+              </div>
+              {m.id === 'pegboard' && <figure class="shot"><img src={t.pickShot.src} alt={t.pickShot.alt} width="540" height="1116" loading="lazy" /></figure>}
+            </div>
           </div>
         ))}
       </section>
@@ -239,17 +291,20 @@ const heading = c.meta.replace(/\s+(on a NextFour club night|d’une soirée de 
         </div>
       </section>
 
+      <section class="part" id={IDS[6]} aria-labelledby={`${IDS[6]}-h`}>
+        <h2 id={`${IDS[6]}-h`}>{signal.title}</h2>
+        <p class="body-text" set:html={md(text(signal.blocks[0]))} />
+        <ul class="rules">
+          {items(signal.blocks[1]).map((it) => <li set:html={md(asCard(it))} />)}
+        </ul>
+        <p class="note-warn"><strong set:html={md(text(signal.blocks[2]))} /></p>
+      </section>
+
       <section class="part" id={IDS[4]} aria-labelledby={`${IDS[4]}-h`}>
         <h2 id={`${IDS[4]}-h`}>{scores.title}</h2>
-        <div class="grid g220">
-          {items(scores.blocks[0]).map((it) => {
-            const { title: cardTitle, rest } = lead(it);
-            return <div class="card"><h3>{cardTitle}</h3><p set:html={md(rest)} /></div>;
-          })}
-        </div>
-        <dl class="stats-strip">
-          {t.ratingStats.map(([label, value]) => <div><dt>{label}</dt><dd>{value}</dd></div>)}
-        </dl>
+        <ul class="rules">
+          {items(scores.blocks[0]).map((it) => <li set:html={md(it)} />)}
+        </ul>
       </section>
 
       <section class="part" id={IDS[5]} aria-labelledby={`${IDS[5]}-h`}>
@@ -267,98 +322,93 @@ const heading = c.meta.replace(/\s+(on a NextFour club night|d’une soirée de 
         </div>
       </section>
 
-      <section class="part" id={IDS[6]} aria-labelledby={`${IDS[6]}-h`}>
-        <h2 id={`${IDS[6]}-h`}>{signal.title}</h2>
-        <p class="body-text" set:html={md(text(signal.blocks[0]))} />
-        <ul class="grid g240" style="list-style: none; margin: 0; padding: 0">
-          {items(signal.blocks[1]).map((it) => <li class="card" set:html={md(asCard(it))} />)}
-        </ul>
-        <p class="note-warn"><strong set:html={md(text(signal.blocks[2]))} /></p>
-      </section>
-
-      <section class="part" id={IDS[7]} aria-labelledby={`${IDS[7]}-h`}>
+      <section class="part org" id={IDS[7]} aria-labelledby={`${IDS[7]}-h`}>
         <h2 id={`${IDS[7]}-h`}>{attendance.title}</h2>
-        <div class="split" style="gap: 12px; margin-bottom: 16px">
-          {items(attendance.blocks[0]).slice(0, 2).map((it, i) => {
-            const { title: cardTitle, rest } = lead(it);
-            return (
-              <div class="card" style="flex: 1 1 260px">
-                <span class="ttl"><b>{withoutPlan(cardTitle)}</b><span class={badge(t.attendancePlans[i])}>{t.attendancePlans[i]}</span></span>
-                <p set:html={md(rest)} />
-              </div>
-            );
-          })}
-        </div>
         <ul class="rules">
-          {items(attendance.blocks[0]).slice(2).map((it) => <li set:html={md(it)} />)}
+          {items(attendance.blocks[0]).map((it) => <li set:html={md(it)} />)}
         </ul>
       </section>
 
-      <section class="part" id={IDS[8]} aria-labelledby={`${IDS[8]}-h`}>
+      <section class="part org" id={IDS[8]} aria-labelledby={`${IDS[8]}-h`}>
         <h2 id={`${IDS[8]}-h`} style="margin-bottom: 12px">{payments.title}</h2>
-        <p class="body-text" style="margin: 0; font-size: 17px" set:html={md(text(payments.blocks[0]))} />
+        <p class="body-text" style="margin: 0" set:html={md(text(payments.blocks[0]))} />
       </section>
 
-      <section class="part" id={IDS[9]} aria-labelledby={`${IDS[9]}-h`}>
-        <div class="plans-top">
-          <h2 id={`${IDS[9]}-h`}>{plans.title}</h2>
-          <p set:html={md(text(plans.blocks[1]))} />
-        </div>
-        <div class="grid g240" style="gap: 12px">
-          {items(plans.blocks[0]).map((it) => {
-            const { title: name, rest } = lead(it);
-            const featured = name === 'Pro';
-            return (
-              <div class:list={['plan', { featured }]}>
-                <span class="ttl"><b>{name}</b>{featured && <span class="badge">{t.forOrganisers}</span>}</span>
-                <p set:html={md(rest[0].toUpperCase() + rest.slice(1))} />
-              </div>
-            );
-          })}
-        </div>
+      <section class="part org" id={IDS[9]} aria-labelledby={`${IDS[9]}-h`}>
+        <h2 id={`${IDS[9]}-h`}>{plans.title}</h2>
+        <ul class="rules">
+          {items(plans.blocks[0]).map((it) => <li set:html={md(it)} />)}
+        </ul>
+        <p class="note-small" set:html={md(text(plans.blocks[1]))} />
       </section>
 
       <section class="part last" id={IDS[10]} aria-labelledby={`${IDS[10]}-h`}>
         <h2 id={`${IDS[10]}-h`} style="margin-bottom: 12px">{testing.title}</h2>
         <p class="body-text" set:html={md(text(testing.blocks[0]))} />
-        <dl class="stats-strip" style="margin: 0 0 16px">
-          {t.testStats.map(([label, value]) => <div><dt>{label}</dt><dd>{value}</dd></div>)}
-        </dl>
-        <h3 class="small-h">{t.testRules}</h3>
-        <ol class="numbered">
-          {items(testing.blocks[1]).map((it, i) => <li><span class="n">{i + 1}</span><span set:html={md(asCard(it))} /></li>)}
-        </ol>
+        <h3 class="small-h">{t.rulesHold}</h3>
+        <ul class="holds">
+          {items(testing.blocks[1]).map((it) => <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg><span set:html={md(asCard(it))} /></li>)}
+        </ul>
         <p class="questions" set:html={md(text(testing.blocks[2]))} />
       </section>
 
       <div class="cta-slot">
-        <AppCta heading={t.cta.heading} text={t.cta.text} getLabel={t.cta.get} secondLabel={t.cta.second} src="how-it-works" />
+        <AppCta quiet heading={t.cta.heading} text={t.cta.text} getLabel={t.cta.get} secondLabel={t.cta.second} src="how-it-works" />
       </div>
     </div>
   </div>
 
   <script>
-    // Picking methods: tabs with arrow keys. Every panel is in the HTML; the
-    // script hides all but the chosen one.
+    // Picking methods: tabs with arrow keys, Home and End. Every panel is in the
+    // HTML; the script hides all but the chosen one. Each has its own link
+    // (#pegboard and so on), which opens its tab, and choosing a tab updates it.
     const tabs = [...document.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const panelOf = (t: HTMLButtonElement) => document.getElementById(t.getAttribute('aria-controls')!)!;
     const select = (tab: HTMLButtonElement) => {
       for (const t of tabs) {
         const on = t === tab;
         t.setAttribute('aria-selected', String(on));
         t.tabIndex = on ? 0 : -1;
-        document.getElementById(t.getAttribute('aria-controls')!)!.hidden = !on;
+        panelOf(t).hidden = !on;
       }
     };
+    const byHash = () => tabs.find((t) => `#${t.getAttribute('aria-controls')}` === location.hash);
     tabs.forEach((tab, i) => {
-      tab.addEventListener('click', () => select(tab));
+      tab.addEventListener('click', () => {
+        select(tab);
+        history.replaceState(null, '', `#${tab.getAttribute('aria-controls')}`);
+      });
       tab.addEventListener('keydown', (e) => {
-        const step = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
-        if (!step) return;
-        const next = tabs[(i + step + tabs.length) % tabs.length];
-        select(next);
-        next.focus();
+        const n = tabs.length;
+        const to = e.key === 'ArrowRight' ? (i + 1) % n : e.key === 'ArrowLeft' ? (i - 1 + n) % n
+          : e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : -1;
+        if (to < 0) return;
+        e.preventDefault();
+        tabs[to].click();
+        tabs[to].focus();
       });
     });
-    if (tabs.length) select(tabs[0]);
+    const openFromHash = () => {
+      const tab = byHash();
+      if (!tab) return;
+      select(tab);
+      panelOf(tab).closest('section')!.scrollIntoView();
+    };
+    if (tabs.length) select(byHash() ?? tabs[0]);
+    if (byHash()) requestAnimationFrame(openFromHash);
+    addEventListener('hashchange', openFromHash);
+
+    // The contents: closed on a narrow screen, and the section you are reading marked.
+    const toc = document.querySelector<HTMLDetailsElement>('.toc details');
+    if (toc && !matchMedia('(min-width: 900px)').matches) toc.open = false;
+    const links = new Map([...document.querySelectorAll<HTMLAnchorElement>('.toc-g > ol > li > a')].map((a) => [a.hash.slice(1), a]));
+    const spy = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        for (const a of links.values()) a.removeAttribute('aria-current');
+        links.get(e.target.id)?.setAttribute('aria-current', 'true');
+      }
+    }, { rootMargin: '-15% 0px -75% 0px' });
+    document.querySelectorAll('section.part').forEach((sec) => spy.observe(sec));
   </script>
 </Directory>
