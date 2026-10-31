@@ -62,6 +62,8 @@ const dropInCount = weeklyDropIns(dir.dropIns);
     .query { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
     .field { flex: 999 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
     .field label { font-size: 14px; font-weight: 700; }
+    /* The privacy promise, where the postcode goes in. */
+    .hint { margin: -10px 0 0; font-size: 14px; color: var(--muted); }
     .box {
       display: flex; align-items: center; gap: 10px; height: 56px; padding: 0 6px 0 16px; border-radius: 14px;
       border: 1.5px solid var(--field-line); background: var(--bg);
@@ -154,8 +156,8 @@ const dropInCount = weeklyDropIns(dir.dropIns);
       background: var(--seg-off); display: flex; justify-content: flex-start; flex: none;
     }
     #open span { width: 26px; height: 26px; border-radius: 999px; background: var(--surface); transition: transform 0.15s; }
-    #open[aria-pressed='true'] { background: var(--seg-on); }
-    #open[aria-pressed='true'] span { transform: translateX(20px); }
+    #open[aria-checked='true'] { background: var(--seg-on); }
+    #open[aria-checked='true'] span { transform: translateX(20px); }
 
     #status { margin: 8px 0 16px; font-size: 22px; font-weight: 800; font-stretch: 106%; scroll-margin-top: 24px; }
     #status:focus { outline: none; }
@@ -226,7 +228,7 @@ const dropInCount = weeklyDropIns(dir.dropIns);
           <label for="q">Postcode, town or club name</label>
           <div class="box">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
-            <input id="q" name="q" type="search" placeholder="e.g. SM1 or Sutton" autocomplete="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-form-type="other" />
+            <input id="q" name="q" type="search" placeholder="e.g. SM1 or Sutton" autocomplete="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-form-type="other" aria-describedby="q-hint" />
             <button type="button" class="icon" id="near" aria-pressed="false" aria-label="Near me" title="Near me">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
             </button>
@@ -238,6 +240,7 @@ const dropInCount = weeklyDropIns(dir.dropIns);
         </button>
         <button type="submit" id="search">Search</button>
       </div>
+      <p class="hint" id="q-hint">Your postcode is looked up on this device and never sent to us.</p>
       <div class="filters" id="filters" hidden>
         <fieldset class="levels">
           <legend>Level</legend>
@@ -252,7 +255,7 @@ const dropInCount = weeklyDropIns(dir.dropIns);
           </div>
         </fieldset>
         <div class="switch-row">
-          <button type="button" id="open" aria-pressed="false" aria-labelledby="open-label"><span></span></button>
+          <button type="button" id="open" role="switch" aria-checked="false" aria-labelledby="open-label"><span></span></button>
           <label id="open-label" for="open">Only clubs taking new players</label>
         </div>
       </div>
@@ -433,7 +436,7 @@ const dropInCount = weeklyDropIns(dir.dropIns);
         const l = Number(filter.level);
         if (l < r.l[0] || l > r.l[1]) return false;
       }
-      return open.getAttribute('aria-pressed') !== 'true' || r.o === 1;
+      return open.getAttribute('aria-checked') !== 'true' || r.o === 1;
     }
 
     const PIN = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg>';
@@ -611,7 +614,7 @@ const dropInCount = weeklyDropIns(dir.dropIns);
     }
 
     function filtered() {
-      return Boolean(filter.day || filter.level || filter.kind) || open.getAttribute('aria-pressed') === 'true';
+      return Boolean(filter.day || filter.level || filter.kind) || open.getAttribute('aria-checked') === 'true';
     }
 
     /** The filters in words, as their buttons name them: "Beginner, Drop-in, Tuesdays". */
@@ -621,7 +624,7 @@ const dropInCount = weeklyDropIns(dir.dropIns);
         filter.level ? pill('level') : '',
         filter.kind ? pill('kind') : '',
         filter.day ? `${DAY_NAMES[Number(filter.day)]}s` : '',
-        open.getAttribute('aria-pressed') === 'true' ? 'taking new players' : '',
+        open.getAttribute('aria-checked') === 'true' ? 'taking new players' : '',
       ].filter(Boolean).join(', ');
     }
 
@@ -639,7 +642,7 @@ const dropInCount = weeklyDropIns(dir.dropIns);
       document.querySelectorAll<HTMLElement>('.pills').forEach((group) => {
         group.querySelectorAll('.pill').forEach((b, i) => b.setAttribute('aria-pressed', String(i === 0)));
       });
-      open.setAttribute('aria-pressed', 'false');
+      open.setAttribute('aria-checked', 'false');
       answer();
     }
     afterBtn.addEventListener('click', () => afterAction?.());
@@ -722,10 +725,21 @@ const dropInCount = weeklyDropIns(dir.dropIns);
       // A name search has no place to count a week around.
       week(null);
       const words = norm(text).split(' ').filter(Boolean);
+      // Best match first: names that start with the search, then names that
+      // contain it, then clubs found by their venue or area; A to Z within each.
+      const whole = norm(text);
+      const rank = (r: Row) => {
+        const name = norm(r.n);
+        if (name.startsWith(whole)) return 0;
+        if (name.includes(whole)) return 1;
+        return words.every((w) => name.includes(w)) ? 2 : 3;
+      };
       const named = all.filter((r) => {
         const hay = norm(`${r.n} ${r.v} ${r.a}`);
         return words.every((w) => hay.includes(w));
-      }).map((r) => ({ r }));
+      }).map((r) => ({ r, k: rank(r) }))
+        .sort((a, b) => a.k - b.k || a.r.n.localeCompare(b.r.n))
+        .map(({ r }) => ({ r }));
       const found = named.filter(({ r }) => passes(r));
       if (found.length) render(found, `${counted(found)} matching “${text}”`);
       else if (named.length && filtered()) render([], `${counted(named)} matching “${text}”, but not with your filters`, whyEmpty(), true);
@@ -766,7 +780,7 @@ const dropInCount = weeklyDropIns(dir.dropIns);
       }));
     });
     open.addEventListener('click', () => {
-      open.setAttribute('aria-pressed', String(open.getAttribute('aria-pressed') !== 'true'));
+      open.setAttribute('aria-checked', String(open.getAttribute('aria-checked') !== 'true'));
       run();
     });
 
@@ -832,7 +846,7 @@ const dropInCount = weeklyDropIns(dir.dropIns);
       const text = q.value.trim();
       if (text) state.set('q', text);
       for (const key of ['day', 'level', 'kind'] as const) if (filter[key]) state.set(key, filter[key]);
-      if (open.getAttribute('aria-pressed') === 'true') state.set('open', '1');
+      if (open.getAttribute('aria-checked') === 'true') state.set('open', '1');
       // The Filters button counts what is set behind it.
       const set = [filter.level, filter.kind].filter(Boolean).length + (state.has('open') ? 1 : 0);
       filtersN.textContent = set ? String(set) : '';
@@ -857,7 +871,7 @@ const dropInCount = weeklyDropIns(dir.dropIns);
         pills.forEach((b) => b.setAttribute('aria-pressed', String(b === pick)));
         filter[key] = pick.dataset.value ?? '';
       });
-      open.setAttribute('aria-pressed', String(state.get('open') === '1'));
+      open.setAttribute('aria-checked', String(state.get('open') === '1'));
       if (q.value.trim()) run();
       else if (location.search) save();
     }
