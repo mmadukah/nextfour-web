@@ -19,3 +19,7 @@ npm-debug.log*
 
 # directory data fetched at build time (never commit: the repo is public)
 .cache/
+
+# Design-tool working files (Impeccable: critiques, sketches, caches) and local Claude settings
+.impeccable/
+.claude/
