@@ -6,11 +6,10 @@
 // time and a price, too thin a page to be worth finding.
 import Directory from '../../../../layouts/Directory.astro';
 import AppFeaturesCompact from '../../../../components/directory/AppFeaturesCompact.astro';
-import CourtArt from '../../../../components/directory/CourtArt.astro';
 import VenueMap from '../../../../components/directory/VenueMap.astro';
 import {
-  getDirectory, nearbyPlaces, townOf, nextDate, addressLines, clubTint, clubDaysShort, fitTitle, fitDescription, checkedText,
-  durationText, timeRange, listText, openLink, DAY_NAMES, DAY_LETTERS, WEEK_ORDER, type Venue, type DropIn,
+  getDirectory, nearbyPlaces, townOf, nextDate, addressLines, clubDaysShort, soonest, longDate, fitTitle, fitDescription, checkedText,
+  durationText, timeRange, listText, openLink, DAY_NAMES, type Venue, type DropIn,
 } from '../../../../data/directory';
 
 export async function getStaticPaths() {
@@ -25,6 +24,7 @@ const { venue } = Astro.props as { venue: Venue };
 const dir = await getDirectory();
 const area = dir.areas.find((a) => a.slug === venue.areaSlug)!;
 const town = townOf(venue.venue, venue.areaName);
+const near = area.hasPage ? area.name : town;
 const site = Astro.site!;
 const pageUrl = new URL(venue.url, site).href;
 const nearby = nearbyPlaces(dir, venue);
@@ -46,11 +46,21 @@ const rows: Row[] = venue.sessions.flatMap((s) => {
 });
 rows.sort((a, b) => a.key.localeCompare(b.key) || a.s.night.start.localeCompare(b.s.night.start));
 const groups = [...rows.reduce((m, r) => m.set(r.key, [...(m.get(r.key) ?? []), r]), new Map<string, Row[]>()).values()]
-  .map((rs) => ({ label: `${rs[0].label}${rs.length > 1 ? ` · ${rs.length} sessions` : ''}`, rows: rs }));
+  .map((rs) => ({ label: rs[0].label, count: rs.length > 1 ? `${rs.length} sessions` : '', rows: rs }));
 
-const prices = venue.sessions.map((s) => s.night.price).filter((p): p is string => Boolean(p));
-const lowest = prices.length ? prices.reduce((a, b) => (parseFloat(b.replace(/[^0-9.]/g, '')) < parseFloat(a.replace(/[^0-9.]/g, '')) ? b : a)) : null;
-const fromPrice = lowest?.replace(' a session', '') ?? null;
+// "From" is the cheapest session anyone can go to: a women-only or seniors'
+// session's price is no use to everyone else, so it only counts when every
+// priced session is like that, and then the price says whose it is.
+const RESTRICTED = /\b(women|ladies|female|girls|men only|male|boys|junior|juniors|kids|children|youth|teen|u\d{1,2}s?|seniors?|over\s?\d+|\d+\+|disab\w*|parent)\b/i;
+const priced = venue.sessions.filter((s) => s.night.price);
+const amount = (s: DropIn) => parseFloat(s.night.price!.replace(/[^0-9.]/g, ''));
+const pool = priced.some((s) => !RESTRICTED.test(s.title)) ? priced.filter((s) => !RESTRICTED.test(s.title)) : priced;
+const cheapest = pool.length ? pool.reduce((a, b) => (amount(b) < amount(a) ? b : a)) : null;
+const fromPrice = cheapest ? cheapest.night.price!.replace(' a session', '') : null;
+// Whose price it is, when every priced session is for one group.
+const fromFor = cheapest && RESTRICTED.test(cheapest.title) ? cheapest.title : null;
+const anyBook = venue.sessions.some((s) => !s.claimed && s.bookingUrl);
+const next = soonest(venue.sessions, new Date());
 const weekly = rows.length;
 const clubs = venue.clubs;
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
@@ -148,21 +158,25 @@ const ARROW = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" strok
     .tally > div { padding: 16px 18px; box-shadow: 1px 0 0 var(--line), 0 1px 0 var(--line); }
     .tally dt { font-size: 13px; color: var(--muted); }
     .tally dd { margin: 4px 0 0; font-size: 32px; font-weight: 800; font-stretch: 112%; line-height: 1; font-variant-numeric: tabular-nums; }
-    .art {
-      flex: 1 1 320px; min-height: 260px; border-radius: 20px; overflow: hidden; position: relative;
-      display: flex; align-items: center; justify-content: center;
+    .tally dd.for { margin-top: 6px; font-size: 13px; font-weight: 600; font-stretch: 100%; color: var(--muted); }
+    /* The next session, where the decorative court used to be. */
+    .next {
+      flex: 1 1 300px; align-self: flex-start; margin: 0; padding: 24px; border-radius: 20px; background: var(--chip-bg); color: var(--chip-fg);
+      display: flex; flex-direction: column; gap: 6px;
     }
-    .art span {
-      position: absolute; left: 14px; bottom: 14px; font-size: 12px; font-weight: 600; color: #FFFFFF;
-      background: rgba(0, 0, 0, 0.4); padding: 4px 9px; border-radius: 6px;
-    }
+    .next dt { font-size: 14px; font-weight: 700; opacity: 0.8; display: flex; align-items: center; gap: 8px; }
+    .next dt svg { color: var(--hl-bg); }
+    .next .date { margin: 2px 0 6px; font-size: clamp(26px, 3vw, 34px); font-weight: 800; font-stretch: 110%; line-height: 1.05; letter-spacing: -0.01em; }
+    .next dd { margin: 0; font-size: 16px; text-wrap: pretty; }
+    .next dd.small-dd { padding-top: 10px; font-size: 14px; opacity: 0.8; }
 
     .box { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: clamp(18px, 3vw, 28px); margin-bottom: 24px; }
     .box h2 { margin: 0; font-size: 24px; font-weight: 800; font-stretch: 106%; }
     .box-top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; margin-bottom: 8px; }
     .box-top p { margin: 0; font-size: 14px; color: var(--muted); }
     .groups { display: flex; flex-direction: column; gap: 20px; margin-top: 12px; }
-    .groups h3 { margin: 0 0 8px; font-size: 15px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+    .groups h3 { margin: 0 0 8px; font-size: 17px; font-weight: 800; color: var(--ink); }
+    .groups h3 span { font-weight: 600; color: var(--muted); }
     .rows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
     .row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding: 14px 16px; border-radius: 14px; background: var(--row); }
     .chip {
@@ -214,7 +228,7 @@ const ARROW = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" strok
 
     .run {
       display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px;
-      padding: 18px 22px; border-radius: 16px; border: 1.5px dashed var(--line-strong); margin-bottom: 32px;
+      padding: 18px 22px; border-radius: 16px; border: 1px solid var(--line); margin-bottom: 32px;
     }
     .run > div { flex: 999 1 380px; min-width: 0; }
     .run h2 { margin: 0; font-size: 17px; font-weight: 800; }
@@ -230,7 +244,6 @@ const ARROW = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" strok
       display: flex; flex-direction: column; gap: 10px; height: 100%; box-sizing: border-box; padding: 16px; border-radius: 14px;
       background: var(--surface); border: 1px solid var(--line); text-decoration: none;
     }
-    .nearby .kind { font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
     .nearby b { font-weight: 700; line-height: 1.3; }
     .nearby .meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: auto; }
     .nearby small { font-size: 13px; color: var(--muted); }
@@ -255,43 +268,41 @@ const ARROW = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" strok
       <dl class="tally">
         <div><dt>Drop-ins</dt><dd>{weekly}</dd></div>
         {clubs.length > 0 && <div><dt>Clubs</dt><dd>{clubs.length}</dd></div>}
-        {fromPrice && <div><dt>From</dt><dd>{fromPrice}</dd></div>}
+        {fromPrice && <div><dt>From</dt><dd>{fromPrice}</dd>{fromFor && <dd class="for">{fromFor}</dd>}</div>}
       </dl>
     </div>
-    <div class="art" style={`background: ${clubTint(venue.id)}`}>
-      <CourtArt width={240} />
-      <span>{venue.name}</span>
-    </div>
+    {next && (
+      <dl class="next">
+        <dt><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18"></path></svg>Next drop-in</dt>
+        <dd class="date">{longDate(next.date)}</dd>
+        <dd>{timeRange(next.item.night)}{next.item.night.price && `, ${next.item.night.price.replace(' a session', '')}`}</dd>
+        <dd>{next.item.title}</dd>
+        <dd class="small-dd">{next.item.claimed ? 'Join it in the NextFour app.' : next.item.bookingUrl ? 'Book it on the operator’s site, below.' : 'Check with the venue before you go.'}</dd>
+      </dl>
+    )}
   </section>
 
   <section class="box" aria-labelledby="dropin-h">
     <div class="box-top">
       <h2 id="dropin-h">Drop-in sessions</h2>
-      <p>Pay per session. Book with the operator.</p>
+      <p>{anyBook ? 'Pay per session. Book with the operator.' : 'Pay per session.'}</p>
     </div>
     <div class="groups">
       {groups.map((g) => (
         <div>
-          <h3>{g.label}</h3>
+          <h3>{g.label}{g.count && <span> · {g.count}</span>}</h3>
           <ul class="rows">
             {g.rows.map((r) => {
               const n = r.s.night;
               const duration = durationText(n);
               return (
                 <li class="row">
-                  {r.chip
-                    ? <span class="chip">{r.chip}</span>
-                    : (
-                      <span class="day-strip" role="img" aria-label={`${DAY_NAMES[r.day!]}s`}>
-                        {WEEK_ORDER.map((d) => <span class:list={['ds-cell', { on: d === r.day }]} aria-hidden="true">{DAY_LETTERS[d]}</span>)}
-                      </span>
-                    )}
                   <span class="what">
                     <span class="what-top">
                       <b>{r.s.title}</b>
                       {r.s.claimed && <span class="runs">Runs on NextFour</span>}
                     </span>
-                    {r.s.operator && <small>Run by {r.s.operator}</small>}
+                    {(r.s.operator || r.s.levelKnown) && <small>{[r.s.operator && `Run by ${r.s.operator}`, r.s.levelKnown && n.levels].filter(Boolean).join(' · ')}</small>}
                   </span>
                   <span class="when"><b>{timeRange(n)}</b>{duration && <small>{duration}</small>}</span>
                   {n.price && <span class="cost"><b>{n.price.replace(' a session', '')}</b><small>per session</small></span>}
@@ -312,7 +323,7 @@ const ARROW = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" strok
         </div>
       ))}
     </div>
-    <p class="small">Booking opens the operator's own site in a new tab. Nothing is booked or paid for on NextFour.</p>
+    {anyBook && <p class="small">Booking opens the operator's own site in a new tab. Nothing is booked or paid for on NextFour.</p>}
     <p class="small">{sourceNote} <a href="/data-sources.html">Data sources</a></p>
   </section>
 
@@ -361,17 +372,16 @@ const ARROW = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" strok
   {nearby.length > 0 && (
     <section class="near" aria-labelledby="near-h">
       <div class="near-top">
-        <h2 id="near-h">Other places to play near {town}</h2>
+        <h2 id="near-h">Other places to play near {near}</h2>
         {area.hasPage && <a href={area.url}>All badminton in {area.name} <Fragment set:html={ARROW} /></a>}
       </div>
       <ul class="nearby">
         {nearby.map((p) => (
           <li>
             <a href={'venue' in p ? p.venue.url : p.club.url}>
-              <span class="kind">{'venue' in p ? 'Drop-in venue' : 'Club'}</span>
               <b>{'venue' in p ? p.venue.name : p.club.name}</b>
               <span class="meta">
-                <small>{'venue' in p ? venueDays(p.venue) : clubDaysShort(p.club)}</small>
+                <small>{'venue' in p ? `Drop-ins · ${venueDays(p.venue)}` : `Club · ${clubDaysShort(p.club)}`}</small>
                 <span class="dist">{p.km < 1 ? 'Under 1' : Math.round(p.km)} km</span>
               </span>
             </a>

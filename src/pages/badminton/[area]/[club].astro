@@ -9,11 +9,11 @@
 import Directory from '../../../layouts/Directory.astro';
 import AppFeaturesCompact from '../../../components/directory/AppFeaturesCompact.astro';
 import NightLine from '../../../components/directory/NightLine.astro';
-import CourtArt from '../../../components/directory/CourtArt.astro';
 import VenueMap from '../../../components/directory/VenueMap.astro';
 import {
   getDirectory, clubDaysText, checkedText, shortDate, townOf, nearbyClubs, nextDate, sortedRows, dayRows,
-  addressLines, clubTint, clubTimeText, clubDaysShort, fitTitle, fitDescription, slugify, openLink, DAY_NAMES, SHORT_DAYS, WEEK_ORDER, type Club,
+  addressLines, clubTimeText, clubDaysShort, fitTitle, fitDescription, slugify, openLink, soonest, longDate, timeRange, pounds,
+  DAY_NAMES, SHORT_DAYS, WEEK_ORDER, type Club,
 } from '../../../data/directory';
 
 export async function getStaticPaths() {
@@ -61,9 +61,8 @@ const description = fitDescription([
 
 const summary = [
   `${club.name} is a badminton club in ${club.areaName}.`,
-  `It plays at ${club.venue.name}${otherVenues.length ? ` and ${otherVenues.length === 1 ? otherVenues[0].name : `${otherVenues.length} other venues`}` : ''}${days ? ` on ${days}` : ''}.`,
+  `It plays at ${club.venue.name}${otherVenues.length ? ` and ${otherVenues.length === 1 ? otherVenues[0].name : `${otherVenues.length} other venues`}` : ''}${days ? ` on ${days}` : ''}${club.courts ? `, on ${club.courts} court${club.courts === 1 ? '' : 's'}` : ''}.`,
   club.levels !== 'All levels' ? `Sessions are for ${club.levels.toLowerCase()} players.` : '',
-  club.courts ? `It plays on ${club.courts} court${club.courts === 1 ? '' : 's'}.` : '',
 ].filter(Boolean).join(' ');
 
 const rows = sortedRows(club);
@@ -71,7 +70,29 @@ const playDays = new Set(rows.map((r) => r.day).filter((d) => d != null));
 const directionsUrl = directionsTo(club.venue);
 const [website, ...otherLinks] = club.links;
 const prices = [...new Set(club.nights.map((n) => n.price).filter(Boolean))];
-const costsPublished = Boolean(club.visitorPolicy || club.fees || prices.length);
+const visitorPolicy = club.visitorPolicy ? pounds(club.visitorPolicy) : null;
+const fees = club.fees ? pounds(club.fees) : null;
+const costsPublished = Boolean(visitorPolicy || fees || prices.length);
+// The answer a visitor needs first, short enough for the facts row: from the
+// club's own visitor terms ("First evening is free. After that GBP 12..."),
+// else the session price, else plainly not published.
+const visitorFact = (() => {
+  if (!club.takingNewPlayers) return 'Not taking new players';
+  if (visitorPolicy) {
+    const free = /\bfirst (evening|night|session|visit)s?\b[^.]*\bfree\b|\bfree\b[^.]*\bfirst (evening|night|session|visit)/i.test(visitorPolicy);
+    const amount = visitorPolicy.match(/£\d+(?:\.\d{2})?/)?.[0];
+    if (free && amount) return `First visit free, then ${amount}`;
+    if (amount) return amount;
+    if (free) return 'First visit free';
+    return 'See below';
+  }
+  if (prices.length === 1) return prices[0]!;
+  if (fees || prices.length) return 'See below';
+  return 'Not published';
+})();
+const time = clubTimeText(club);
+// The next night, for the card beside the title.
+const next = soonest(club.nights.map((night) => ({ night })), new Date());
 // "Claim Chew Park Keynsham": the name without its "Badminton Club" tail.
 const shortName = club.name.replace(/\s+Badminton Club\b.*$/i, '') || club.name;
 const correction = `mailto:clubs@nextfour.app?subject=${encodeURIComponent(`Correction: ${club.name}`)}&body=${encodeURIComponent(`Page: ${pageUrl}\n\nWhat needs changing:\n`)}`;
@@ -142,10 +163,12 @@ const crumbs = [
     h1 { font-size: clamp(38px, 5.6vw, 64px); line-height: 1; font-stretch: 112%; }
     .summary { margin: 0; max-width: 600px; font-size: 18px; color: var(--body); }
     .facts {
-      margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      /* Four facts: four across, or two by two on a phone, never three and one. */
+      margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(130px, 100%), 1fr));
       border: 1px solid var(--line); border-radius: 16px; background: var(--surface); overflow: hidden;
     }
     .facts > div { padding: 16px 18px; box-shadow: 1px 0 0 var(--line), 0 1px 0 var(--line); }
+    .facts dd.long { font-size: 16px; line-height: 1.3; }
     .facts dt { font-size: 13px; color: var(--muted); }
     .facts dd { margin: 4px 0 0; font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums; }
     .acts { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
@@ -157,17 +180,18 @@ const crumbs = [
     .act.lime { border-color: var(--hl-bg); background: var(--hl-bg); color: var(--hl-fg); font-weight: 800; }
     .act.lime:hover { color: var(--hl-fg); opacity: 0.92; }
     .act.soft { border-color: var(--line-strong); }
-    .act[aria-expanded='true'] { background: var(--sel-bg); color: var(--sel-fg); border-color: var(--sel-bg); }
-    .follow-note { flex: 1 1 100%; margin: 0; padding: 12px 16px; border-radius: 12px; background: var(--row); font-size: 15px; color: var(--body); }
-    .follow-note[hidden] { display: none; }
-    .art {
-      flex: 1 1 320px; min-height: 280px; border-radius: 20px; overflow: hidden; position: relative;
-      display: flex; align-items: center; justify-content: center;
+    .act-note { margin: -6px 0 0; font-size: 14px; color: var(--muted); }
+    .act-note a { color: var(--body); font-weight: 600; }
+    /* The next night, where the decorative court used to be: the one date a player needs. */
+    .next {
+      flex: 1 1 300px; align-self: flex-start; margin: 0; padding: 24px; border-radius: 20px; background: var(--chip-bg); color: var(--chip-fg);
+      display: flex; flex-direction: column; gap: 6px;
     }
-    .art span {
-      position: absolute; left: 14px; bottom: 14px; font-size: 12px; font-weight: 600; color: #FFFFFF;
-      background: rgba(0, 0, 0, 0.4); padding: 4px 9px; border-radius: 6px;
-    }
+    .next dt { font-size: 14px; font-weight: 700; opacity: 0.8; display: flex; align-items: center; gap: 8px; }
+    .next dt svg { color: var(--hl-bg); }
+    .next .date { margin: 2px 0 6px; font-size: clamp(26px, 3vw, 34px); font-weight: 800; font-stretch: 110%; line-height: 1.05; letter-spacing: -0.01em; }
+    .next dd { margin: 0; font-size: 16px; text-wrap: pretty; }
+    .next dd.small-dd { padding-top: 10px; font-size: 14px; opacity: 0.8; }
 
     .body { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; padding-bottom: 48px; }
     .main { flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 24px; }
@@ -176,22 +200,22 @@ const crumbs = [
     .box h2 { margin: 0 0 16px; font-size: 22px; font-weight: 800; font-stretch: 106%; }
     .week { list-style: none; margin: 0 0 16px; padding: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
     .week li {
-      text-align: center; padding: 10px 0; border-radius: 10px; font-size: 13px; font-weight: 700; letter-spacing: 0.04em;
-      text-transform: uppercase; background: var(--row); color: var(--empty-day);
+      text-align: center; padding: 10px 0; border-radius: 10px; font-size: 14px; font-weight: 700;
+      background: var(--row); color: var(--empty-day);
     }
-    .week li.on { background: var(--hl-bg); color: var(--hl-fg); }
+    .week li.on { background: var(--ink); color: var(--bg); }
     .lines { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
     .notice { display: flex; gap: 14px; align-items: flex-start; padding: 16px; border-radius: 14px; background: var(--warn-bg); color: var(--warn-fg); }
     .notice svg { flex: 0 0 auto; margin-top: 1px; }
     .notice p { margin: 0; }
     .notice p + p { margin-top: 4px; font-size: 15px; }
     .notice + .notice, .notice + .tiles { margin-top: 16px; }
-    .tiles { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
-    .tiles > div { padding: 14px 16px; border-radius: 12px; background: var(--row); border: 1px solid var(--row); }
-    .tiles > div.none { background: transparent; border: 1px dashed var(--line-strong); }
+    /* What the club publishes, as plain rows: only the ones it has. */
+    .tiles { margin: 0; display: flex; flex-direction: column; }
+    .tiles > div { padding: 12px 0; border-top: 1px solid var(--line); }
+    .tiles > div:first-child { border-top: 0; padding-top: 0; }
     .tiles dt { font-size: 13px; color: var(--muted); }
-    .tiles dd { margin: 4px 0 0; font-weight: 600; color: var(--body); }
-    .tiles .none dd { font-weight: 700; color: var(--muted); }
+    .tiles dd { margin: 4px 0 0; font-weight: 600; color: var(--body); max-width: 64ch; text-wrap: pretty; }
     .venue { padding: 0; overflow: hidden; display: flex; flex-wrap: wrap; }
     .map { flex: 1 1 260px; min-height: 240px; position: relative; background: var(--row); }
     .venue-text { flex: 999 1 280px; min-width: 0; padding: 24px; display: flex; flex-direction: column; gap: 14px; }
@@ -209,27 +233,23 @@ const crumbs = [
     .show-on-map:hover { color: var(--link-hover); }
     .arrow-link { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; font-weight: 700; min-height: 24px; }
 
-    .claim { border: 2px solid var(--hl-bg); }
     .claim h2 { margin: 0; line-height: 1.15; }
     .ticks { list-style: none; margin: 16px 0 20px; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 15px; color: var(--body); }
     .ticks li { display: flex; gap: 10px; }
     .ticks svg { flex: 0 0 auto; margin-top: 2px; color: var(--eyebrow); }
     .claim-btn {
-      width: 100%; min-height: 48px; border-radius: 999px; border: 0; background: var(--hl-bg); color: var(--hl-fg);
-      font-size: 16px; font-weight: 800; cursor: pointer;
+      width: 100%; min-height: 48px; border-radius: 999px; border: 1.5px solid var(--ink); color: var(--ink);
+      display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 16px; font-weight: 800;
     }
-    .steps { margin: 20px 0 0; padding: 18px 0 0; list-style: none; display: flex; flex-direction: column; gap: 14px; border-top: 1px solid var(--line); }
+    .claim details { margin-top: 14px; font-size: 14px; }
+    .claim summary { cursor: pointer; font-weight: 700; min-height: 44px; display: flex; align-items: center; }
+    .steps { margin: 4px 0 0; padding: 18px 0 0; list-style: none; display: flex; flex-direction: column; gap: 14px; border-top: 1px solid var(--line); }
     .steps li { display: flex; gap: 12px; font-size: 15px; }
     .steps .n {
       flex: 0 0 28px; height: 28px; border-radius: 999px; background: var(--chip-bg); color: var(--chip-fg);
       font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center;
     }
     .steps strong { display: block; }
-    .claim-more[hidden] { display: none; }
-    .claim-get {
-      margin-top: 18px; display: flex; justify-content: center; align-items: center; min-height: 48px;
-      border-radius: 999px; border: 1.5px solid var(--ink); text-decoration: none; font-weight: 700;
-    }
     .small { margin: 14px 0 0; font-size: 13px; color: var(--muted); }
     .about { padding: 20px 24px; }
     .about h2 { margin: 0 0 8px; font-size: 16px; }
@@ -262,39 +282,40 @@ const crumbs = [
       <p class="summary">{summary}</p>
       <dl class="facts">
         <div><dt>Plays</dt><dd>{clubDaysShort(club)}</dd></div>
-        <div><dt>Time</dt><dd>{clubTimeText(club)}</dd></div>
+        {time !== 'Varies' && <div><dt>Time</dt><dd>{time}</dd></div>}
         <div><dt>Level</dt><dd>{club.levels}</dd></div>
-        {club.lastChecked && <div><dt>Checked</dt><dd>{shortDate(club.lastChecked)}</dd></div>}
+        <div><dt>Visitors</dt><dd class={visitorFact.length > 14 ? 'long' : undefined}>{visitorFact === 'See below' ? <a href="#visit-h">See below</a> : visitorFact}</dd></div>
       </dl>
       <div class="acts">
+        <a class="act lime" href={openLink('club', club.id, 'club-open')}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"></rect><path d="M11 18h2"></path></svg>
+          Open in the app
+        </a>
         {website && (
-          <a class="act lime" href={website.href} rel="noopener" target="_blank">
+          <a class="act" href={website.href} rel="noopener" target="_blank">
             {website.label}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"></path></svg>
           </a>
         )}
-        {otherLinks.map((l) => <a class="act soft" href={l.href} rel="noopener" target="_blank">{l.label}</a>)}
-        <a class="act" href={several ? '#venue-h' : directionsUrl} {...(several ? {} : { rel: 'noopener', target: '_blank' })}>
+        <a class="act soft" href={several ? '#venue-h' : directionsUrl} {...(several ? {} : { rel: 'noopener', target: '_blank' })}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11 21 3l-8 18-2-8-8-2z"></path></svg>
-          Directions
+          {several ? 'See the venues' : 'Directions'}
         </a>
-        <a class="act" href={openLink('club', club.id, 'club-open')}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"></rect><path d="M11 18h2"></path></svg>
-          Open in the app
-        </a>
-        <button type="button" class="act soft" id="follow" aria-expanded="false" aria-controls="follow-note">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>
-          Follow club
-        </button>
-        <p class="follow-note" id="follow-note" hidden>
-          Follow {club.name} in the NextFour app to hear when it adds a session. <a href={openLink('club', club.id, 'follow')}>Open it in the app</a> and tap Follow.
-        </p>
       </div>
+      <p class="act-note">
+        Follow it in the app to hear when it adds a session.
+        {otherLinks.length > 0 && <> Also on {otherLinks.map((l, i) => <>{i > 0 && ' and '}<a href={l.href} rel="noopener" target="_blank">{l.label}</a></>)}.</>}
+      </p>
     </div>
-    <div class="art" style={`background: ${clubTint(club.id)}`}>
-      <CourtArt width={240} />
-      <span>{several ? `${venues.length} venues` : club.venue.name}</span>
-    </div>
+    {next && (
+      <dl class="next">
+        <dt><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18"></path></svg>Next club night</dt>
+        <dd class="date">{longDate(next.date)}</dd>
+        <dd>{timeRange(next.item.night)}</dd>
+        <dd>{next.item.night.venue.name}</dd>
+        <dd class="small-dd">{next.item.night.days.length ? `Every ${DAY_NAMES[next.item.night.days[0]]}${next.item.night.days.length > 1 ? ' and more' : ''}` : 'One-off'}{club.claimed ? '' : ', from the club’s published times'}.</dd>
+      </dl>
+    )}
   </section>
 
   <div class="body">
@@ -325,25 +346,18 @@ const crumbs = [
         )}
         {costsPublished ? (
           <dl class="tiles">
-            <div class={club.visitorPolicy ? '' : 'none'}><dt>Visitors</dt><dd>{club.visitorPolicy ?? 'Not listed'}</dd></div>
-            <div class={club.fees ? '' : 'none'}><dt>Costs</dt><dd>{club.fees ?? 'Not listed'}</dd></div>
-            <div class={prices.length ? '' : 'none'}><dt>Session price</dt><dd>{prices.length ? prices.join(', ') : 'Not listed'}</dd></div>
+            {visitorPolicy && <div><dt>Visitors</dt><dd>{visitorPolicy}</dd></div>}
+            {fees && <div><dt>Costs</dt><dd>{fees}</dd></div>}
+            {prices.length > 0 && <div><dt>Session price</dt><dd>{prices.join(', ')}</dd></div>}
           </dl>
         ) : (
-          <>
-            <div class="notice">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg>
-              <div>
-                <p><strong>Visitor terms and prices aren't published yet</strong></p>
-                <p>Check with the club before you go.{website ? ' Their website is the best place to start.' : ''}</p>
-              </div>
+          <div class="notice">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg>
+            <div>
+              <p><strong>Visitor terms and prices aren't published yet</strong></p>
+              <p>Check with the club before you go.{website ? ' Their website is the best place to start.' : ''}</p>
             </div>
-            <dl class="tiles">
-              <div class="none"><dt>Visitor fee</dt><dd>Not listed</dd></div>
-              <div class="none"><dt>Membership</dt><dd>Not listed</dd></div>
-              <div class="none"><dt>Shuttles</dt><dd>Not listed</dd></div>
-            </dl>
-          </>
+          </div>
         )}
       </section>
 
@@ -386,16 +400,15 @@ const crumbs = [
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg>{t}</li>
             ))}
           </ul>
-          <button type="button" class="claim-btn" id="claim" aria-expanded="false" aria-controls="claim-more">Claim this club</button>
-          <div class="claim-more" id="claim-more" hidden>
+          <a class="claim-btn" href={openLink('club', club.id, 'claim')}>Claim it in the app</a>
+          <details>
+            <summary>How claiming works</summary>
             <ol class="steps">
               <li><span class="n">1</span><span><strong>Get the NextFour app</strong><span class="muted">Free on iPhone and Android.</span></span></li>
               <li><span class="n">2</span><span><strong>Find this club and tap Claim</strong><span class="muted">We check each claim by hand before handing the club over.</span></span></li>
               <li><span class="n">3</span><span><strong>Update your listing</strong><span class="muted">Changes show on this page.</span></span></li>
             </ol>
-            <a class="claim-get" href={openLink('club', club.id, 'claim')}>Get the app to claim</a>
-          </div>
-          <p class="small">Not the organiser? <a href="/how-it-works.html">How claiming works</a></p>
+          </details>
         </section>
       )}
       <section class="box about" aria-labelledby="about-h">
@@ -414,7 +427,7 @@ const crumbs = [
       </div>
       <ul class="nearby">
         {nearby.map(({ club: c, km }) => (
-          <li><a href={c.url}><b>{c.name}</b><span class="meta"><small>{c.areaName}</small><span class="dist">{km < 1 ? 'Under 1' : Math.round(km)} km</span></span></a></li>
+          <li><a href={c.url}><b>{c.name}</b><span class="meta"><small>{clubDaysShort(c)} · {c.areaName}</small><span class="dist">{km < 1 ? 'Under 1' : Math.round(km)} km</span></span></a></li>
         ))}
       </ul>
     </section>
@@ -423,16 +436,4 @@ const crumbs = [
   <!-- An unclaimed club's page is often found by its own organiser, so its banner speaks to them. -->
   <AppFeaturesCompact variant={club.claimed ? 'claimed' : 'unclaimed'} clubName={club.name} src={club.claimed ? 'club-claimed' : 'club-unclaimed'} clubId={club.id} />
 
-  <script>
-    // Follow and Claim open a short explanation; both happen in the app.
-    for (const [buttonId, panelId] of [['follow', 'follow-note'], ['claim', 'claim-more']]) {
-      const button = document.getElementById(buttonId);
-      const panel = document.getElementById(panelId);
-      button?.addEventListener('click', () => {
-        const open = button.getAttribute('aria-expanded') !== 'true';
-        button.setAttribute('aria-expanded', String(open));
-        if (panel) panel.hidden = !open;
-      });
-    }
-  </script>
 </Directory>

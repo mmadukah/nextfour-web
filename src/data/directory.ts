@@ -624,6 +624,40 @@ export function nearbyClubs(dir: Directory, club: Club, count = 5): { club: Club
     .slice(0, count);
 }
 
+/**
+ * The soonest upcoming night among [items], from [from]: a weekly night's next
+ * day, or a one-off date not yet past (YYYY-MM-DD). The site rebuilds nightly,
+ * so "next" stays true.
+ */
+export function soonest<T extends { night: Night }>(items: T[], from: Date): { item: T; date: string } | null {
+  const today = nextDate(from.getUTCDay(), from);
+  // A night that has already started today is next week's, not today's.
+  const now = from.toLocaleTimeString('en-GB', { timeZone: 'Europe/London', hour: '2-digit', minute: '2-digit', hour12: false });
+  const weekLater = (iso: string) => new Date(Date.parse(`${iso}T12:00:00Z`) + 7 * 864e5).toISOString().slice(0, 10);
+  let best: { item: T; date: string } | null = null;
+  for (const item of items) {
+    const n = item.night;
+    const started = (iso: string) => iso === today && n.start <= now;
+    const dates = n.days.length
+      ? n.days.map((d) => nextDate(d, from)).map((iso) => (started(iso) ? weekLater(iso) : iso))
+      : n.date && n.date >= today && !started(n.date) ? [n.date] : [];
+    for (const date of dates) {
+      if (!best || date + n.start < best.date + best.item.night.start) best = { item, date };
+    }
+  }
+  return best;
+}
+
+/** "Tuesday 4 November" from YYYY-MM-DD. */
+export function longDate(iso: string): string {
+  return new Date(`${iso}T12:00:00`).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+
+/** A club's own text with "GBP 12" written as "£12". */
+export function pounds(text: string): string {
+  return text.replace(/\bGBP\s?(?=\d)/g, '£');
+}
+
 /** The next date a weekly night runs, on or after [from], as YYYY-MM-DD. */
 export function nextDate(day: number, from: Date): string {
   const d = new Date(Date.UTC(from.getUTCFullYear(), from.getUTCMonth(), from.getUTCDate()));
