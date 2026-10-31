@@ -69,6 +69,33 @@ export function distanceKm(lat1: number, lng1: number, lat2: number, lng2: numbe
 }
 
 /**
+ * Where each district sits: the centroid of its largest polygon, so an
+ * island or an exclave does not drag the point out to sea.
+ */
+export function districtCentres(): { code: string; name: string; lat: number; lng: number }[] {
+  return load().map((d) => {
+    const ring = d.polygons
+      .map((poly) => poly[0])
+      .reduce((best, r) => (Math.abs(ringArea(r)) > Math.abs(ringArea(best)) ? r : best));
+    let [cx, cy, a] = [0, 0, 0];
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      const cross = ring[j][0] * ring[i][1] - ring[i][0] * ring[j][1];
+      cx += (ring[j][0] + ring[i][0]) * cross;
+      cy += (ring[j][1] + ring[i][1]) * cross;
+      a += cross;
+    }
+    return { code: d.code, name: d.name, lat: cy / (3 * a), lng: cx / (3 * a) };
+  });
+}
+
+/** Twice the signed area of a ring, in squared degrees. */
+function ringArea(ring: Ring): number {
+  let a = 0;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) a += ring[j][0] * ring[i][1] - ring[i][0] * ring[j][1];
+  return a;
+}
+
+/**
  * The district a point sits in. The boundaries are generalised, so a venue on
  * the coast or a border can fall just outside every polygon; it then takes the
  * district whose outline passes nearest.

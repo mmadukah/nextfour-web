@@ -266,7 +266,7 @@ export function slugify(s: string): string {
 }
 
 /** "Bristol, City of" reads as "Bristol". */
-function areaName(ladName: string): string {
+export function areaName(ladName: string): string {
   return ladName.replace(/,\s*(City|County) of$/i, '').trim();
 }
 

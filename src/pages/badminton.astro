@@ -307,15 +307,26 @@ const dropInCount = weeklyDropIns(dir.dropIns);
 
     let rows: Row[] | null = null;
     let districts: [string, number, number, string][] | null = null;
+    let areas: [string, number, number][] | null = null;
     let origin: { lat: number; lng: number; label: string } | null = null;
 
+    /** A file the finder needs; a failed load throws, so the search can say so and the next one tries again. */
+    async function load<T>(url: string): Promise<T> {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`${url}: ${res.status}`);
+      return res.json();
+    }
     async function index(): Promise<Row[]> {
-      rows ??= await (await fetch(`/badminton/search-index.json?v=${results.dataset.build ?? ''}`)).json();
-      return rows!;
+      rows ??= await load<Row[]>(`/badminton/search-index.json?v=${results.dataset.build ?? ''}`);
+      return rows;
     }
     async function postcodes() {
-      districts ??= await (await fetch('/postcode-districts.json')).json();
-      return districts!;
+      districts ??= await load<[string, number, number, string][]>('/postcode-districts.json');
+      return districts;
+    }
+    async function councils() {
+      areas ??= await load<[string, number, number][]>(`/badminton/places.json?v=${results.dataset.build ?? ''}`);
+      return areas;
     }
     function km(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
       const r = Math.PI / 180;
@@ -330,7 +341,8 @@ const dropInCount = weeklyDropIns(dir.dropIns);
 
     /**
      * Where the text points: a postcode district, a council area with clubs,
-     * or a locality the district table names ("Croydon, Addiscombe, ...").
+     * a locality the district table names ("Croydon, Addiscombe, ..."), or
+     * any council area or London, whether or not it has clubs of its own.
      */
     async function place(text: string) {
       const t = text.trim();
@@ -356,6 +368,8 @@ const dropInCount = weeklyDropIns(dir.dropIns);
           label: t.replace(/\b\w/g, (c) => c.toUpperCase()),
         };
       }
+      const council = (await councils()).find((a) => norm(a[0]) === norm(t));
+      if (council) return { lat: council[1], lng: council[2], label: council[0] };
       return null;
     }
 
@@ -490,12 +504,29 @@ const dropInCount = weeklyDropIns(dir.dropIns);
       results.innerHTML = list.slice(0, 40).map(({ r, dist }) => (r.y === 'd' ? dropCard(r, dist) : card(r, dist))).join('');
     }
 
+    // Each search counts itself, so a slow earlier one (still loading the
+    // postcode table, say) never paints over the answer to a later one.
+    let latest = 0;
     async function run() {
+      const seq = ++latest;
+      save();
+      try {
+        await search(() => seq !== latest);
+      } catch {
+        if (seq !== latest) return;
+        status.textContent = 'The club list didn’t load. Check your connection and search again.';
+        results.innerHTML = '';
+      }
+    }
+
+    async function search(stale: () => boolean) {
       const all = await index();
+      if (stale()) return;
       const text = q.value.trim();
       browse.hidden = Boolean(text || origin);
       if (!text && !origin) { status.textContent = ''; results.innerHTML = ''; return; }
       const where = origin ?? (text ? await place(text) : null);
+      if (stale()) return;
       if (where) {
         const near = all.filter(passes)
           .map((r) => ({ r, dist: km(where, r) }))
@@ -577,7 +608,39 @@ const dropInCount = weeklyDropIns(dir.dropIns);
         { maximumAge: 600000, timeout: 10000 },
       );
     });
-    const initial = new URLSearchParams(location.search).get('q');
-    if (initial) { q.value = initial; run(); }
+    // The search lives in the URL's #fragment (#q=SE15&day=3), so Back from a
+    // club page and a shared link both bring it back. A fragment never goes to
+    // the server, which keeps the promise that a postcode stays on the device;
+    // a ?q= from the home page's search box is moved into it for that reason.
+    // Near me is left out: a link should not ask for someone's location.
+    function save() {
+      const state = new URLSearchParams();
+      const text = q.value.trim();
+      if (text) state.set('q', text);
+      for (const key of ['day', 'level', 'kind'] as const) if (filter[key]) state.set(key, filter[key]);
+      if (open.getAttribute('aria-pressed') === 'true') state.set('open', '1');
+      const hash = state.toString();
+      history.replaceState(history.state, '', `${location.pathname}${hash ? `#${hash}` : ''}`);
+    }
+
+    function restore() {
+      const fromHash = new URLSearchParams(location.hash.slice(1));
+      const state = fromHash.has('q') || fromHash.has('day') || fromHash.has('level') || fromHash.has('kind') || fromHash.has('open')
+        ? fromHash
+        : new URLSearchParams(location.search);
+      q.value = state.get('q') ?? '';
+      document.querySelectorAll<HTMLElement>('.pills').forEach((group) => {
+        const key = group.dataset.filter as 'day' | 'level' | 'kind';
+        const pills = [...group.querySelectorAll<HTMLButtonElement>('.pill')];
+        // Only a value one of the pills offers; anything else is the group's "Any".
+        const pick = pills.find((b) => b.dataset.value === (state.get(key) ?? '')) ?? pills[0];
+        pills.forEach((b) => b.setAttribute('aria-pressed', String(b === pick)));
+        filter[key] = pick.dataset.value ?? '';
+      });
+      open.setAttribute('aria-pressed', String(state.get('open') === '1'));
+      if (q.value.trim()) run();
+      else if (location.search) save();
+    }
+    restore();
   </script>
 </Directory>
