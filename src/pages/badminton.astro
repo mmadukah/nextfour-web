@@ -64,9 +64,10 @@ const dropInCount = weeklyDropIns(dir.dropIns);
     .field label { font-size: 14px; font-weight: 700; }
     .box {
       display: flex; align-items: center; gap: 10px; height: 56px; padding: 0 6px 0 16px; border-radius: 14px;
-      border: 1.5px solid var(--line-strong); background: var(--bg);
+      border: 1.5px solid var(--field-line); background: var(--bg);
     }
-    .box:focus-within { border-color: var(--eyebrow); }
+    .box:focus-within { border-color: var(--eyebrow); box-shadow: 0 0 0 1.5px var(--eyebrow); }
+    .box input::placeholder { color: var(--muted); opacity: 1; }
     .box > svg { color: var(--muted); flex: 0 0 auto; }
     .box input {
       flex: 1 1 auto; min-width: 0; border: 0; outline: none; background: transparent; color: var(--ink);
@@ -162,6 +163,21 @@ const dropInCount = weeklyDropIns(dir.dropIns);
     /* The cards themselves: src/styles/club-card.css, shared with the area pages. */
     #results { list-style: none; padding: 0; margin: 0 0 48px; display: flex; flex-direction: column; gap: 16px; }
     #results:empty { display: none; }
+    /* Under the results: the rest of a long list, or the way out of an empty one. */
+    #after { margin: 0 0 48px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+    #after[hidden] { display: none; }
+    #after p { margin: 0; flex: 1 1 280px; max-width: 62ch; color: var(--muted); font-size: 15px; }
+    #after p:empty { display: none; }
+    #after button {
+      min-height: 44px; padding: 0 20px; border-radius: 999px; cursor: pointer; font-size: 15px; font-weight: 700;
+      border: 1.5px solid var(--ink); background: transparent; color: var(--ink);
+    }
+    #after button:hover { background: var(--ink); color: var(--bg); }
+    #after button:focus-visible { outline: 2px solid var(--eyebrow); outline-offset: 3px; }
+    #after button[hidden] { display: none; }
+    #results:not(:empty) + #after { margin-top: -24px; }
+    /* A note about the list (the nearest, when nothing is close) sits above it. */
+    #after:has(+ #results) { margin-bottom: 20px; }
 
     section.browse, section.more { padding: 32px 0 40px; border-top: 1px solid var(--line); }
     .browse-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
@@ -258,6 +274,10 @@ const dropInCount = weeklyDropIns(dir.dropIns);
     <p class="usual">Clubs list the nights they usually play. Holidays and term breaks aren’t shown yet, so check with the club before your first visit.</p>
   </div>
   <ul id="results" data-tints={JSON.stringify(COURT_TINTS)} data-build={build}></ul>
+  <div id="after" hidden>
+    <p id="after-text"></p>
+    <button type="button" id="after-btn"></button>
+  </div>
 
   <div id="browse">
     <section class="browse" aria-labelledby="browse-h">
@@ -531,10 +551,98 @@ const dropInCount = weeklyDropIns(dir.dropIns);
       return parts.join(' and ');
     }
 
-    function render(list: { r: Row; dist?: number }[], heading: string) {
-      status.textContent = heading;
-      results.innerHTML = list.slice(0, 40).map(({ r, dist }) => (r.y === 'd' ? dropCard(r, dist) : card(r, dist))).join('');
+    // The list shows forty at a time; the line under it says how many are left
+    // and brings in the next forty, so a long list is never cut off silently.
+    const PAGE = 40;
+    const after = document.getElementById('after')!;
+    const afterText = document.getElementById('after-text')!;
+    const afterBtn = document.getElementById('after-btn') as HTMLButtonElement;
+    let listed: { r: Row; dist?: number }[] = [];
+    let shown = 0;
+    let afterAction: (() => void) | null = null;
+
+    function cardsFor(from: number, to: number) {
+      return listed.slice(from, to).map(({ r, dist }) => (r.y === 'd' ? dropCard(r, dist) : card(r, dist))).join('');
     }
+
+    /** The line under the results: a note, and a button that does one thing. */
+    function tail(text: string, label = '', action: (() => void) | null = null) {
+      after.hidden = !text && !label;
+      afterText.textContent = text;
+      afterBtn.hidden = !label;
+      afterBtn.textContent = label;
+      afterAction = action;
+    }
+
+    function tailMore() {
+      const rest = listed.length - shown;
+      if (rest <= 0) { tail(''); return; }
+      const nearest = listed[0]?.dist != null ? 'the nearest ' : '';
+      tail(
+        `Showing ${nearest}${shown} of ${listed.length}.`,
+        rest <= PAGE ? (rest === 1 ? 'Show the last one' : `Show the last ${rest}`) : `Show ${PAGE} more`,
+        showMore,
+      );
+    }
+
+    /** The next forty, with focus on the first of them so a keyboard carries on from there. */
+    function showMore() {
+      const from = shown;
+      shown = Math.min(listed.length, shown + PAGE);
+      results.insertAdjacentHTML('beforeend', cardsFor(from, shown));
+      results.children[from]?.querySelector<HTMLAnchorElement>('.cc-name a, a')?.focus();
+      tailMore();
+    }
+
+    /**
+     * Paint a list under its heading. With a note, the list is an answer to an
+     * empty search (the note says why), and `clear` offers to drop the filters.
+     */
+    function render(list: { r: Row; dist?: number }[], heading: string, note = '', clear = false) {
+      status.textContent = heading;
+      listed = list;
+      shown = Math.min(PAGE, list.length);
+      results.innerHTML = cardsFor(0, shown);
+      // A note about the cards is read before them; "show more" comes after them.
+      if (note && list.length) results.before(after);
+      else results.after(after);
+      if (note || clear) tail(note, clear ? 'Clear filters' : '', clearFilters);
+      else tailMore();
+    }
+
+    function filtered() {
+      return Boolean(filter.day || filter.level || filter.kind) || open.getAttribute('aria-pressed') === 'true';
+    }
+
+    /** The filters in words, as their buttons name them: "Beginner, Drop-in, Tuesdays". */
+    function filtersInWords() {
+      const pill = (key: string) => document.querySelector<HTMLElement>(`.pills[data-filter="${key}"] .pill[aria-pressed="true"]`)?.textContent ?? '';
+      return [
+        filter.level ? pill('level') : '',
+        filter.kind ? pill('kind') : '',
+        filter.day ? `${DAY_NAMES[Number(filter.day)]}s` : '',
+        open.getAttribute('aria-pressed') === 'true' ? 'taking new players' : '',
+      ].filter(Boolean).join(', ');
+    }
+
+    /** Why a filtered search came back empty, in a sentence the visitor can act on. */
+    function whyEmpty() {
+      const set = `Filters on: ${filtersInWords()}.`;
+      // Drop-ins publish no level, so the two together can never match.
+      return filter.level && filter.kind === 'dropin'
+        ? `${set} Drop-ins don’t list a level, so picking one leaves them all out.`
+        : set;
+    }
+
+    function clearFilters() {
+      filter.day = filter.level = filter.kind = '';
+      document.querySelectorAll<HTMLElement>('.pills').forEach((group) => {
+        group.querySelectorAll('.pill').forEach((b, i) => b.setAttribute('aria-pressed', String(i === 0)));
+      });
+      open.setAttribute('aria-pressed', 'false');
+      answer();
+    }
+    afterBtn.addEventListener('click', () => afterAction?.());
 
     /**
      * The week above the results: how many clubs around the place usually
@@ -545,6 +653,7 @@ const dropInCount = weeklyDropIns(dir.dropIns);
      */
     function week(base: Row[] | null) {
       weekEl.hidden = !base;
+      refine.hidden = !base;
       for (const b of nightBtns) {
         const d = Number(b.dataset.day);
         const on = base ? base.filter((r) => r.d.includes(d)) : [];
@@ -573,6 +682,7 @@ const dropInCount = weeklyDropIns(dir.dropIns);
         status.textContent = 'The club list didn’t load. Check your connection and search again.';
         results.innerHTML = '';
         refine.hidden = true;
+        tail('');
       }
     }
 
@@ -582,32 +692,44 @@ const dropInCount = weeklyDropIns(dir.dropIns);
       const text = q.value.trim();
       browse.hidden = Boolean(text || origin);
       refine.hidden = !text && !origin;
-      if (!text && !origin) { status.textContent = ''; results.innerHTML = ''; return; }
+      if (!text && !origin) { status.textContent = ''; results.innerHTML = ''; tail(''); return; }
       const where = origin ?? (text ? await place(text) : null);
       if (stale()) return;
       if (where) {
-        const around = all.filter((r) => passes(r, false))
-          .map((r) => ({ r, dist: km(where, r) }))
-          .filter((x) => x.dist <= RADIUS_KM)
-          .sort((a, b) => a.dist - b.dist);
+        const measured = all.map((r) => ({ r, dist: km(where, r) })).sort((a, b) => a.dist - b.dist);
+        const inRange = measured.filter((x) => x.dist <= RADIUS_KM);
+        const around = inRange.filter(({ r }) => passes(r, false));
         const near = around.filter(({ r }) => passes(r));
-        week(around.map(({ r }) => r));
-        const usually = filter.day === '' ? '' : ` usually on ${DAY_NAMES[Number(filter.day)]}s`;
-        render(near, near.length
-          ? `${counted(near)}${usually} within ${RADIUS_KM} km of ${where.label}`
-          : `Nothing within ${RADIUS_KM} km of ${where.label} matches. Try fewer filters.`);
+        const label = where.label;
+        if (near.length) {
+          week(around.map(({ r }) => r));
+          const usually = filter.day === '' ? '' : ` usually on ${DAY_NAMES[Number(filter.day)]}s`;
+          render(near, `${counted(near)}${usually} within ${RADIUS_KM} km of ${label}`);
+        } else if (inRange.length) {
+          // There is badminton here; the filters are what leave it out.
+          week(around.length ? around.map(({ r }) => r) : null);
+          render([], `${counted(inRange)} within ${RADIUS_KM} km of ${label}, but not with your filters`, whyEmpty(), true);
+        } else {
+          // Nothing listed nearby at all: say so, and show the nearest there are.
+          week(null);
+          const nearest = measured.slice(0, 3);
+          render(nearest, `Nothing listed within ${RADIUS_KM} km of ${label} yet`, nearest.length
+            ? `The nearest ${nearest.length === 1 ? 'listing is' : 'listings are'} below, from ${Math.round(nearest[0].dist)} km away.`
+            : '');
+        }
         return;
       }
       // A name search has no place to count a week around.
       week(null);
       const words = norm(text).split(' ').filter(Boolean);
-      const found = all.filter(passes).filter((r) => {
+      const named = all.filter((r) => {
         const hay = norm(`${r.n} ${r.v} ${r.a}`);
         return words.every((w) => hay.includes(w));
       }).map((r) => ({ r }));
-      render(found, found.length
-        ? `${counted(found)} matching “${text}”`
-        : `Nothing matches “${text}”. Try a postcode or a nearby town.`);
+      const found = named.filter(({ r }) => passes(r));
+      if (found.length) render(found, `${counted(found)} matching “${text}”`);
+      else if (named.length && filtered()) render([], `${counted(named)} matching “${text}”, but not with your filters`, whyEmpty(), true);
+      else render([], `Nothing matches “${text}”`, 'Try a postcode, a town or a council area, such as Leeds or Hackney.');
     }
 
     /**
