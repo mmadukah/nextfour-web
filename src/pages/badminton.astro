@@ -25,8 +25,6 @@ const byLetter = (areas: Area[]) => {
 const nations = ['England', 'Scotland', 'Wales', 'Northern Ireland']
   .map((n) => ({ name: n, groups: byLetter(withPage.filter((a) => a.nation === n)) }))
   .filter((n) => n.groups.length > 0);
-const busiest = [...withPage].sort((a, b) => b.clubs.length - a.clubs.length || a.name.localeCompare(b.name)).slice(0, 4);
-const TINTS = ['#1F4D3A', '#2C5873', '#7A4A2A', '#4B3F72'];
 const nights = weeklyNights(dir.clubs);
 // Changes every build, so a browser never pairs this page with a cached index
 // from an earlier build (the host lets browsers keep it for ten minutes).
@@ -49,7 +47,7 @@ const crumbs = [
   { name: 'Home', href: '/' },
   { name: 'Badminton', href: '/badminton.html' },
 ];
-const NIGHTS = [['', 'Any night'], ['1', 'Mon'], ['2', 'Tue'], ['3', 'Wed'], ['4', 'Thu'], ['5', 'Fri'], ['6', 'Sat'], ['0', 'Sun']];
+const NIGHTS = [['1', 'Mon'], ['2', 'Tue'], ['3', 'Wed'], ['4', 'Thu'], ['5', 'Fri'], ['6', 'Sat'], ['0', 'Sun']];
 const LEVELS = [['', 'Any level'], ['1', 'Beginner'], ['2', 'Intermediate'], ['3', 'Upper intermediate'], ['4', 'Advanced']];
 const KINDS = [['', 'Any'], ['club', 'Clubs'], ['dropin', 'Drop-in']];
 const dropInCount = weeklyDropIns(dir.dropIns);
@@ -62,14 +60,14 @@ const dropInCount = weeklyDropIns(dir.dropIns);
     .intro { max-width: 620px; }
     form { margin-top: 32px; display: flex; flex-direction: column; gap: 20px; }
     .query { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
-    .field { flex: 999 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+    .field { flex: 999 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
     .field label { font-size: 14px; font-weight: 700; }
     .box {
-      display: flex; align-items: center; gap: 10px; height: 56px; padding: 0 16px; border-radius: 14px;
+      display: flex; align-items: center; gap: 10px; height: 56px; padding: 0 6px 0 16px; border-radius: 14px;
       border: 1.5px solid var(--line-strong); background: var(--bg);
     }
     .box:focus-within { border-color: var(--eyebrow); }
-    .box svg { color: var(--muted); flex: 0 0 auto; }
+    .box > svg { color: var(--muted); flex: 0 0 auto; }
     .box input {
       flex: 1 1 auto; min-width: 0; border: 0; outline: none; background: transparent; color: var(--ink);
       font-size: 17px; height: 100%;
@@ -80,24 +78,66 @@ const dropInCount = weeklyDropIns(dir.dropIns);
       transition: background-color 9999s;
     }
     .box input::-webkit-search-cancel-button { -webkit-appearance: none; }
-    .go { flex: 1 1 auto; display: flex; gap: 10px; }
-    .go button {
-      flex: 1 1 auto; height: 56px; border-radius: 14px; font-size: 15px; font-weight: 700; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap;
+    /* Near me sits inside the box, as an icon button. */
+    .box .icon {
+      position: relative; flex: none; width: 44px; height: 44px; border-radius: 10px; border: 0; padding: 0; cursor: pointer;
+      display: grid; place-items: center; background: transparent; color: var(--ink);
     }
-    #near { padding: 0 18px; border: 1.5px solid var(--line-strong); background: var(--surface); color: var(--ink); }
-    /* On: searching around the visitor's location. */
-    #near[aria-pressed='true'] { background: var(--sel-bg); color: var(--sel-fg); border-color: var(--sel-bg); }
-    #near[aria-busy='true'] { cursor: progress; opacity: 0.75; }
-    #near .on-tick { display: none; }
-    #near[aria-pressed='true'] .on-tick { display: inline; }
-    #near[aria-busy='true'] svg:first-child { animation: near-spin 1s linear infinite; }
+    .box .icon:hover { background: var(--row); }
+    .box .icon:focus-visible { outline: 2px solid var(--eyebrow); outline-offset: 1px; }
+    /* Filters: a square beside the box that opens the filters below it. */
+    #filters-btn {
+      position: relative; flex: none; width: 56px; height: 56px; border-radius: 14px; padding: 0; cursor: pointer;
+      display: grid; place-items: center; border: 1.5px solid var(--line-strong); background: var(--surface); color: var(--ink);
+    }
+    #filters-btn:hover { border-color: var(--ink); }
+    #filters-btn[aria-expanded='true'] { border-color: var(--sel-bg); }
+    /* On: searching around the visitor's location; open: the filters showing. */
+    #near[aria-pressed='true'], #filters-btn[aria-expanded='true'] { background: var(--sel-bg); color: var(--sel-fg); }
+    #near[aria-busy='true'] { cursor: progress; }
+    #near[aria-busy='true'] svg { animation: near-spin 1s linear infinite; }
     @keyframes near-spin { to { transform: rotate(360deg); } }
-    @media (prefers-reduced-motion: reduce) { #near[aria-busy='true'] svg:first-child { animation: none; } }
-    #search { padding: 0 28px; border: 0; background: var(--hl-bg); color: var(--hl-fg); font-size: 16px; font-weight: 800; }
+    @media (prefers-reduced-motion: reduce) { #near[aria-busy='true'] svg { animation: none; } }
+    #filters-n:empty { display: none; }
+    #filters-n {
+      position: absolute; top: -6px; right: -6px; min-width: 20px; height: 18px; padding: 0 4px; border-radius: 999px;
+      height: 20px; background: var(--hl-bg); color: var(--hl-fg); font-size: 12px; font-weight: 800; display: grid; place-items: center;
+      box-shadow: 0 0 0 2px var(--surface);
+    }
+    #search {
+      flex: 1 1 120px; height: 56px; border-radius: 14px; cursor: pointer; white-space: nowrap;
+      padding: 0 28px; border: 0; background: var(--hl-bg); color: var(--hl-fg); font-size: 16px; font-weight: 800;
+    }
+    /* The week: one tile per night with how many listings usually play it. */
+    #refine { margin: 0 0 20px; display: flex; flex-direction: column; gap: 14px; }
+    #refine[hidden] { display: none; }
+    .week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+    .week[hidden] { display: none; }
+    .night {
+      min-height: 72px; padding: 8px 4px; border-radius: 14px; cursor: pointer; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 2px; border: 1.5px solid var(--line-strong);
+      background: var(--surface); color: var(--ink); font-variant-numeric: tabular-nums;
+    }
+    .night b { font-size: 16px; font-weight: 800; font-stretch: 106%; }
+    /* The count stays smaller than the night, and always has its word. */
+    .night .tc { font-size: 13px; font-weight: 500; line-height: 1.15; text-align: center; }
+    /* The count is written by the script, so outside this file's scope. */
+    .night .tc :global(.tn) { font-weight: 800; }
+    .night .tc :global(.tw) { white-space: nowrap; }
+    /* Seven across a phone: a little less gap, and the word set narrower. */
+    @media (max-width: 480px) {
+      .week { gap: 4px; }
+      .night { padding: 8px 2px; }
+      .night .tc :global(.tw) { font-stretch: 78%; }
+      .night .tc :global(.tn) { display: block; }
+    }
+    .night[aria-pressed='true'] { background: var(--sel-bg); border-color: var(--sel-bg); color: var(--sel-fg); }
+    .night:disabled { cursor: default; background: transparent; border-style: dashed; color: var(--empty-day); }
+    .night.zero .tc { font-weight: 600; }
+    .usual { margin: 0; font-size: 14px; color: var(--muted); max-width: 62ch; }
     .filters { display: flex; flex-wrap: wrap; gap: 20px 32px; padding-top: 18px; border-top: 1px solid var(--line); }
+    .filters[hidden] { display: none; }
     fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
-    fieldset.nights { flex: 999 1 460px; }
     fieldset.levels { flex: 1 1 360px; }
     legend { font-size: 14px; font-weight: 700; margin-bottom: 10px; padding: 0; }
     .pills { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -122,17 +162,6 @@ const dropInCount = weeklyDropIns(dir.dropIns);
     /* The cards themselves: src/styles/club-card.css, shared with the area pages. */
     #results { list-style: none; padding: 0; margin: 0 0 48px; display: flex; flex-direction: column; gap: 16px; }
     #results:empty { display: none; }
-    section.busy { padding: 16px 0 40px; }
-    .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
-    .tiles a {
-      display: flex; flex-direction: column; gap: 22px; padding: 20px; border-radius: 18px; color: #FFFFFF;
-      text-decoration: none; min-height: 120px;
-    }
-    .tiles a:hover { color: #FFFFFF; filter: brightness(1.08); }
-    .tiles .name { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; font-size: 18px; font-weight: 700; line-height: 1.2; }
-    .tiles .n { display: flex; align-items: baseline; gap: 8px; }
-    .tiles .n b { font-size: 44px; font-weight: 800; font-stretch: 112%; line-height: 1; color: #C8F135; }
-    .tiles .n span { font-size: 15px; opacity: 0.9; }
 
     section.browse, section.more { padding: 32px 0 40px; border-top: 1px solid var(--line); }
     .browse-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
@@ -182,24 +211,18 @@ const dropInCount = weeklyDropIns(dir.dropIns);
           <div class="box">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
             <input id="q" name="q" type="search" placeholder="e.g. SM1 or Sutton" autocomplete="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-form-type="other" />
+            <button type="button" class="icon" id="near" aria-pressed="false" aria-label="Near me" title="Near me">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+            </button>
           </div>
         </div>
-        <div class="go">
-          <button type="button" id="near" aria-pressed="false">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
-            <span id="near-label">Near me</span>
-            <svg class="on-tick" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg>
-          </button>
-          <button type="submit" id="search">Search</button>
-        </div>
+        <button type="button" id="filters-btn" aria-expanded="false" aria-controls="filters" aria-label="Filters" title="Filters">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path><circle cx="16" cy="7" r="2"></circle><circle cx="10" cy="17" r="2"></circle></svg>
+          <span id="filters-n"></span>
+        </button>
+        <button type="submit" id="search">Search</button>
       </div>
-      <div class="filters">
-        <fieldset class="nights">
-          <legend>Night</legend>
-          <div class="pills" data-filter="day">
-            {NIGHTS.map(([v, label]) => <button type="button" class="pill" data-value={v} aria-pressed={v === '' ? 'true' : 'false'}>{label}</button>)}
-          </div>
-        </fieldset>
+      <div class="filters" id="filters" hidden>
         <fieldset class="levels">
           <legend>Level</legend>
           <div class="pills" data-filter="level">
@@ -221,24 +244,22 @@ const dropInCount = weeklyDropIns(dir.dropIns);
   </section>
 
   <p id="status" aria-live="polite" tabindex="-1"></p>
+
+  <!-- After a search: the week. A night tile narrows the list to that night
+       and a second press widens it again. -->
+  <div id="refine" hidden>
+    <div class="week" role="group" aria-label="Night">
+      {NIGHTS.map(([v, label]) => (
+        <button type="button" class="night" data-day={v} aria-pressed="false">
+          <b>{label}</b><span class="tc" aria-hidden="true"></span>
+        </button>
+      ))}
+    </div>
+    <p class="usual">Clubs list the nights they usually play. Holidays and term breaks aren’t shown yet, so check with the club before your first visit.</p>
+  </div>
   <ul id="results" data-tints={JSON.stringify(COURT_TINTS)} data-build={build}></ul>
 
   <div id="browse">
-    <section class="busy" aria-labelledby="busy-h">
-      <h2 class="h-section" id="busy-h">Busiest areas</h2>
-      <div class="tiles">
-        {busiest.map((a, i) => (
-          <a href={a.url} style={`background: ${TINTS[i]}`}>
-            <span class="name">
-              {a.name}
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"></path></svg>
-            </span>
-            <span class="n"><b>{a.clubs.length}</b><span>clubs</span></span>
-          </a>
-        ))}
-      </div>
-    </section>
-
     <section class="browse" aria-labelledby="browse-h">
       <div class="browse-top">
         <h2 class="h-results" id="browse-h">Browse by area</h2>
@@ -304,7 +325,14 @@ const dropInCount = weeklyDropIns(dir.dropIns);
     // The area lists are for browsing; a search hides them (they stay in the
     // HTML, so crawlers still follow every link).
     const browse = document.getElementById('browse')!;
+    const refine = document.getElementById('refine')!;
+    const weekEl = refine.querySelector<HTMLElement>('.week')!;
+    const nightBtns = [...weekEl.querySelectorAll<HTMLButtonElement>('.night')];
+    const filtersBtn = document.getElementById('filters-btn') as HTMLButtonElement;
+    const filtersPanel = document.getElementById('filters')!;
+    const filtersN = document.getElementById('filters-n')!;
     const filter = { day: '', level: '', kind: '' };
+    const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
     let rows: Row[] | null = null;
     let districts: [string, number, number, string][] | null = null;
@@ -374,10 +402,11 @@ const dropInCount = weeklyDropIns(dir.dropIns);
       return null;
     }
 
-    function passes(r: Row) {
+    /** Whether a listing fits the filters; the week's counts leave the night out. */
+    function passes(r: Row, withDay = true) {
       if (filter.kind === 'club' && r.y === 'd') return false;
       if (filter.kind === 'dropin' && r.y !== 'd') return false;
-      if (filter.day !== '' && !r.d.includes(Number(filter.day))) return false;
+      if (withDay && filter.day !== '' && !r.d.includes(Number(filter.day))) return false;
       // Drop-ins publish no level, so a level filter leaves them out.
       if (filter.level !== '' && r.y === 'd') return false;
       if (filter.level !== '') {
@@ -399,10 +428,11 @@ const dropInCount = weeklyDropIns(dir.dropIns);
     const PIN_SMALL = PIN.replace(/width="16" height="16"/, 'width="14" height="14"');
     const ARROW = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>';
 
-    /** One grouped row, as NightLine.astro draws it; a picked night dims rows without it and lights its cell. */
+    /** One grouped row, as NightLine.astro draws it; a picked night leaves out rows without it and lights its cell. */
     function line([days, oneOff, daysText, time, duration, bars, levels, venue, grade]: Line) {
       const picked = filter.day === '' ? null : Number(filter.day);
-      const state = picked == null ? '' : days.includes(picked) ? ' hl' : ' dim';
+      if (picked != null && !days.includes(picked)) return '';
+      const state = picked == null ? '' : ' hl';
       const strip = oneOff
         ? `<span class="nl-day">${esc(oneOff)}</span>`
         : `<span class="day-strip" role="img" aria-label="${esc(daysText)}">${WEEK.map((d) => {
@@ -449,7 +479,8 @@ const dropInCount = weeklyDropIns(dir.dropIns);
     /** A drop-in row, as DropInCard.astro draws it. */
     function dropLine([days, label, daysText, time, duration, price, bars, levels]: DropLine) {
       const picked = filter.day === '' ? null : Number(filter.day);
-      const state = picked == null ? '' : days.includes(picked) ? ' hl' : ' dim';
+      if (picked != null && !days.includes(picked)) return '';
+      const state = picked == null ? '' : ' hl';
       const strip = label
         ? `<span class="nl-day">${esc(label)}</span>`
         : `<span class="day-strip" role="img" aria-label="${esc(daysText)}">${WEEK.map((d) => {
@@ -505,6 +536,30 @@ const dropInCount = weeklyDropIns(dir.dropIns);
       results.innerHTML = list.slice(0, 40).map(({ r, dist }) => (r.y === 'd' ? dropCard(r, dist) : card(r, dist))).join('');
     }
 
+    /**
+     * The week above the results: how many clubs around the place usually
+     * play each night, given every filter but the night. A count always
+     * carries its word ("8 clubs"), so it never reads as a date. A night with
+     * only drop-ins counts those instead; a night with nothing cannot be
+     * picked, unless it is the picked one, so it can be let go.
+     */
+    function week(base: Row[] | null) {
+      weekEl.hidden = !base;
+      for (const b of nightBtns) {
+        const d = Number(b.dataset.day);
+        const on = base ? base.filter((r) => r.d.includes(d)) : [];
+        const drops = on.filter((r) => r.y === 'd').length;
+        const clubs = on.length - drops;
+        const [n, word] = clubs ? [clubs, clubs === 1 ? 'club' : 'clubs'] : drops ? [drops, drops === 1 ? 'drop-in' : 'drop-ins'] : [0, ''];
+        const picked = filter.day === b.dataset.day;
+        b.setAttribute('aria-pressed', String(picked));
+        b.disabled = !on.length && !picked;
+        b.classList.toggle('zero', !on.length);
+        b.querySelector('.tc')!.innerHTML = n ? `<span class="tn">${n}</span> <span class="tw">${word}</span>` : 'none';
+        b.setAttribute('aria-label', `${DAY_NAMES[d]}: ${n ? `${n} ${word}` : 'none listed'}`);
+      }
+    }
+
     // Each search counts itself, so a slow earlier one (still loading the
     // postcode table, say) never paints over the answer to a later one.
     let latest = 0;
@@ -517,6 +572,7 @@ const dropInCount = weeklyDropIns(dir.dropIns);
         if (seq !== latest) return;
         status.textContent = 'The club list didn’t load. Check your connection and search again.';
         results.innerHTML = '';
+        refine.hidden = true;
       }
     }
 
@@ -525,19 +581,25 @@ const dropInCount = weeklyDropIns(dir.dropIns);
       if (stale()) return;
       const text = q.value.trim();
       browse.hidden = Boolean(text || origin);
+      refine.hidden = !text && !origin;
       if (!text && !origin) { status.textContent = ''; results.innerHTML = ''; return; }
       const where = origin ?? (text ? await place(text) : null);
       if (stale()) return;
       if (where) {
-        const near = all.filter(passes)
+        const around = all.filter((r) => passes(r, false))
           .map((r) => ({ r, dist: km(where, r) }))
           .filter((x) => x.dist <= RADIUS_KM)
           .sort((a, b) => a.dist - b.dist);
+        const near = around.filter(({ r }) => passes(r));
+        week(around.map(({ r }) => r));
+        const usually = filter.day === '' ? '' : ` usually on ${DAY_NAMES[Number(filter.day)]}s`;
         render(near, near.length
-          ? `${counted(near)} within ${RADIUS_KM} km of ${where.label}`
+          ? `${counted(near)}${usually} within ${RADIUS_KM} km of ${where.label}`
           : `Nothing within ${RADIUS_KM} km of ${where.label} matches. Try fewer filters.`);
         return;
       }
+      // A name search has no place to count a week around.
+      week(null);
       const words = norm(text).split(' ').filter(Boolean);
       const found = all.filter(passes).filter((r) => {
         const hay = norm(`${r.n} ${r.v} ${r.a}`);
@@ -572,7 +634,7 @@ const dropInCount = weeklyDropIns(dir.dropIns);
     });
     document.getElementById('find')!.addEventListener('submit', (e) => { e.preventDefault(); clearTimeout(timer); answer(); });
 
-    // Night and level pills: one pressed per group.
+    // Level and type pills: one pressed per group.
     document.querySelectorAll<HTMLElement>('.pills').forEach((group) => {
       const key = group.dataset.filter as 'day' | 'level' | 'kind';
       group.querySelectorAll<HTMLButtonElement>('.pill').forEach((b) => b.addEventListener('click', () => {
@@ -584,6 +646,19 @@ const dropInCount = weeklyDropIns(dir.dropIns);
     open.addEventListener('click', () => {
       open.setAttribute('aria-pressed', String(open.getAttribute('aria-pressed') !== 'true'));
       run();
+    });
+
+    // A night tile narrows the list to that night; pressing it again widens it.
+    for (const b of nightBtns) b.addEventListener('click', () => {
+      filter.day = filter.day === b.dataset.day ? '' : b.dataset.day!;
+      nightBtns.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.day === filter.day)));
+      run();
+    });
+
+    filtersBtn.addEventListener('click', () => {
+      const show = filtersPanel.hidden;
+      filtersPanel.hidden = !show;
+      filtersBtn.setAttribute('aria-expanded', String(show));
     });
 
     // Country tabs: every country is in the HTML; the tabs show one at a time.
@@ -601,12 +676,12 @@ const dropInCount = weeklyDropIns(dir.dropIns);
     // Near me: off, finding the visitor, or on (searching around them). A press
     // while on turns it off again; typing a search does too.
     const nearBtn = document.getElementById('near') as HTMLButtonElement;
-    const nearLabel = document.getElementById('near-label')!;
     function setNear(state: 'off' | 'finding' | 'on') {
       if (state !== 'on') origin = null;
       nearBtn.setAttribute('aria-pressed', String(state === 'on'));
       nearBtn.setAttribute('aria-busy', String(state === 'finding'));
-      nearLabel.textContent = state === 'finding' ? 'Locating…' : 'Near me';
+      nearBtn.setAttribute('aria-label', state === 'finding' ? 'Locating…' : 'Near me');
+      nearBtn.title = state === 'on' ? 'Near me (on)' : 'Near me';
     }
     nearBtn.addEventListener('click', () => {
       if (nearBtn.getAttribute('aria-pressed') === 'true') { setNear('off'); run(); return; }
@@ -636,6 +711,10 @@ const dropInCount = weeklyDropIns(dir.dropIns);
       if (text) state.set('q', text);
       for (const key of ['day', 'level', 'kind'] as const) if (filter[key]) state.set(key, filter[key]);
       if (open.getAttribute('aria-pressed') === 'true') state.set('open', '1');
+      // The Filters button counts what is set behind it.
+      const set = [filter.level, filter.kind].filter(Boolean).length + (state.has('open') ? 1 : 0);
+      filtersN.textContent = set ? String(set) : '';
+      filtersBtn.setAttribute('aria-label', set ? `Filters, ${set} set` : 'Filters');
       const hash = state.toString();
       history.replaceState(history.state, '', `${location.pathname}${hash ? `#${hash}` : ''}`);
     }
@@ -646,6 +725,8 @@ const dropInCount = weeklyDropIns(dir.dropIns);
         ? fromHash
         : new URLSearchParams(location.search);
       q.value = state.get('q') ?? '';
+      const day = state.get('day') ?? '';
+      filter.day = nightBtns.some((b) => b.dataset.day === day) ? day : '';
       document.querySelectorAll<HTMLElement>('.pills').forEach((group) => {
         const key = group.dataset.filter as 'day' | 'level' | 'kind';
         const pills = [...group.querySelectorAll<HTMLButtonElement>('.pill')];
