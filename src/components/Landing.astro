@@ -5,6 +5,7 @@
 // words are the table's; the design only adds the short labels marked below.
 import Directory from '../layouts/Directory.astro';
 import { PLAY_URL, APP_STORE_URL } from '../store-links';
+import { getDirectory, weeklyNights } from '../data/directory';
 import { INSTAGRAM_URL, FACEBOOK_URL } from '../social-links';
 
 interface Props {
@@ -16,28 +17,24 @@ const locales = ['en', 'fr'] as const;
 const localeNames: Record<string, string> = { en: 'English', fr: 'Français' };
 
 type Step = { title: string; body: string };
-type Path = { label: string; sub: string };
 type Shot = { src: string; alt: string };
 // One moment of the night, shown on the device it happens on.
-type Beat = { time: string; title: string; body: string; shot: Shot; device: 'tablet' | 'phone' };
+// `ways`: the picking methods, a line each, when the moment depends on how the club picks.
+type Beat = { time: string; title: string; body: string; ways?: { name: string; body: string }[]; shot: Shot; device: 'tablet' | 'phone' };
 type Plan = { name: string; body: string };
 type Strings = {
   title: string;
   description: string;
   ogDescription: string;
-  heroLine1: string;
-  heroLine2: string;
-  lead: string;
-  pathPlayers: Path;
-  pathHosts: Path;
+  /** The live board on a tablet, shown beside the organisers' section. */
   heroBoard: Shot;
-  heroPhone: Shot;
+  /** The link to the club finder, with the live count of weekly club nights. */
+  listed: (nights: number) => string;
   ctaPlay: string;
   ctaAppStore: string;
   note: string;
   qr: { head: string; body: string; alt: string };
   players: {
-    kicker: string;
     head: string;
     body: string;
     night: string;
@@ -48,14 +45,15 @@ type Strings = {
     shot: Shot;
   };
   hosts: {
-    kicker: string;
     head: string;
     body: string;
     terminal: string;
+    /** The organiser's way to their club's listing, in the finder (English-only pages). */
+    claim: string;
     help: string;
     shot: Shot;
   };
-  story: { head: string; sub: string; beats: Beat[]; ending: string };
+  story: { head: string; accent: string; sub: string; beats: Beat[]; ending: string };
   pricing: { head: string; sub: string; plans: Plan[]; note: string };
   stepsHead: string;
   stepsSub: string;
@@ -72,8 +70,6 @@ type Strings = {
   findPlaceholder: string;
   storyLink: string;
   endingTitle: string;
-  plansKicker: string;
-  setupKicker: string;
 };
 
 const content: Record<string, Strings> = {
@@ -83,62 +79,62 @@ const content: Record<string, Strings> = {
       'NextFour is the app for racket sport club nights. Find badminton, squash, tennis, padel and table tennis near you, or run your night with a digital pegboard.',
     ogDescription:
       'Find a game near you, or run your club night: live courts, a digital pegboard and fair picks, all in one app.',
-    heroLine1: 'Find a game.',
-    heroLine2: 'Run the night.',
-    lead: 'NextFour is the app for racket sport club nights. Players find sessions near them. Organisers run the courts, the queue and the picks from one phone.',
-    pathPlayers: { label: 'I want to play', sub: 'Find club nights near you' },
-    pathHosts: { label: 'I run a club night', sub: 'Courts, queue and picks, sorted' },
     heroBoard: { src: '/screens/board-tablet.webp', alt: 'The live board on a tablet, with three courts in play' },
-    heroPhone: { src: '/screens/pick-nudge.webp', alt: 'A phone showing the “Your turn to pick” prompt' },
+    listed: (n) => `Find one of ${n} badminton club nights a week`,
     ctaPlay: 'Get it on Google Play',
     ctaAppStore: 'Download on the App Store',
     note: 'Free to get started. Built for badminton, squash, tennis, padel & table tennis.',
     qr: { head: 'On a computer?', body: 'Scan to get the app on your phone.', alt: 'QR code linking to the NextFour app' },
     players: {
-      kicker: 'For players',
       head: 'Find your next game.',
       body: 'Search club nights and sessions near you by sport, on a list or a map. See the day, the time and the venue before you turn up, and follow the ones you like.',
       night: 'On the night, check in from your phone, see who’s on and who’s next and, on pegboard nights, get a nudge when it’s your turn to pick.',
       calloutHead: 'Your club might already be here.',
-      find: 'Find badminton clubs near you',
-      calloutBody: 'We list club nights that aren’t on NextFour yet. If yours is one of them, show your organiser: they can claim it and run the night from the app.',
+      find: 'Find sessions',
+      calloutBody: 'We list UK badminton sessions for now, including club nights that aren’t on NextFour yet. If yours is one of them, show your organiser: they can claim it and run the night from the app.',
       shot: { src: '/screens/map.webp', alt: 'The Discover map with session pins across south London' },
     },
     hosts: {
-      kicker: 'For organisers',
       head: 'Run the whole night from one phone.',
-      body: 'The pegboard your club already knows, made digital. Players peg on, the next picker gets a nudge and chooses three players to join them on the free court. No whiteboard, no arguments about who’s next.',
+      body: 'The pegboard your club already knows, made digital. Players peg on, the next picker gets a nudge and chooses three players to join them on the free court. No more arguments about who’s next.',
       terminal: 'Got a spare tablet? Terminal mode turns it into a courtside board where players check themselves in.',
+      claim: 'Find your club’s listing',
       help: 'Want a hand setting up your first night? Email',
       shot: { src: '/screens/pick-sheet.webp', alt: 'The picker choosing three players for their court' },
     },
     story: {
-      head: '16 players. 4 courts. One pegboard.',
-      sub: 'This is a club night on NextFour.',
+      head: 'Your club night.',
+      accent: 'One app.',
+      sub: 'This is a club night on NextFour, the app for racket sport club nights.',
       beats: [
         {
           time: '7:00pm',
           title: 'Everyone checks in',
-          body: 'Players check in on their phones or at the courtside tablet, and join the queue in the order they arrived. Nobody has to guard a whiteboard.',
+          body: 'Players check in on their phones or at the courtside tablet, and join the queue in the order they arrived.',
           shot: { src: '/screens/loop-queue.webp', alt: 'The live board on a tablet, opening the waiting queue' },
           device: 'tablet',
         },
         {
           time: '7:05pm',
-          title: 'The next player picks',
-          body: 'A court comes free and whoever is at the front of the queue gets a nudge. They choose three players to join them, right from their phone.',
+          title: 'A court comes free',
+          body: 'It’s filled your club’s way:',
+          ways: [
+            { name: 'Pegboard', body: 'the next player gets a nudge and picks three to join them.' },
+            { name: 'Skill-based', body: 'the app builds an even game from whoever is waiting.' },
+            { name: 'Manual', body: 'the organiser places players by hand.' },
+          ],
           shot: { src: '/screens/loop-pick.webp', alt: 'A player choosing three others to join their court' },
           device: 'phone',
         },
         {
           time: '8:30pm',
-          title: 'Even games in one tap',
-          body: 'Smart pick builds a fair game from whoever is waiting, and you can always place players yourself.',
+          title: 'Nobody loses their place',
+          body: 'The queue goes by how long you’ve waited, and everyone can see who’s next on their phone or the courtside board.',
           shot: { src: '/screens/loop-smart-pick.webp', alt: 'Smart pick filling a court on the tablet board' },
           device: 'tablet',
         },
       ],
-      ending: '10:00pm. Everyone played, nobody argued about who was next, and the organiser got on court too.',
+      ending: '10:00pm. Nobody argued about who was next, and the organiser got on court too.',
     },
     pricing: {
       head: 'Free to play. Free to host.',
@@ -159,7 +155,7 @@ const content: Record<string, Strings> = {
       { title: 'Let the board run the night', body: 'The queue fills courts fairly and live, so you can focus on playing.' },
     ],
     closingHead: 'Less faff at the door. More time on court.',
-    closingSub: 'Be one of the first clubs to run their nights on NextFour.',
+    closingSub: 'Get the app and find a game near you. Run a club night? Be one of the first to run it on NextFour.',
     nav: { clubs: 'Badminton clubs', howItWorks: 'How it works', support: 'Support', privacy: 'Privacy', terms: 'Terms', delete: 'Account & Data Deletion' },
     questions: 'Questions? Email',
     copyright: '© 2026 NextFour. All rights reserved.',
@@ -169,8 +165,6 @@ const content: Record<string, Strings> = {
     findPlaceholder: 'Postcode, town or club name',
     storyLink: 'The rules behind it',
     endingTitle: 'Everyone played',
-    plansKicker: 'Plans',
-    setupKicker: 'Getting started',
   },
   fr: {
     title: 'NextFour : Trouvez un match, gérez votre soirée de club',
@@ -178,62 +172,62 @@ const content: Record<string, Strings> = {
       'NextFour, l’appli des soirées de club de raquette : trouvez du badminton, du squash ou du padel près de chez vous, ou gérez la soirée sur un tableau numérique.',
     ogDescription:
       'Trouvez un match près de chez vous, ou gérez votre soirée de club : terrains en direct, tableau numérique et sélections équitables, dans une seule application.',
-    heroLine1: 'Trouvez un match.',
-    heroLine2: 'Gérez la soirée.',
-    lead: 'NextFour est l’application des soirées de club de sports de raquette. Les joueurs trouvent des sessions près de chez eux. Les organisateurs gèrent les terrains, la file et les sélections depuis un seul téléphone.',
-    pathPlayers: { label: 'Je veux jouer', sub: 'Des soirées de club près de chez vous' },
-    pathHosts: { label: 'J’organise une soirée', sub: 'Terrains, file et sélections, réglés' },
     heroBoard: { src: '/screens/board-tablet.webp', alt: 'Le tableau en direct sur une tablette, avec trois terrains en jeu' },
-    heroPhone: { src: '/screens/pick-nudge.webp', alt: 'Un téléphone affichant l’invite « À vous de choisir »' },
+    listed: (n) => `Trouver une des ${n} soirées de badminton par semaine (Royaume-Uni, en anglais)`,
     ctaPlay: 'Disponible sur Google Play',
     ctaAppStore: 'Télécharger dans l’App Store',
     note: 'Gratuit pour commencer. Conçu pour le badminton, le squash, le tennis, le padel et le tennis de table.',
     qr: { head: 'Sur un ordinateur ?', body: 'Scannez pour installer l’application sur votre téléphone.', alt: 'QR code vers l’application NextFour' },
     players: {
-      kicker: 'Pour les joueurs',
       head: 'Trouvez votre prochain match.',
       body: 'Cherchez les soirées de club et les sessions près de chez vous par sport, en liste ou sur une carte. Voyez le jour, l’heure et le lieu avant de venir, et suivez celles qui vous plaisent.',
       night: 'Le soir venu, enregistrez-vous depuis votre téléphone, voyez qui joue et qui suit et, les soirs de tableau, recevez une notification quand c’est à vous de choisir.',
       calloutHead: 'Votre club y est peut-être déjà.',
-      find: 'Trouver un club de badminton au Royaume-Uni',
-      calloutBody: 'Nous répertorions des soirées de club qui ne sont pas encore sur NextFour. Si la vôtre en fait partie, montrez-la à la personne qui l’organise : elle peut la revendiquer et gérer la soirée depuis l’application.',
+      find: 'Trouver des sessions',
+      calloutBody: 'Pour l’instant, nous répertorions les sessions de badminton au Royaume-Uni (en anglais), y compris des soirées de club qui ne sont pas encore sur NextFour. Si la vôtre en fait partie, montrez-la à la personne qui l’organise : elle peut la revendiquer et gérer la soirée depuis l’application.',
       shot: { src: '/screens/map.webp', alt: 'La carte Découvrir avec des sessions dans le sud de Londres' },
     },
     hosts: {
-      kicker: 'Pour les organisateurs',
       head: 'Gérez toute la soirée depuis un seul téléphone.',
-      body: 'Le tableau que votre club connaît déjà, en version numérique. Les joueurs s’inscrivent dans la file, le prochain à choisir reçoit une notification et choisit trois joueurs pour le terrain libre. Plus de tableau blanc, plus de disputes sur qui passe ensuite.',
+      body: 'Le tableau que votre club connaît déjà, en version numérique. Les joueurs s’inscrivent dans la file, le prochain à choisir reçoit une notification et choisit trois joueurs pour le terrain libre. Plus de disputes sur qui passe ensuite.',
       terminal: 'Une tablette en trop ? Le mode Terminal en fait un tableau au bord du terrain où les joueurs s’enregistrent eux-mêmes.',
+      claim: 'Trouver la fiche de votre club (Royaume-Uni)',
       help: 'Besoin d’aide pour votre première soirée ? Écrivez à',
       shot: { src: '/screens/pick-sheet.webp', alt: 'Le joueur qui choisit trois joueurs pour son terrain' },
     },
     story: {
-      head: '16 joueurs. 4 terrains. Un tableau.',
-      sub: 'Voici une soirée de club avec NextFour.',
+      head: 'Votre soirée de club.',
+      accent: 'Une appli.',
+      sub: 'Voici une soirée de club avec NextFour, l’application des soirées de club de sports de raquette.',
       beats: [
         {
           time: '19h00',
           title: 'Tout le monde s’enregistre',
-          body: 'Les joueurs s’enregistrent sur leur téléphone ou sur la tablette au bord du terrain, et rejoignent la file dans leur ordre d’arrivée. Plus besoin de surveiller un tableau blanc.',
+          body: 'Les joueurs s’enregistrent sur leur téléphone ou sur la tablette au bord du terrain, et rejoignent la file dans leur ordre d’arrivée.',
           shot: { src: '/screens/loop-queue.webp', alt: 'Le tableau en direct sur une tablette, avec la file d’attente' },
           device: 'tablet',
         },
         {
           time: '19h05',
-          title: 'Le suivant choisit',
-          body: 'Un terrain se libère et la personne en tête de file reçoit une notification. Elle choisit trois joueurs pour la rejoindre, directement depuis son téléphone.',
+          title: 'Un terrain se libère',
+          body: 'Il est rempli à la manière de votre club :',
+          ways: [
+            { name: 'Pegboard', body: 'le suivant reçoit une notification et choisit trois joueurs.' },
+            { name: 'Par niveau', body: 'l’application compose un match équilibré parmi les joueurs en attente.' },
+            { name: 'Manuel', body: 'l’organisateur place les joueurs lui-même.' },
+          ],
           shot: { src: '/screens/loop-pick.webp', alt: 'Un joueur qui choisit trois autres joueurs pour son terrain' },
           device: 'phone',
         },
         {
           time: '20h30',
-          title: 'Des matchs équilibrés en une touche',
-          body: 'La sélection intelligente compose un match équitable parmi les joueurs en attente, et vous pouvez toujours placer les joueurs vous-même.',
+          title: 'Personne ne perd sa place',
+          body: 'La file suit le temps d’attente, et chacun voit qui passe ensuite sur son téléphone ou sur le tableau au bord du terrain.',
           shot: { src: '/screens/loop-smart-pick.webp', alt: 'La sélection intelligente qui remplit un terrain sur la tablette' },
           device: 'tablet',
         },
       ],
-      ending: '22h00. Tout le monde a joué, personne ne s’est disputé pour savoir qui passait ensuite, et l’organisateur a joué aussi.',
+      ending: '22h00. Personne ne s’est disputé pour savoir qui passait ensuite, et l’organisateur a joué aussi.',
     },
     pricing: {
       head: 'Gratuit pour jouer. Gratuit pour organiser.',
@@ -254,7 +248,7 @@ const content: Record<string, Strings> = {
       { title: 'Laissez le tableau gérer la soirée', body: 'La file remplit les terrains équitablement et en direct, pour que vous puissiez vous concentrer sur le jeu.' },
     ],
     closingHead: 'Moins de tracas à l’entrée. Plus de temps sur le terrain.',
-    closingSub: 'Soyez parmi les premiers clubs à gérer leurs soirées avec NextFour.',
+    closingSub: 'Téléchargez l’application et trouvez un match près de chez vous. Vous organisez une soirée ? Soyez parmi les premiers à la gérer avec NextFour.',
     nav: { clubs: 'Clubs de badminton', howItWorks: 'Comment ça marche', support: 'Assistance', privacy: 'Confidentialité', terms: 'Conditions', delete: 'Suppression du compte et des données' },
     questions: 'Des questions ? Écrivez à',
     copyright: '© 2026 NextFour. Tous droits réservés.',
@@ -264,12 +258,12 @@ const content: Record<string, Strings> = {
     findPlaceholder: 'Code postal, ville ou nom du club',
     storyLink: 'Les règles derrière tout ça',
     endingTitle: 'Tout le monde a joué',
-    plansKicker: 'Formules',
-    setupKicker: 'Pour commencer',
   },
 };
 
 const s = content[lang] ?? content.en;
+// The real count, from the directory build: the one number the page shows.
+const nights = weeklyNights((await getDirectory()).clubs);
 const fr = lang === 'fr';
 // Each store's badge in the page's language (Apple's French one is still to come).
 const playBadge = fr ? '/badges/google-play-fr.png' : '/badges/google-play.png';
@@ -326,26 +320,43 @@ const siteLd = {
   footer="site"
   bare
 >
-  <section class="hero x">
-    <div class="hero-copy">
-      <h1>{s.heroLine1}<br /><span class="accent">{s.heroLine2}</span></h1>
-      <p class="lead">{s.lead}</p>
-      <div class="paths">
-        <a class="path primary" href="#players"><span><b>{s.pathPlayers.label}</b><small>{s.pathPlayers.sub}</small></span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"></path></svg></a>
-        <a class="path" href="#organisers"><span><b>{s.pathHosts.label}</b><small>{s.pathHosts.sub}</small></span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"></path></svg></a>
-      </div>
-      <div class="stores">
-        {appStore && <a href={appStore} aria-label={s.ctaAppStore}><img class="apple" src="/badges/app-store.svg" alt="" width="162" height="54" /></a>}
-        {play && <a href={play} aria-label={s.ctaPlay}><img class="google" src={playBadge} alt="" width="207" height="80" /></a>}
-      </div>
-      <div class="built">
-        <p>{s.sportsLead}</p>
-        <ul aria-label={s.sportsLabel}>{s.sports.map((sp) => <li>{sp}</li>)}</ul>
+  <!-- The hero is a club night, hour by hour: the product shown as the night it runs. -->
+  <section class="x hero" aria-labelledby="night-h">
+    <div class="hero-top">
+      <h1 id="night-h">{s.story.head} <span class="accent">{s.story.accent}</span></h1>
+      <div class="hero-side">
+        <p class="lead">{s.story.sub}</p>
+        <div class="stores">
+          {appStore && <a href={appStore} aria-label={s.ctaAppStore}><img class="apple" src="/badges/app-store.svg" alt="" width="162" height="54" /></a>}
+          {play && <a href={play} aria-label={s.ctaPlay}><img class="google" src={playBadge} alt="" width="207" height="80" /></a>}
+        </div>
+        <p class="note">{s.note}</p>
       </div>
     </div>
-    <div class="hero-art">
-      <div class="tablet"><img src={s.heroBoard.src} alt={s.heroBoard.alt} width="720" height="430" fetchpriority="high" /></div>
-      <div class="phone overlap"><img src={s.heroPhone.src} alt={s.heroPhone.alt} width="540" height="1116" /></div>
+    <ol class="beats">
+      {s.story.beats.map((b, i) => (
+        <li>
+          <span class="time">{b.time}</span>
+          <h2 class="beat-h">{b.title}</h2>
+          <p>{b.body}</p>
+          {b.ways && <ul class="ways">{b.ways.map((w) => <li><b>{w.name}:</b> {w.body}</li>)}</ul>}
+          <div class="shot">
+            {b.device === 'tablet'
+              ? <div class="tablet"><img src={b.shot.src} alt={b.shot.alt} width="720" height="430" fetchpriority={i === 0 ? 'high' : undefined} loading={i === 0 ? undefined : 'lazy'} /></div>
+              : <div class="phone-crop"><div class="phone"><img src={b.shot.src} alt={b.shot.alt} width="540" height="1116" loading="lazy" /></div></div>}
+          </div>
+        </li>
+      ))}
+      <li class="done">
+        <span class="time">{endTime}</span>
+        <h2 class="beat-h">{s.endingTitle}</h2>
+        <p>{endText}</p>
+        <div class="shot" aria-hidden="true"><svg width="88" height="88" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 3 3 5-6"></path></svg></div>
+      </li>
+    </ol>
+    <div class="hero-links">
+      <a class="arrow" href="/badminton.html">{s.listed(nights)}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+      <a class="arrow" href={fr ? '/fr/how-it-works.html' : '/how-it-works.html'}>{s.storyLink}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
     </div>
   </section>
 
@@ -356,7 +367,6 @@ const siteLd = {
         <div class="phone raised"><img src={s.hosts.shot.src} alt={s.hosts.shot.alt} width="540" height="1116" loading="lazy" /></div>
       </div>
       <div class="copy">
-        <p class="eyebrow">{s.players.kicker}</p>
         <h2 id="pl-h">{s.players.head}</h2>
         <ul class="ticks">{playerPoints.map((p) => <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={TICK} /><span>{p}</span></li>)}</ul>
         <form class="find" action="/badminton.html" method="get" role="search">
@@ -373,62 +383,29 @@ const siteLd = {
 
   <section class="x split org" id="organisers" aria-labelledby="org-h">
     <div class="copy">
-      <p class="eyebrow">{s.hosts.kicker}</p>
       <h2 id="org-h">{s.hosts.head}</h2>
       <ul class="ticks">{hostPoints.map((p) => <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={TICK} /><span>{p}</span></li>)}</ul>
+      {/* An organiser sent by their players ("show your organiser") finds the night they can claim. */}
+      <a class="claim" href="/badminton.html">{s.hosts.claim}<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
       <p class="help">{s.hosts.help} <a href="mailto:support@nextfour.app">support@nextfour.app</a>.</p>
     </div>
     <div class="org-art"><div class="tablet"><img src={s.heroBoard.src} alt={s.heroBoard.alt} width="720" height="430" loading="lazy" /></div></div>
   </section>
 
-  <section class="x night" aria-labelledby="night-h">
-    <div class="sec-top">
-      <div>
-        <p class="eyebrow">{s.story.sub}</p>
-        <h2 id="night-h">{s.story.head}</h2>
-      </div>
-      <a class="arrow" href={fr ? '/fr/how-it-works.html' : '/how-it-works.html'}>{s.storyLink}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
-    </div>
-    <ol class="beats">
-      {s.story.beats.map((b) => (
-        <li>
-          <div class="shot">
-            {b.device === 'tablet'
-              ? <div class="tablet"><img src={b.shot.src} alt={b.shot.alt} width="720" height="430" loading="lazy" /></div>
-              : <div class="phone-crop"><div class="phone"><img src={b.shot.src} alt={b.shot.alt} width="540" height="1116" loading="lazy" /></div></div>}
-          </div>
-          <span class="time">{b.time}</span>
-          <h3>{b.title}</h3>
-          <p>{b.body}</p>
-        </li>
-      ))}
-      <li class="done">
-        <div class="shot" aria-hidden="true"><svg width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 3 3 5-6"></path></svg></div>
-        <span class="time">{endTime}</span>
-        <h3>{s.endingTitle}</h3>
-        <p>{endText}</p>
-      </li>
-    </ol>
-  </section>
-
   <section class="band" aria-labelledby="price-h">
     <div class="x">
       <div class="sec-top">
-        <div>
-          <p class="eyebrow">{s.plansKicker}</p>
-          <h2 id="price-h">{s.pricing.head}</h2>
-        </div>
+        <h2 id="price-h">{s.pricing.head}</h2>
         <p class="side">{s.pricing.sub} {s.pricing.note}</p>
       </div>
       <ul class="plans">
-        {s.pricing.plans.map((p) => <li class:list={['plan', { featured: p.name === 'Pro' }]}><b>{p.name}</b><p>{p.body}</p></li>)}
+        {s.pricing.plans.map((p, i) => <li class:list={['plan', { featured: i === 0 }]}><b>{p.name}</b><p>{p.body}</p></li>)}
       </ul>
     </div>
   </section>
 
   <section class="x setup" aria-labelledby="setup-h">
     <div class="setup-copy">
-      <p class="eyebrow">{s.setupKicker}</p>
       <h2 id="setup-h">{s.stepsHead}</h2>
       <p class="sub">{s.stepsSub}</p>
     </div>
@@ -460,7 +437,8 @@ const siteLd = {
   .x { max-width: 1120px; margin: 0 auto; padding-left: var(--pad); padding-right: var(--pad); box-sizing: border-box; }
   .band { background: var(--surface); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
   h2 { margin: 0; font-size: clamp(32px, 4.6vw, 52px); line-height: 1.02; font-weight: 800; font-stretch: 114%; letter-spacing: -0.03em; }
-  .eyebrow { margin: 0 0 12px; }
+  h2 { text-wrap: balance; }
+  .lead, .ticks, .beats p, .ways, .closing p { text-wrap: pretty; }
   #players, #organisers { scroll-margin-top: 12px; }
 
   /* Device frames around the real screenshots. */
@@ -470,38 +448,24 @@ const siteLd = {
   .tablet img { border-radius: 13px; }
   .phone img { border-radius: 23px; }
 
-  .hero { padding-top: clamp(32px, 6vw, 72px); padding-bottom: clamp(40px, 6vw, 72px); display: flex; flex-wrap: wrap; gap: 40px; align-items: center; }
-  .hero-copy { flex: 999 1 480px; min-width: 0; display: flex; flex-direction: column; gap: 22px; }
-  h1 { font-size: clamp(48px, 8vw, 96px); line-height: 0.94; font-stretch: 118%; letter-spacing: -0.035em; }
-  .accent { color: var(--eyebrow); }
-  .lead { margin: 0; max-width: 540px; font-size: 19px; color: var(--body); }
-  .paths { display: flex; flex-wrap: wrap; gap: 10px; }
-  .path {
-    flex: 1 1 220px; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 76px;
-    box-sizing: border-box; padding: 14px 20px; border-radius: 18px; text-decoration: none; border: 1.5px solid var(--ink); color: var(--ink);
-  }
-  .path.primary { background: var(--hl-bg); color: var(--hl-fg); border-color: var(--hl-bg); }
-  .path:hover { color: inherit; filter: brightness(1.03); }
-  .path span { display: flex; flex-direction: column; line-height: 1.25; }
-  .path b { font-size: 18px; font-weight: 800; }
-  .path small { font-size: 14px; opacity: 0.8; }
+  /* The hero: the headline and the way in, then the night along a rail. */
+  .hero { padding-top: clamp(28px, 5vw, 64px); padding-bottom: clamp(48px, 6vw, 80px); }
+  .hero-top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px 56px; }
+  h1 { flex: 999 1 560px; min-width: 0; margin: 0; font-size: clamp(46px, 7.4vw, 96px); line-height: 0.94; font-stretch: 118%; letter-spacing: -0.035em; text-wrap: balance; }
+  .accent { display: block; color: var(--eyebrow); }
+  .hero-side { flex: 1 1 320px; max-width: 420px; display: flex; flex-direction: column; gap: 16px; }
+  .lead { margin: 0; font-size: 18px; color: var(--body); }
+  .note { margin: 0; font-size: 14px; color: var(--muted); }
   .stores { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
   .stores a { display: inline-flex; align-items: center; min-height: 56px; }
   .stores img.apple { height: 54px; width: auto; }
   .stores img.google { height: 80px; width: auto; margin: -12px; }
-  .built { display: flex; flex-direction: column; gap: 10px; }
-  .built p { margin: 0; font-size: 14px; font-weight: 700; color: var(--muted); }
-  .built ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
-  .built li { font-size: 13px; font-weight: 700; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line-strong); color: var(--body); }
-  .hero-art { flex: 1 1 380px; min-width: 0; position: relative; padding-bottom: 48px; }
-  .phone.overlap { position: absolute; right: -8px; bottom: 0; width: 34%; }
 
   .split { display: flex; flex-wrap: wrap; gap: 48px; align-items: center; padding-top: clamp(48px, 7vw, 88px); padding-bottom: clamp(48px, 7vw, 88px); }
   .phones { flex: 1 1 340px; min-width: 0; display: flex; justify-content: center; gap: 16px; align-items: flex-end; }
   .phones .phone { width: 46%; max-width: 230px; }
   .phones .phone.raised { margin-bottom: 40px; }
   .copy { flex: 999 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 18px; }
-  .copy .eyebrow { margin-bottom: -6px; }
   .ticks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 17px; color: var(--body); }
   .ticks li { display: flex; gap: 10px; }
   .ticks svg { flex: 0 0 auto; margin-top: 3px; color: var(--eyebrow); }
@@ -512,28 +476,56 @@ const siteLd = {
     flex: 999 1 220px; min-width: 0; height: 52px; box-sizing: border-box; padding: 0 16px; border-radius: 12px;
     border: 1.5px solid var(--line-strong); background: var(--surface); color: var(--ink); font: inherit; font-size: 16px;
   }
-  .find input:focus { outline: none; border-color: var(--eyebrow); }
+  .find input:focus { outline: none; border-color: var(--eyebrow); box-shadow: 0 0 0 1.5px var(--eyebrow); }
+  .find input::placeholder { color: var(--muted); opacity: 1; }
   .find input::-webkit-search-cancel-button { -webkit-appearance: none; }
   .find button { flex: 1 1 auto; height: 52px; padding: 0 22px; border-radius: 12px; border: 0; background: var(--hl-bg); color: var(--hl-fg); font: inherit; font-weight: 800; cursor: pointer; }
   .find p { margin: 0; font-size: 14px; color: var(--muted); }
   .org { padding-bottom: 32px; }
   .org-art { flex: 1 1 380px; min-width: 0; }
+  .claim {
+    align-self: flex-start; display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 22px;
+    border-radius: 999px; background: var(--btn-bg); color: var(--btn-fg); font-weight: 800; text-decoration: none;
+  }
+  .claim:hover { color: var(--btn-fg); filter: brightness(1.08); }
   .help { margin: 0; font-size: 15px; color: var(--muted); }
 
-  .night { padding-top: 40px; padding-bottom: clamp(48px, 7vw, 88px); }
-  .sec-top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; margin-bottom: 24px; }
   .arrow { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-weight: 700; }
-  .beats { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 12px; }
-  .beats > li { display: flex; flex-direction: column; gap: 14px; padding: 16px; border-radius: 20px; background: var(--surface); border: 1px solid var(--line); }
-  .beats .shot { height: 210px; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 14px; }
-  .phone-crop { display: flex; justify-content: center; align-items: flex-start; width: 100%; height: 100%; background: var(--row); border-radius: 14px; padding-top: 14px; box-sizing: border-box; overflow: hidden; }
-  .phone-crop .phone { width: 52%; }
-  .time { align-self: flex-start; font-size: 14px; font-weight: 800; padding: 3px 10px; border-radius: 999px; background: var(--chip-bg); color: var(--chip-fg); }
-  .beats h3 { margin: 0; font-size: 20px; font-weight: 800; }
+  .sec-top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; margin-bottom: 24px; }
+
+  /* The night: four moments on a rail, each over the screen it happens on. */
+  .beats { list-style: none; margin: clamp(36px, 5vw, 56px) 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; position: relative; }
+  .beats::before { content: ''; position: absolute; left: 8px; right: 8px; top: 15px; height: 2px; background: var(--line-strong); }
+  .beats > li { position: relative; padding-top: 42px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .beats > li::before { content: ''; position: absolute; left: 0; top: 8px; width: 16px; height: 16px; border-radius: 999px; background: var(--ink); box-shadow: 0 0 0 4px var(--bg); }
+  .beats > .done::before { background: var(--hl-bg); box-shadow: 0 0 0 4px var(--bg), 0 0 0 5px var(--ink); }
+  .time { align-self: flex-start; font-size: 14px; font-weight: 800; padding: 3px 10px; border-radius: 999px; background: var(--chip-bg); color: var(--chip-fg); font-variant-numeric: tabular-nums; }
+  .done .time { background: var(--hl-bg); color: var(--hl-fg); }
+  .beat-h { margin: 0; font-size: 22px; line-height: 1.15; font-weight: 800; font-stretch: 106%; letter-spacing: 0; }
   .beats p { margin: 0; font-size: 15px; color: var(--body); }
-  .beats .done { background: var(--hl-bg); color: var(--hl-fg); border-color: var(--hl-bg); }
-  .beats .done .time { background: var(--hl-fg); color: var(--hl-bg); }
-  .beats .done p { color: inherit; }
+  .ways { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--body); }
+  .ways li { padding-left: 12px; border-left: 1px solid var(--line-strong); }
+  .ways b { color: var(--ink); }
+  .beats .shot { margin-top: auto; height: 190px; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 14px; background: var(--row); }
+  .beats .shot .tablet { width: 90%; }
+  .beats .done .shot { background: var(--hl-bg); color: var(--hl-fg); }
+  /* Anchored to the foot of the phone, where the "Your turn to pick" bar sits. */
+  .phone-crop { display: flex; justify-content: center; align-items: flex-end; width: 100%; height: 100%; background: var(--row); border-radius: 14px; padding-bottom: 14px; box-sizing: border-box; overflow: hidden; }
+  .phone-crop .phone { width: 52%; }
+  .hero-links { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 4px 28px; }
+  /* Two by two on a tablet; on a phone the rail runs down the side and the words carry it. */
+  @media (max-width: 980px) {
+    .beats { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 32px; }
+    .beats::before { display: none; }
+  }
+  @media (max-width: 600px) {
+    .beats { grid-template-columns: 1fr; row-gap: 0; padding-left: 30px; }
+    .beats::before { display: block; left: 7px; right: auto; top: 10px; bottom: 10px; width: 2px; height: auto; }
+    .beats > li { padding: 0 0 24px; }
+    .beats > li::before { left: -30px; top: 4px; }
+    .beats .shot { display: none; }
+    .beats .done { padding-bottom: 0; }
+  }
 
   .band > .x { padding-top: clamp(48px, 7vw, 88px); padding-bottom: clamp(48px, 7vw, 88px); }
   .side { margin: 0; max-width: 360px; font-size: 15px; color: var(--muted); }

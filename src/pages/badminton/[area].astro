@@ -11,7 +11,7 @@ import Directory from '../../layouts/Directory.astro';
 import ClubCard from '../../components/directory/ClubCard.astro';
 import DropInCard from '../../components/directory/DropInCard.astro';
 import {
-  getDirectory, nearbyAreas, weeklyNights, newestCheck, checkedText, weeklyDropIns, groupedRows, dropInRows,
+  getDirectory, nearbyLinks, weeklyNights, newestCheck, checkedText, weeklyDropIns, groupedRows, dropInRows,
   nextDate, fitTitle, fitDescription, DAY_NAMES, SHORT_DAYS, WEEK_ORDER, type Area,
 } from '../../data/directory';
 
@@ -42,7 +42,8 @@ const tile = (d: number) => {
   if (v) return { n: v, word: v === 1 ? 'drop-in' : 'drop-ins', plus: '' };
   return { n: 0, word: 'none', plus: '' };
 };
-const nearby = nearbyAreas(dir, area);
+const nearby = nearbyLinks(dir, area);
+const kmText = (km: number) => (km < 1 ? 'Under 1 km' : `${Math.round(km)} km`);
 const site = Astro.site!;
 const newest = newestCheck(area.clubs);
 const checked = checkedText(newest);
@@ -159,6 +160,22 @@ const allHeading = `${plural(area.clubs.length, 'club')}, ${plural(nights, 'nigh
     .empty .try { margin: 8px 0 20px; color: var(--muted); }
     .empty .go { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
     .dropins { padding: 8px 0 24px; }
+    /* Nearby: area pages and, from areas too small for one, single clubs and venues, each with its distance. */
+    .near-top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 20px; margin-bottom: 16px; }
+    .near-top h2 { margin: 0; }
+    .near-search { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 15px; min-height: 24px; }
+    .near-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+    .near-list a {
+      height: 100%; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 16px;
+      background: var(--surface); border: 1px solid var(--line); border-radius: 12px; text-decoration: none;
+    }
+    .near-list a:hover { border-color: var(--line-strong); }
+    .near-list b { display: block; font-weight: 700; line-height: 1.3; }
+    .near-list small { display: block; margin-top: 2px; font-size: 13px; color: var(--muted); }
+    .near-list .dist {
+      flex: 0 0 auto; font-size: 12px; font-weight: 800; padding: 3px 9px; border-radius: 999px;
+      background: var(--tag-bg); color: var(--tag-fg); font-variant-numeric: tabular-nums; white-space: nowrap;
+    }
     .dropins .lede { margin: 6px 0 20px; color: var(--body); max-width: 640px; }
     @media (max-width: 560px) {
       .days { gap: 5px; }
@@ -216,7 +233,7 @@ const allHeading = `${plural(area.clubs.length, 'club')}, ${plural(nights, 'nigh
 
     <div class="empty" id="empty" hidden>
       <p class="what">Nothing listed in {area.name} on <span id="empty-day"></span></p>
-      <p class="try">Try another night, or look in a nearby area.</p>
+      <p class="try">Try another night, or somewhere nearby.</p>
       <div class="go">
         {nearby.slice(0, 3).map((a) => <a class="btn" href={a.url}>{a.name}</a>)}
       </div>
@@ -247,10 +264,18 @@ const allHeading = `${plural(area.clubs.length, 'club')}, ${plural(nights, 'nigh
 
   {nearby.length > 0 && (
     <section class="near" aria-labelledby="near-h">
-      <h2 class="h-section" id="near-h">Badminton near {area.name}</h2>
-      <div class="cards">
-        {nearby.map((a) => <a href={a.url}>{a.name} <span aria-hidden="true">→</span></a>)}
+      <div class="near-top">
+        <h2 class="h-section" id="near-h">Badminton near {area.name}</h2>
+        <a class="near-search" href={`/badminton.html#q=${encodeURIComponent(area.name)}`}>
+          Search everything within 25 km
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+        </a>
       </div>
+      <ul class="near-list">
+        {nearby.map((l) => (
+          <li><a href={l.url}><span><b>{l.name}</b><small>{l.sub}</small></span><span class="dist">{kmText(l.km)}</span></a></li>
+        ))}
+      </ul>
     </section>
   )}
 

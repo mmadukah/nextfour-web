@@ -577,6 +577,34 @@ export function claimedSessionId(v: DropInVenue): string | null {
   return v.sessions.find((s) => s.claimed)?.id ?? null;
 }
 
+/** A place near an area page: another area page, or a club or venue in an area too small for its own page. */
+export interface NearbyLink { name: string; url: string; sub: string; km: number }
+
+/**
+ * Where else to play near an area: the nearest other area pages, plus the
+ * clubs and drop-in venues of areas too small for a page of their own, so a
+ * neighbour with one club (Southwark beside Tower Hamlets) is not skipped
+ * for an area pages further off. Within the finder's 25 km where there are
+ * enough; otherwise the nearest there are, so the list is never empty.
+ */
+export function nearbyLinks(dir: Directory, area: Area, count = 6, maxKm = 25): NearbyLink[] {
+  const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+  const links: NearbyLink[] = [];
+  for (const a of dir.areas) {
+    if (a.slug === area.slug) continue;
+    if (a.hasPage) {
+      const what = [a.clubs.length ? plural(a.clubs.length, 'club') : '', a.venues.length ? plural(a.venues.length, 'drop-in venue') : ''];
+      links.push({ name: a.name, url: a.url, sub: what.filter(Boolean).join(', '), km: distanceKm(area.lat, area.lng, a.lat, a.lng) });
+      continue;
+    }
+    for (const c of a.clubs) links.push({ name: c.name, url: c.url, sub: `Club in ${a.name}`, km: distanceKm(area.lat, area.lng, c.venue.lat, c.venue.lng) });
+    for (const v of a.venues) links.push({ name: v.name, url: v.url, sub: `Drop-ins in ${a.name}`, km: distanceKm(area.lat, area.lng, v.venue.lat, v.venue.lng) });
+  }
+  links.sort((x, y) => x.km - y.km);
+  const close = links.filter((l) => l.km <= maxKm);
+  return (close.length >= 3 ? close : links).slice(0, count);
+}
+
 /** The nearest other venues and clubs, for the venue page. */
 export function nearbyPlaces(dir: Directory, venue: Venue, count = 4): ({ venue: Venue; km: number } | { club: Club; km: number })[] {
   const from = venue.venue;
