@@ -13,8 +13,10 @@ interface Props {
   description?: string;
   lang: string;
   slug: string;
+  /** English only (no French version), so no language menu. */
+  englishOnly?: boolean;
 }
-const { title, meta, description, lang, slug } = Astro.props;
+const { title, meta, description, lang, slug, englishOnly = false } = Astro.props;
 const fr = lang === 'fr';
 const fullTitle = fr ? `NextFour : ${title}` : `NextFour: ${title}`;
 
@@ -22,20 +24,19 @@ const crumbs = [
   { name: fr ? 'Accueil' : 'Home', href: fr ? '/fr/' : '/' },
   { name: title, href: getRelativeLocaleUrl(lang, `${slug}.html`) },
 ];
-const languages = [
+const languages = englishOnly ? [] : [
   { lang: 'en', label: 'English', href: getRelativeLocaleUrl('en', `${slug}.html`) },
   { lang: 'fr', label: 'Français', href: getRelativeLocaleUrl('fr', `${slug}.html`) },
 ];
 ---
 
-<Directory title={fullTitle} description={description} crumbs={crumbs} cta={false} lang={fr ? 'fr' : 'en'} footer="site" languages={languages}>
+<Directory title={fullTitle} description={description} crumbs={crumbs} cta={false} lang={fr ? 'fr' : 'en'} languages={languages}>
   <style>
     .page { padding: 28px 0 56px; max-width: 720px; }
-    .page .eyebrow { margin: 0 0 10px; }
     h1 { font-size: clamp(34px, 5vw, 52px); line-height: 1.05; font-stretch: 112%; }
     .meta { margin: 14px 0 0; font-size: 14px; color: var(--muted); }
     /* The Markdown's own elements. */
-    .prose { margin-top: 32px; font-size: 16px; line-height: 1.65; color: var(--body); }
+    .prose { margin-top: 32px; max-width: 60ch; font-size: 16px; line-height: 1.65; color: var(--body); text-wrap: pretty; }
     .prose :global(h2) { margin: 40px 0 12px; font-size: 24px; line-height: 1.2; font-weight: 800; font-stretch: 106%; letter-spacing: -0.01em; color: var(--ink); }
     .prose :global(h3) { margin: 28px 0 8px; font-size: 18px; font-weight: 800; color: var(--ink); }
     .prose :global(p) { margin: 0 0 14px; }
@@ -56,7 +57,6 @@ const languages = [
   </style>
 
   <article class="page">
-    <p class="eyebrow">NextFour</p>
     <h1>{title}</h1>
     <p class="meta">{meta}</p>
     <div class="prose">

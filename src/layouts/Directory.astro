@@ -10,15 +10,14 @@
 //
 // Also the frame for the rest of the site (home, How it works, the legal
 // pages, /get.html): `lang` switches the chrome's words, `languages` adds the
-// English/Français pills to the footer, and every page shares one footer (SiteFooter);
-// `footer: 'directory'` adds the directory's data and licence notes to it.
+// English/Français pills to the footer, and every page shares one footer (SiteFooter).
+// The directory's data credits and licences live on /data-sources.html, linked from it.
 import Base from './Base.astro';
 import AppFeaturesCompact from '../components/directory/AppFeaturesCompact.astro';
 import ThemeToggle from '../components/ThemeToggle.astro';
 import LogoMark from '../components/LogoMark.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import '../styles/club-card.css';
-import { getDirectory } from '../data/directory';
 
 interface Crumb { name: string; href: string }
 interface Props {
@@ -32,19 +31,15 @@ interface Props {
   /** The header link marked as the current page. */
   current?: 'finder' | 'how';
   lang?: 'en' | 'fr';
-  /** 'directory' adds the directory's data and licence notes to the shared footer (SiteFooter). */
-  footer?: 'directory' | 'site';
   /** Full-width main, for a page that lays out its own bands (the home page). */
   bare?: boolean;
   /** Language versions of this page, for the footer's pills and the hreflang links. */
   languages?: { lang: string; label: string; href: string }[];
   /** A shorter line for link previews (Base's og:description). */
   ogDescription?: string;
-  /** A line of the page's own above the directory notes: a venue page's data source. */
-  footerNote?: string;
 }
 const {
-  title, description, crumbs, jsonLd = [], cta = true, current, lang = 'en', footer = 'directory', languages = [], ogDescription, bare = false, footerNote,
+  title, description, crumbs, jsonLd = [], cta = true, current, lang = 'en', languages = [], ogDescription, bare = false,
 } = Astro.props;
 
 const WORDS = {
@@ -58,9 +53,6 @@ const WORDS = {
     homeLink: 'Accueil', find: 'Trouver des sessions', findShort: 'Sessions', how: 'Comment ça marche', get: 'Télécharger',
   },
 }[lang];
-// Drop-in data is the operators' OpenActive feeds, under CC BY 4.0: the footer
-// credits each one, links the licence and says what was changed.
-const operators = footer === 'directory' ? (await getDirectory()).operators : [];
 
 const site = Astro.site!;
 const alternates = languages.length
@@ -171,7 +163,6 @@ const ld = crumbs.length > 1 ? [breadcrumbLd, ...jsonLd] : jsonLd;
     nav.crumbs .sep { margin: 0 8px; }
     .crumb-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; }
 
-    .eyebrow { margin: 0 0 12px; font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--eyebrow); }
     h1 { margin: 0; font-weight: 800; letter-spacing: -0.03em; }
     .intro { margin: 20px 0 0; max-width: 560px; font-size: 18px; color: var(--body); }
     .h-section { margin: 0 0 16px; font-size: 22px; font-weight: 800; font-stretch: 106%; }
@@ -190,19 +181,10 @@ const ld = crumbs.length > 1 ? [breadcrumbLd, ...jsonLd] : jsonLd;
       font-weight: 700; font-size: 15px; text-decoration: none; cursor: pointer;
     }
 
-    /* Hero: title, then the stat card, which wraps under it on a phone. */
+    /* Hero: the title and intro, with any art beside them on a wide screen. */
     .hero { padding: 28px 0 40px; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 32px; }
     .hero > div { flex: 999 1 520px; min-width: 0; }
-    .stats {
-      /* About 105px a cell (--cells, set by the page when it isn't 3), so a fourth cell widens the card. */
-      flex: 1 1 calc(var(--cells, 3) * 105px); margin: 0; display: grid; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column;
-      border: 1px solid var(--line); border-radius: 16px; background: var(--surface); overflow: hidden;
-    }
-    .stats > div { padding: 18px 18px 16px; }
-    .stats > div + div { border-left: 1px solid var(--line); }
-    .stats dt { font-size: 13px; color: var(--muted); white-space: nowrap; }
-    .stats dd { margin: 4px 0 0; font-size: 32px; font-weight: 800; font-stretch: 112%; line-height: 1; }
-    .stats dd.date { margin-top: 6px; font-size: 17px; font-weight: 700; line-height: 1.2; white-space: nowrap; }
+    .week-line { margin: 12px 0 0; display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 15px; color: var(--muted); font-variant-numeric: tabular-nums; }
 
     /* Link cards: nearby areas and clubs. */
     .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
@@ -217,7 +199,6 @@ const ld = crumbs.length > 1 ? [breadcrumbLd, ...jsonLd] : jsonLd;
 
 
     @media (max-width: 640px) {
-      .stats > div { padding: 14px 12px 12px; }
       header.top nav { gap: 8px 14px; }
       header.top nav .hide-sm { display: none; }
       header.top nav .show-sm { display: inline; }
@@ -263,24 +244,5 @@ const ld = crumbs.length > 1 ? [breadcrumbLd, ...jsonLd] : jsonLd;
     {cta && <AppFeaturesCompact />}
   </main>
 
-  <SiteFooter lang={lang} languages={languages}>
-    {footer === 'directory' && (
-      <>
-        {footerNote && <p>{footerNote}</p>}
-        <p>
-          Club times come from published information and every page says when it was last checked.
-          Spotted something wrong? Email <a href="mailto:clubs@nextfour.app">clubs@nextfour.app</a>.
-          Clubs can ask for their page to be corrected or removed at the same address.
-        </p>
-        {operators.length > 0 && (
-          <p>
-            Drop-in sessions: data from {operators.join(', ')}, published through OpenActive and licensed under
-            {' '}<a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a>.
-            Session titles are shortened and sessions grouped by venue.
-          </p>
-        )}
-        <p>Council areas and postcode districts: contains OS data © Crown copyright and database right 2024; contains Royal Mail data © Royal Mail copyright and database right 2024; source: Office for National Statistics, licensed under the Open Government Licence v3.0.</p>
-      </>
-    )}
-  </SiteFooter>
+  <SiteFooter lang={lang} languages={languages} />
 </Base>

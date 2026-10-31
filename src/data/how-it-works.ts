@@ -80,7 +80,6 @@ export const IDS = ['checking-in', 'queue', 'picking', 'overrides', 'scores', 'b
 export const UI = {
   en: {
     crumb: 'How it works',
-    eyebrow: 'NextFour: How it works',
     steps: [
       { tag: 'Arrive', title: 'Check in', text: 'With the session code, at the courtside board, or via the organiser.' },
       { tag: 'Wait', title: 'Join the queue', text: 'Longest wait goes first. Everyone sees the same order.' },
@@ -120,7 +119,6 @@ export const UI = {
   },
   fr: {
     crumb: 'Comment ça marche',
-    eyebrow: 'NextFour : Comment ça marche',
     steps: [
       { tag: 'Arriver', title: 'S’enregistrer', text: 'Avec le code de la session, sur le tableau au bord du terrain, ou par l’organisateur.' },
       { tag: 'Attendre', title: 'Rejoindre la file', text: 'Le plus long temps d’attente d’abord. Tout le monde voit le même ordre.' },

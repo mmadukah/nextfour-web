@@ -1,0 +1,37 @@
+---
+// Where the directory's data comes from, with the attributions its licences
+// ask for (CC BY 4.0 for the OpenActive feeds, the Open Government Licence for
+// the area and postcode data). The footer links here, so the notes are on
+// every page by link rather than in the footer itself.
+import Legal from '../layouts/Legal.astro';
+import { getDirectory } from '../data/directory';
+
+const { operators } = await getDirectory();
+---
+
+<Legal title="Data sources" meta="Where the club and session listings come from." description="Where NextFour's badminton club and drop-in session listings come from, and the licences that cover them." lang="en" slug="data-sources" englishOnly>
+  <h2>Club listings</h2>
+  <p>
+    Club times come from information the clubs publish themselves, and every club page says when it was last checked.
+    Spotted something wrong? Email <a href="mailto:clubs@nextfour.app">clubs@nextfour.app</a>.
+    Clubs can ask for their page to be corrected or removed at the same address.
+  </p>
+
+  {operators.length > 0 && (
+    <>
+      <h2>Drop-in sessions</h2>
+      <p>
+        Data from {operators.join(', ')}, published through OpenActive and licensed under
+        {' '}<a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a>.
+        Session titles are shortened and sessions grouped by venue.
+      </p>
+    </>
+  )}
+
+  <h2>Council areas and postcode districts</h2>
+  <p>
+    Contains OS data © Crown copyright and database right 2024; contains Royal Mail data © Royal Mail copyright and database right 2024;
+    source: Office for National Statistics, licensed under the
+    {' '}<a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" rel="license noopener">Open Government Licence v3.0</a>.
+  </p>
+</Legal>

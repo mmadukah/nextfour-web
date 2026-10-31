@@ -1,8 +1,8 @@
 ---
 // The one footer every page shares (through layouts/Directory.astro): the
 // links, the support email and copyright, the social buttons, and a language
-// menu on pages that have other language versions. A page adds notes of its
-// own through the slot (the directory's data and licence lines).
+// menu on pages that have other language versions. The directory's data credits
+// are on /data-sources.html, linked here.
 //
 // The language menu is a <details> disclosure of plain links, so it works
 // without script and grows to any number of languages; a little script only
@@ -20,12 +20,12 @@ const WORDS = {
   en: {
     label: 'Footer', language: 'Language', choose: 'Choose a language', questions: 'Questions? Email', copyright: '© 2026 NextFour. All rights reserved.',
     links: [['Home', '/'], ['Badminton clubs', '/badminton.html'], ['How it works', '/how-it-works.html'], ['Support', '/support.html'],
-      ['Privacy', '/privacy.html'], ['Terms', '/terms.html'], ['Account and data deletion', '/delete-account.html']],
+      ['Privacy', '/privacy.html'], ['Terms', '/terms.html'], ['Data sources', '/data-sources.html']],
   },
   fr: {
     label: 'Pied de page', language: 'Langue', choose: 'Choisir une langue', questions: 'Des questions ? Écrivez à', copyright: '© 2026 NextFour. Tous droits réservés.',
     links: [['Accueil', '/fr/'], ['Clubs de badminton', '/badminton.html'], ['Comment ça marche', '/fr/how-it-works.html'], ['Assistance', '/fr/support.html'],
-      ['Confidentialité', '/fr/privacy.html'], ['Conditions', '/fr/terms.html'], ['Suppression du compte et des données', '/fr/delete-account.html']],
+      ['Confidentialité', '/fr/privacy.html'], ['Conditions', '/fr/terms.html'], ['Sources des données (en anglais)', '/data-sources.html']],
   },
 }[lang];
 const current = languages.find((l) => l.lang === lang) ?? languages[0];
@@ -37,7 +37,6 @@ const current = languages.find((l) => l.lang === lang) ?? languages[0];
       <nav aria-label={WORDS.label}>
         {WORDS.links.map(([label, href]) => <a href={href}>{label}</a>)}
       </nav>
-      <slot />
       <p>{WORDS.questions} <a href="mailto:support@nextfour.app">support@nextfour.app</a>. {WORDS.copyright}</p>
     </div>
     <div class="foot-right">
@@ -79,8 +78,8 @@ const current = languages.find((l) => l.lang === lang) ?? languages[0];
   .foot-left nav { display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 14px; font-weight: 600; }
   .foot-left nav a { color: var(--body); text-decoration: none; }
   .foot-left nav a:hover { color: var(--link-hover); }
-  .foot-left :global(p) { margin: 0; max-width: 760px; }
-  .foot-left :global(p a) { color: var(--muted); }
+  .foot-left p { margin: 0; }
+  .foot-left p a { color: var(--muted); }
   .foot-right { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
   .social { width: 44px; height: 44px; border-radius: 999px; border: 1px solid var(--line-strong); display: flex; align-items: center; justify-content: center; color: var(--ink); }
   .social:hover { border-color: var(--muted); color: var(--ink); }

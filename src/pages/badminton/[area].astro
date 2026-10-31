@@ -48,8 +48,11 @@ const site = Astro.site!;
 const newest = newestCheck(area.clubs);
 const checked = checkedText(newest);
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+// The week in one line, in place of a stat card: the night picker below already counts each day.
+const facts = area.clubs.length > 0
+  ? `${plural(area.clubs.length, 'club')} with ${plural(nights, 'night')} a week${dropIns > 0 ? `, plus ${plural(dropIns, 'drop-in session')}` : ''}`
+  : dropIns > 0 ? `${plural(dropIns, 'drop-in session')} a week` : '';
 const title = fitTitle(area.clubs.length
   ? [
     `Badminton in ${area.name}: ${area.clubs.length} clubs and club nights | NextFour`,
@@ -195,13 +198,11 @@ const allHeading = `${plural(area.clubs.length, 'club')}, ${plural(nights, 'nigh
         Where to play badminton in {area.name} this week.{' '}
         {area.clubs.length > 0 ? 'Every club below shows its nights, times, venue and playing level.' : 'Drop-in sessions below show their days, times and prices.'}
       </p>
+      <p class="week-line">
+        {facts && <span>{facts[0].toUpperCase() + facts.slice(1)}.</span>}
+        {newest && <span>Last checked {newest.getDate()} {MONTHS[newest.getMonth()]} {newest.getFullYear()}.</span>}
+      </p>
     </div>
-    <dl class="stats" style={`--cells: ${(area.clubs.length > 0 ? 2 : 0) + (dropIns > 0 ? 1 : 0) + (newest ? 1 : 0)}`}>
-      {area.clubs.length > 0 && <div><dt>Clubs</dt><dd>{area.clubs.length}</dd></div>}
-      {area.clubs.length > 0 && <div><dt>Nights</dt><dd>{nights}</dd></div>}
-      {dropIns > 0 && <div><dt>Drop-ins</dt><dd>{dropIns}</dd></div>}
-      {newest && <div><dt>Checked</dt><dd class="date">{newest.getDate()} {MONTHS[newest.getMonth()]}<br />{newest.getFullYear()}</dd></div>}
-    </dl>
   </section>
 
   <section class="panel" aria-labelledby="week-h">

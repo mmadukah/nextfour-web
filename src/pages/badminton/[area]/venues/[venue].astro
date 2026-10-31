@@ -133,7 +133,7 @@ const OUT = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke=
 const ARROW = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>';
 ---
 
-<Directory title={title} description={description} crumbs={crumbs} jsonLd={[{ '@context': 'https://schema.org', ...placeLd }, ...eventsLd]} cta={false} footerNote={sourceNote}>
+<Directory title={title} description={description} crumbs={crumbs} jsonLd={[{ '@context': 'https://schema.org', ...placeLd }, ...eventsLd]} cta={false}>
   <style>
     .hero { align-items: stretch; padding-bottom: 36px; }
     .hero > .lead-col { display: flex; flex-direction: column; gap: 18px; flex: 999 1 560px; min-width: 0; }
@@ -313,6 +313,7 @@ const ARROW = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" strok
       ))}
     </div>
     <p class="small">Booking opens the operator's own site in a new tab. Nothing is booked or paid for on NextFour.</p>
+    <p class="small">{sourceNote} <a href="/data-sources.html">Data sources</a></p>
   </section>
 
   {clubs.length > 0 && (

@@ -31,15 +31,13 @@ const qrSvg = (await import('../../public/get-qr.svg?raw')).default;
 <Directory
   title="Get NextFour"
   description="Download NextFour for Android or iPhone."
-  ogDescription="Find a game near you, or run your club night."
+  ogDescription="Find a game near you, or run your session."
   crumbs={crumbs}
   cta={false}
-  footer="site"
 >
   <style>
     .get { padding: clamp(28px, 5vw, 56px) 0 8px; display: flex; flex-wrap: wrap; gap: 32px; align-items: center; }
     .lead-col { flex: 999 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
-    .lead-col .eyebrow { margin: 0; }
     h1 { font-size: clamp(38px, 6vw, 68px); line-height: 1; font-stretch: 114%; }
     .lead { margin: 0; max-width: 560px; font-size: 18px; color: var(--body); }
     .came {
@@ -79,9 +77,8 @@ const qrSvg = (await import('../../public/get-qr.svg?raw')).default;
         <span class="mark" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21a3 3 0 0 0 3-3H9a3 3 0 0 0 3 3z"></path><path d="M9 18 5 4l7 3 7-3-4 14"></path><path d="M12 7v11"></path></svg></span>
         <span class="txt"><small>You came from</small><b id="came-name"></b></span>
       </div>
-      <p class="eyebrow">Get the app</p>
-      <h1>Find a game near you, or run your club night.</h1>
-      <p class="lead" id="lead">On iPhone and Android. Free to start: join club nights, take your turn to pick, and see who’s going.</p>
+      <h1>Find a game near you, or run your session.</h1>
+      <p class="lead" id="lead">On iPhone and Android. Free to start: join sessions, take your turn to pick, and see who’s going.</p>
       <div class="stores">
         {APP_STORE_URL && (
           <a id="ios" href={APP_STORE_URL} aria-label="Download on the App Store, for iPhone and iPad">

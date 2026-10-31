@@ -154,7 +154,7 @@ const content: Record<string, Strings> = {
       { title: 'Let the board run the night', body: 'The queue fills courts fairly and live, so you can focus on playing.' },
     ],
     closingHead: 'Less faff at the door. More time on court.',
-    closingSub: 'Get the app and find a game near you. Run a club night? Be one of the first to run it on NextFour.',
+    closingSub: 'Get the app and find a game near you. Run sessions? Be one of the first to run them on NextFour.',
     nav: { clubs: 'Badminton clubs', howItWorks: 'How it works', support: 'Support', privacy: 'Privacy', terms: 'Terms', delete: 'Account & Data Deletion' },
     questions: 'Questions? Email',
     copyright: '© 2026 NextFour. All rights reserved.',
@@ -247,7 +247,7 @@ const content: Record<string, Strings> = {
       { title: 'Laissez le tableau gérer la soirée', body: 'La file remplit les terrains équitablement et en direct, pour que vous puissiez vous concentrer sur le jeu.' },
     ],
     closingHead: 'Moins de tracas à l’entrée. Plus de temps sur le terrain.',
-    closingSub: 'Téléchargez l’application et trouvez un match près de chez vous. Vous organisez une soirée ? Soyez parmi les premiers à la gérer avec NextFour.',
+    closingSub: 'Téléchargez l’application et trouvez un match près de chez vous. Vous organisez des sessions ? Soyez parmi les premiers à les gérer avec NextFour.',
     nav: { clubs: 'Clubs de badminton', howItWorks: 'Comment ça marche', support: 'Assistance', privacy: 'Confidentialité', terms: 'Conditions', delete: 'Suppression du compte et des données' },
     questions: 'Des questions ? Écrivez à',
     copyright: '© 2026 NextFour. Tous droits réservés.',
@@ -314,7 +314,6 @@ const siteLd = {
   cta={false}
   lang={fr ? 'fr' : 'en'}
   languages={languages}
-  footer="site"
   bare
 >
   <!-- The hero is a club night, hour by hour: the product shown as the night it runs. -->
@@ -503,11 +502,11 @@ const siteLd = {
   .ways { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--body); }
   .ways li { padding-left: 12px; border-left: 1px solid var(--line-strong); }
   .ways b { color: var(--ink); }
-  .beats .shot { margin-top: auto; height: 190px; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 14px; background: var(--row); }
-  .beats .shot .tablet { width: 90%; }
-  .beats .done .shot { background: var(--hl-bg); color: var(--hl-fg); }
+  .beats .shot { margin-top: auto; height: 190px; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 14px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); }
+  .beats .shot .tablet { width: 90%; box-shadow: 0 14px 28px -18px rgba(0, 0, 0, 0.45); }
+  .beats .done .shot { background: var(--hl-bg); color: var(--hl-fg); box-shadow: none; }
   /* Anchored to the foot of the phone, where the "Your turn to pick" bar sits. */
-  .phone-crop { display: flex; justify-content: center; align-items: flex-end; width: 100%; height: 100%; background: var(--row); border-radius: 14px; padding-bottom: 14px; box-sizing: border-box; overflow: hidden; }
+  .phone-crop { display: flex; justify-content: center; align-items: flex-end; width: 100%; height: 100%; border-radius: 14px; padding-bottom: 14px; box-sizing: border-box; overflow: hidden; }
   .phone-crop .phone { width: 52%; }
   .hero-links { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 4px 28px; }
   /* Two by two on a tablet; on a phone the rail runs down the side and the words carry it. */

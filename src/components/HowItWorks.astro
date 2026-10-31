@@ -40,7 +40,7 @@ const title = lang === 'fr' ? `NextFour : ${c.title}` : `NextFour: ${c.title}`;
 const heading = c.meta.replace(/\s+(on a NextFour club night|d’une soirée de club NextFour)\.$/, '');
 ---
 
-<Directory title={title} description={c.meta} crumbs={crumbs} cta={false} current="how" lang={lang} footer="site" languages={languages}>
+<Directory title={title} description={c.meta} crumbs={crumbs} cta={false} current="how" lang={lang} languages={languages}>
   <style>
     .top { padding: 28px 0 40px; }
     h1 { max-width: 860px; font-size: clamp(38px, 6vw, 72px); line-height: 1; font-stretch: 114%; }
@@ -60,13 +60,13 @@ const heading = c.meta.replace(/\s+(on a NextFour club night|d’une soirée de 
     .toc a { display: block; padding: 6px 0 6px 14px; margin-left: -2px; border-left: 2px solid transparent; text-decoration: none; font-size: 15px; color: var(--body); }
     .toc a:hover { border-left-color: var(--eyebrow); color: var(--ink); }
     .content { flex: 999 1 600px; min-width: 0; display: flex; flex-direction: column; }
-    .lead-p { margin: 32px 0 0; font-size: 17px; color: var(--body); max-width: 680px; }
+    .lead-p { margin: 32px 0 0; font-size: 17px; color: var(--body); max-width: 62ch; }
 
     section.part { padding: 32px 0; border-bottom: 1px solid var(--line); scroll-margin-top: 16px; }
     section.part.last { border-bottom: 0; }
     section.part > h2 { margin: 0 0 16px; font-size: 28px; font-weight: 800; font-stretch: 108%; letter-spacing: -0.01em; }
-    .body-text { margin: 0 0 16px; max-width: 680px; color: var(--body); }
-    .rules { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; color: var(--body); }
+    .body-text { margin: 0 0 16px; max-width: 64ch; color: var(--body); }
+    .rules { margin: 0; padding-left: 20px; max-width: 64ch; display: flex; flex-direction: column; gap: 8px; color: var(--body); text-wrap: pretty; }
     .rules :global(strong), .card :global(strong) { color: var(--ink); }
     .grid { display: grid; gap: 10px; }
     .g170 { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
@@ -140,7 +140,6 @@ const heading = c.meta.replace(/\s+(on a NextFour club night|d’une soirée de 
   </style>
 
   <section class="top">
-    <p class="eyebrow">{t.eyebrow}</p>
     <h1>{heading}</h1>
     <p class="intro" set:html={md(text(c.intro[0]))} />
     <ol class="flow" aria-label={t.stepsLabel}>
