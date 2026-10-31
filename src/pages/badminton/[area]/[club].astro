@@ -134,7 +134,6 @@ const crumbs = [
     .hero { align-items: stretch; padding-bottom: 36px; }
     .hero > .lead-col { display: flex; flex-direction: column; gap: 20px; flex: 999 1 560px; }
     .eyerow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
-    .eyerow .eyebrow { margin: 0; }
     .status {
       display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 3px 10px;
       border-radius: 999px; border: 1px dashed var(--line-strong); color: var(--muted);
@@ -211,7 +210,6 @@ const crumbs = [
     .arrow-link { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; font-weight: 700; min-height: 24px; }
 
     .claim { border: 2px solid var(--hl-bg); }
-    .claim .eyebrow { margin: 0 0 6px; letter-spacing: 0.1em; }
     .claim h2 { margin: 0; line-height: 1.15; }
     .ticks { list-style: none; margin: 16px 0 20px; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 15px; color: var(--body); }
     .ticks li { display: flex; gap: 10px; }
@@ -255,7 +253,6 @@ const crumbs = [
   <section class="hero">
     <div class="lead-col">
       <div class="eyerow">
-        <p class="eyebrow">Badminton club · {club.areaName}</p>
         {club.claimed
           ? <span class="status claimed">Claimed</span>
           : <span class="status"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle></svg>Unclaimed listing</span>}
@@ -383,7 +380,6 @@ const crumbs = [
         </section>
       ) : (
         <section class="box claim" aria-labelledby="claim-h">
-          <p class="eyebrow">Run this club?</p>
           <h2 id="claim-h">Claim {shortName}</h2>
           <ul class="ticks">
             {['Keep nights, times and levels accurate', 'Publish visitor terms and prices', 'Run a digital pegboard night, free'].map((t) => (

@@ -11,7 +11,7 @@ import Directory from '../../layouts/Directory.astro';
 import ClubCard from '../../components/directory/ClubCard.astro';
 import DropInCard from '../../components/directory/DropInCard.astro';
 import {
-  getDirectory, nearbyAreas, weeklyNights, nightsPerDay, newestCheck, checkedText, dropInsPerDay, weeklyDropIns,
+  getDirectory, nearbyAreas, weeklyNights, newestCheck, checkedText, weeklyDropIns, groupedRows, dropInRows,
   nextDate, fitTitle, fitDescription, DAY_NAMES, SHORT_DAYS, WEEK_ORDER, type Area,
 } from '../../data/directory';
 
@@ -27,10 +27,21 @@ const { area } = Astro.props as { area: Area };
 const dir = await getDirectory();
 const nights = weeklyNights(area.clubs);
 const dropIns = weeklyDropIns(area.dropIns);
-// The night picker counts every session: club nights and drop-ins alike.
-const clubDays = nightsPerDay(area.clubs);
-const dropInDays = dropInsPerDay(area.dropIns);
-const perDay = clubDays.map((n, d) => n + dropInDays[d]);
+// The night picker counts listings, as the finder does: how many clubs play
+// each night, and how many venues hold a drop-in that night. A tile always
+// gives its count a word ("5 clubs"), so it never reads as a date.
+const clubsOn = [0, 1, 2, 3, 4, 5, 6].map((d) => area.clubs.filter((c) => groupedRows(c).some((r) => r.days.includes(d))).length);
+const dropsOn = [0, 1, 2, 3, 4, 5, 6].map((d) => area.dropIns.filter((v) => dropInRows(v).some((r) => r.days.includes(d))).length);
+const counted = (clubs: number, drops: number) => [
+  clubs ? `${clubs} club${clubs === 1 ? '' : 's'}` : '',
+  drops ? `${drops} drop-in${drops === 1 ? '' : 's'}` : '',
+].filter(Boolean).join(' and ');
+const tile = (d: number) => {
+  const [c, v] = [clubsOn[d], dropsOn[d]];
+  if (c) return { n: c, word: c === 1 ? 'club' : 'clubs', plus: v ? `+${v} drop-in${v === 1 ? '' : 's'}` : '' };
+  if (v) return { n: v, word: v === 1 ? 'drop-in' : 'drop-ins', plus: '' };
+  return { n: 0, word: 'none', plus: '' };
+};
 const nearby = nearbyAreas(dir, area);
 const site = Astro.site!;
 const newest = newestCheck(area.clubs);
@@ -111,6 +122,8 @@ const allHeading = `${plural(area.clubs.length, 'club')}, ${plural(nights, 'nigh
 <Directory title={title} description={description} crumbs={crumbs} jsonLd={[...(area.clubs.length ? [listLd] : []), ...dropInLd]}>
   <style>
     h1 { font-size: clamp(44px, 7vw, 84px); line-height: 0.95; font-stretch: 118%; }
+    /* The sport, as the heading's own first line: smaller, so the place leads. */
+    .h1-lead { display: block; margin-bottom: 0.12em; font-size: 0.4em; font-weight: 700; font-stretch: 106%; line-height: 1.1; color: var(--eyebrow); }
     .week-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
     .week-top h2 { margin: 0; font-size: 18px; font-weight: 700; }
     .any {
@@ -125,12 +138,14 @@ const allHeading = `${plural(area.clubs.length, 'club')}, ${plural(nights, 'nigh
       border: 1.5px solid var(--line-strong); background: var(--surface); color: var(--ink);
     }
     .day .short { font-size: 14px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
-    .day .count { font-size: 28px; font-weight: 800; font-stretch: 112%; line-height: 1; }
-    .day .unit { font-size: 12px; opacity: 0.85; }
-    .day.none { background: var(--bg); color: var(--empty-day); border-color: var(--line); }
-    .day.none .count { opacity: 0.6; }
+    .day .count { font-size: 28px; font-weight: 800; font-stretch: 112%; line-height: 1; font-variant-numeric: tabular-nums; }
+    .day .unit { font-size: 13px; font-weight: 600; line-height: 1.1; }
+    .day .plus { font-size: 12px; line-height: 1.1; color: var(--muted); }
+    /* A night with nothing: solid colours, never faded, so it still reads. */
+    .day.none { background: var(--bg); color: var(--empty-day); border-color: var(--line); border-style: dashed; }
+    .day.none .count { visibility: hidden; }
     .day[aria-pressed='true'] { background: var(--sel-bg); color: var(--sel-fg); border-color: var(--sel-bg); }
-    .day[aria-pressed='true'] .count { opacity: 1; }
+    .day[aria-pressed='true'] .plus { color: inherit; }
     .results { padding: 40px 0 24px; }
     .results-top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 20px; }
     .results-top p { margin: 0; font-size: 14px; color: var(--muted); }
@@ -139,7 +154,7 @@ const allHeading = `${plural(area.clubs.length, 'club')}, ${plural(nights, 'nigh
       border: 1.5px dashed var(--line-strong); border-radius: 20px; padding: 40px 24px; text-align: center;
       background: var(--surface); margin-bottom: 16px;
     }
-    .empty[hidden] { display: none; }
+    .empty[hidden], #club-list[hidden], .dropins[hidden] { display: none; }
     .empty .what { margin: 0; font-size: 20px; font-weight: 700; }
     .empty .try { margin: 8px 0 20px; color: var(--muted); }
     .empty .go { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
@@ -150,14 +165,15 @@ const allHeading = `${plural(area.clubs.length, 'club')}, ${plural(nights, 'nigh
       .day { min-height: 78px; padding: 10px 2px; border-radius: 12px; }
       .day .short { font-size: 12px; }
       .day .count { font-size: 22px; }
-      .day .unit { display: none; }
+      /* The word stays on a phone, set narrower; the drop-ins aside goes (the label and heading carry it). */
+      .day .unit { font-size: 12px; font-stretch: 78%; }
+      .day .plus { display: none; }
     }
   </style>
 
   <section class="hero">
     <div>
-      <p class="eyebrow">Badminton club nights</p>
-      <h1>{area.name}</h1>
+      <h1><span class="h1-lead">Badminton in</span> {area.name}</h1>
       <p class="intro">
         Where to play badminton in {area.name} this week.{' '}
         {area.clubs.length > 0 ? 'Every club below shows its nights, times, venue and playing level.' : 'Drop-in sessions below show their days, times and prices.'}
@@ -178,11 +194,13 @@ const allHeading = `${plural(area.clubs.length, 'club')}, ${plural(nights, 'nigh
     </div>
     <div class="days">
       {WEEK_ORDER.map((d) => (
-        <button type="button" class:list={['day', { none: perDay[d] === 0 }]} data-day={d} aria-pressed="false"
-          aria-label={`${DAY_NAMES[d]}, ${perDay[d]} session${perDay[d] === 1 ? '' : 's'}`}>
+        <button type="button" class:list={['day', { none: clubsOn[d] + dropsOn[d] === 0 }]} data-day={d} aria-pressed="false"
+          aria-label={`${DAY_NAMES[d]}: ${counted(clubsOn[d], dropsOn[d]) || 'nothing listed'}`}>
           <span class="short">{SHORT_DAYS[d]}</span>
-          <span class="count">{perDay[d]}</span>
-          <span class="unit">{perDay[d] === 1 ? 'night' : 'nights'}</span>
+          <span class="count">{tile(d).n}</span>
+          <span class="unit">{tile(d).word}</span>
+          {/* Every tile keeps the aside's line, so the counts sit level. */}
+          <span class="plus">{tile(d).plus || ' '}</span>
         </button>
       ))}
     </div>
@@ -192,12 +210,12 @@ const allHeading = `${plural(area.clubs.length, 'club')}, ${plural(nights, 'nigh
     {area.clubs.length > 0 && (
       <div class="results-top">
         <h2 class="h-results" id="results-h" aria-live="polite">{allHeading}</h2>
-        <p>Sorted by club name</p>
+        <p id="sorted">Sorted by club name</p>
       </div>
     )}
 
     <div class="empty" id="empty" hidden>
-      <p class="what">Nothing on in {area.name} on <span id="empty-day"></span></p>
+      <p class="what">Nothing listed in {area.name} on <span id="empty-day"></span></p>
       <p class="try">Try another night, or look in a nearby area.</p>
       <div class="go">
         {nearby.slice(0, 3).map((a) => <a class="btn" href={a.url}>{a.name}</a>)}
@@ -205,7 +223,7 @@ const allHeading = `${plural(area.clubs.length, 'club')}, ${plural(nights, 'nigh
     </div>
 
     {area.clubs.length > 0 && (
-      <>
+      <div id="club-list">
         <div class="clubs">
           {area.clubs.map((c) => <ClubCard club={c} />)}
         </div>
@@ -213,7 +231,7 @@ const allHeading = `${plural(area.clubs.length, 'club')}, ${plural(nights, 'nigh
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg>
           Level bars run Beginner, Intermediate, Advanced. Times come from each club's published information.
         </p>
-      </>
+      </div>
     )}
   </section>
 
@@ -237,35 +255,51 @@ const allHeading = `${plural(area.clubs.length, 'club')}, ${plural(nights, 'nigh
   )}
 
   <script define:vars={{ allHeading, dayNames: DAY_NAMES }}>
+    // The night picker: it only hides cards and dims rows, so every listing
+    // stays in the HTML. The picked night lives in the URL (#day=4), so Back
+    // from a club page and a shared link both bring it back.
     const buttons = document.querySelectorAll('button[data-day]');
-    const cards = document.querySelectorAll('.club-card');
     const heading = document.getElementById('results-h');
     const empty = document.getElementById('empty');
-    buttons.forEach((b) => b.addEventListener('click', () => {
-      buttons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-      const day = b.dataset.day ?? '';
-      let shown = 0;
-      let any = 0;
-      cards.forEach((c) => {
-        const on = day === '' || (c.dataset.days ?? '').split(',').includes(day);
+    const clubList = document.getElementById('club-list');
+    const dropSection = document.querySelector('.dropins');
+    const clubCards = clubList ? [...clubList.querySelectorAll('.club-card')] : [];
+    const dropCards = dropSection ? [...dropSection.querySelectorAll('.club-card')] : [];
+    const plays = (el, day) => (el.dataset.days ?? '').split(',').includes(day);
+    const counted = (clubs, drops) => [
+      clubs ? `${clubs} club${clubs === 1 ? '' : 's'}` : '',
+      drops ? `${drops} drop-in${drops === 1 ? '' : 's'}` : '',
+    ].filter(Boolean).join(' and ');
+
+    function pick(day) {
+      buttons.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.day === day)));
+      let clubs = 0;
+      let drops = 0;
+      for (const c of [...clubCards, ...dropCards]) {
+        const on = day === '' || plays(c, day);
         c.hidden = !on;
-        if (on) any++;
-        if (on && !c.classList.contains('dropin')) shown++;
+        if (on) { if (c.classList.contains('dropin')) drops++; else clubs++; }
         c.querySelectorAll('.night-line').forEach((l) => {
-          const match = day === '' || (l.dataset.days ?? '').split(',').includes(day);
+          const match = day === '' || plays(l, day);
           l.classList.toggle('dim', !match);
           l.classList.toggle('hl', match && day !== '');
           l.querySelectorAll('.ds-cell').forEach((cell) => cell.classList.toggle('hl', cell.dataset.d === day));
         });
-      });
-      const name = day === '' ? '' : dayNames[Number(day)];
-      if (heading) {
-        heading.textContent = day === ''
-          ? allHeading
-          : shown ? `${shown} club${shown === 1 ? '' : 's'} on ${name}` : `No clubs on ${name}`;
       }
-      document.getElementById('empty-day').textContent = name;
-      empty.hidden = any > 0;
-    }));
+      // A section with nothing left in it goes, heading and all.
+      if (clubList) clubList.hidden = clubs === 0;
+      const sorted = document.getElementById('sorted');
+      if (sorted) sorted.hidden = clubs === 0;
+      if (dropSection) dropSection.hidden = dropCards.length > 0 && drops === 0;
+      const name = day === '' ? '' : dayNames[Number(day)];
+      if (heading) heading.textContent = day === '' ? allHeading : clubs + drops ? `${counted(clubs, drops)} on ${name}s` : `Nothing listed on ${name}s`;
+      document.getElementById('empty-day').textContent = `${name}s`;
+      empty.hidden = clubs + drops > 0;
+      history.replaceState(history.state, '', `${location.pathname}${location.search}${day === '' ? '' : `#day=${day}`}`);
+    }
+
+    buttons.forEach((b) => b.addEventListener('click', () => pick(b.dataset.day ?? '')));
+    const saved = new URLSearchParams(location.hash.slice(1)).get('day');
+    if (saved && [...buttons].some((b) => b.dataset.day === saved)) pick(saved);
   </script>
 </Directory>
