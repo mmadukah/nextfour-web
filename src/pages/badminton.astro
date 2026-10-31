@@ -116,7 +116,8 @@ const dropInCount = weeklyDropIns(dir.dropIns);
     #open[aria-pressed='true'] { background: var(--seg-on); }
     #open[aria-pressed='true'] span { transform: translateX(20px); }
 
-    #status { margin: 8px 0 16px; font-size: 22px; font-weight: 800; font-stretch: 106%; }
+    #status { margin: 8px 0 16px; font-size: 22px; font-weight: 800; font-stretch: 106%; scroll-margin-top: 24px; }
+    #status:focus { outline: none; }
     #status:empty { display: none; }
     /* The cards themselves: src/styles/club-card.css, shared with the area pages. */
     #results { list-style: none; padding: 0; margin: 0 0 48px; display: flex; flex-direction: column; gap: 16px; }
@@ -219,7 +220,7 @@ const dropInCount = weeklyDropIns(dir.dropIns);
     </form>
   </section>
 
-  <p id="status" aria-live="polite"></p>
+  <p id="status" aria-live="polite" tabindex="-1"></p>
   <ul id="results" data-tints={JSON.stringify(COURT_TINTS)} data-build={build}></ul>
 
   <div id="browse">
@@ -547,13 +548,29 @@ const dropInCount = weeklyDropIns(dir.dropIns);
         : `Nothing matches “${text}”. Try a postcode or a nearby town.`);
     }
 
+    /**
+     * The answer to a search the visitor asked for (Search, Return, Near me):
+     * the results start below the form, off the screen on a phone, so bring
+     * the line that heads them into view and put focus there, where a
+     * keyboard carries on into the cards. Typing and the filters update in
+     * place and leave the page where it is.
+     */
+    async function answer() {
+      const seq = latest + 1;
+      await run();
+      if (seq !== latest || !status.textContent) return;
+      status.focus({ preventScroll: true });
+      const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      status.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'start' });
+    }
+
     let timer: number | undefined;
     q.addEventListener('input', () => {
       setNear('off');
       clearTimeout(timer);
       timer = window.setTimeout(run, 250);
     });
-    document.getElementById('find')!.addEventListener('submit', (e) => { e.preventDefault(); clearTimeout(timer); run(); });
+    document.getElementById('find')!.addEventListener('submit', (e) => { e.preventDefault(); clearTimeout(timer); answer(); });
 
     // Night and level pills: one pressed per group.
     document.querySelectorAll<HTMLElement>('.pills').forEach((group) => {
@@ -602,7 +619,7 @@ const dropInCount = weeklyDropIns(dir.dropIns);
           q.value = '';
           setNear('on');
           origin = { lat: p.coords.latitude, lng: p.coords.longitude, label: 'you' };
-          run();
+          answer();
         },
         () => { setNear('off'); status.textContent = 'Location was not shared. Try a postcode instead.'; },
         { maximumAge: 600000, timeout: 10000 },
