@@ -1,10 +1,10 @@
 ---
 title: Privacy Policy
-meta: "Last updated: 24 October 2026"
+meta: "Last updated: 31 October 2026"
 description: "How NextFour collects, uses and protects your personal data under UK GDPR, and how to see, change or delete what we hold about you."
 ---
 
-This Privacy Policy explains how NextFour ("we", "us", "our") collects, uses, stores, and shares your personal data when you use the NextFour mobile application and related services (the "Service"). The Service is provided by NextFour Ltd, a company registered in England and Wales, and we comply with the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018.
+This Privacy Policy explains how NextFour ("we", "us", "our") collects, uses, stores, and shares your personal data when you use the NextFour mobile application, our website nextfour.app, and related services (the "Service"). The Service is provided by NextFour Ltd, a company registered in England and Wales, and we comply with the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018.
 
 ## 1. Who we are
 
@@ -85,13 +85,27 @@ Where a source publishes a contact address for a club, we may keep it privately 
 
 If you run a club and want its listing corrected or removed, or you object to us holding a contact address, email [clubs@nextfour.app](mailto:clubs@nextfour.app). A club can also claim its listing in the app to manage it directly.
 
-## 9. Data retention
+## 9. This website
+
+This section covers our website, nextfour.app, including the club and session directory.
+
+- **No cookies, analytics or advertising.** The website sets no cookies, has no analytics or tracking, and shows no ads, so it does not ask for cookie consent.
+- **Your theme choice:** if you choose light or dark mode, the choice is saved in your browser's local storage so the next page opens the same way. It stays on your device. Choosing Auto, or clearing your browser's data for the site, removes it.
+- **Postcode search and "Near me":** a postcode you type is matched in your browser against a list of postcode districts that the page downloads from us, so the postcode itself is never sent to us or anyone else. "Near me" uses your browser's own location prompt, and your position is used only in your browser, to sort the results.
+- **Hosting:** the website is hosted on GitHub Pages, run by GitHub, Inc. Like any web host, GitHub receives your IP address and the pages you request, and keeps them in server logs to run and secure the service.
+- **Maps:** club and venue pages show a map, which loads when you scroll to it. Its map images come from the OpenStreetMap Foundation, which receives your IP address and the area of the map shown.
+- **Links to other sites:** a club's website, an operator's booking page, map directions and the app stores are separate sites with their own privacy policies.
+- **Emails you send us:** if you email us from the website, for example to correct a listing, we use what you send to reply and to put things right.
+
+Our lawful basis for the hosting and map requests is legitimate interests: showing you the pages and maps you asked for, and keeping the website secure.
+
+## 10. Data retention
 
 We retain your data while your account is active. When you delete your account in the app, we delete or anonymise your personal data straight away. When you ask us by email, we do so within 30 days. Copies in our database backups are deleted as those backups expire, and are not used in the meantime.
 
 Anonymised match records, which can no longer be linked to you, may be kept indefinitely so that other players' statistics stay correct. Where the law requires us to keep data (e.g. financial records), we restrict it from further processing.
 
-## 10. Your rights
+## 11. Your rights
 
 Under UK GDPR you have the right to:
 
@@ -105,23 +119,23 @@ Under UK GDPR you have the right to:
 
 To exercise any of these rights, email [privacy@nextfour.app](mailto:privacy@nextfour.app). See also the [Account & Data Deletion](/delete-account.html) page.
 
-## 11. Security
+## 12. Security
 
 Data is stored encrypted at rest by Supabase and transmitted over HTTPS. Database access is controlled by row-level security policies. We restrict administrative access and do not log raw passwords (authentication is handled by Supabase Auth or social providers).
 
-## 12. Children
+## 13. Children
 
 NextFour is intended for users aged 13 and over. If you tell us you are under 18, we turn off Firebase Analytics for you, stop passing your sports to our ad provider, and ask Google to apply its protections for teenagers to any ads you see. If you believe a child under 13 has created an account, please contact us so we can delete it.
 
-## 13. International transfers
+## 14. International transfers
 
-Several of our sub-processors are based in the United States, including Google (Firebase, AdMob, and Google sign-in), Apple, Meta, RevenueCat, and Resend. Where data is transferred outside the UK or EEA, it is protected by a UK adequacy decision (such as the UK-US data bridge), the UK International Data Transfer Agreement, EU Standard Contractual Clauses, or an equivalent safeguard. You can ask us which safeguard applies to a provider, and for a copy of it, at [privacy@nextfour.app](mailto:privacy@nextfour.app).
+Several of our sub-processors are based in the United States, including Google (Firebase, AdMob, and Google sign-in), Apple, Meta, RevenueCat, Resend, and GitHub (which hosts the website). Where data is transferred outside the UK or EEA, it is protected by a UK adequacy decision (such as the UK-US data bridge), the UK International Data Transfer Agreement, EU Standard Contractual Clauses, or an equivalent safeguard. You can ask us which safeguard applies to a provider, and for a copy of it, at [privacy@nextfour.app](mailto:privacy@nextfour.app).
 
-## 14. Changes to this policy
+## 15. Changes to this policy
 
 We may update this policy from time to time. Material changes will be announced in-app or by email. The "Last updated" date at the top reflects the most recent revision.
 
-## 15. Contact
+## 16. Contact
 
 For any privacy questions or to exercise your rights, contact: [privacy@nextfour.app](mailto:privacy@nextfour.app)
 

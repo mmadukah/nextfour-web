@@ -1,10 +1,10 @@
 ---
 title: Politique de confidentialité
-meta: "Dernière mise à jour : 24 octobre 2026"
+meta: "Dernière mise à jour : 31 octobre 2026"
 description: "Comment NextFour collecte, utilise et protège vos données personnelles selon le RGPD britannique, et comment les consulter, modifier ou supprimer."
 ---
 
-La présente Politique de confidentialité explique comment NextFour (« nous », « notre ») collecte, utilise, conserve et partage vos données personnelles lorsque vous utilisez l'application mobile NextFour et les services associés (le « Service »). Le Service est fourni par NextFour Ltd, société immatriculée en Angleterre et au pays de Galles, et nous nous conformons au Règlement général sur la protection des données du Royaume-Uni (UK GDPR) ainsi qu'au Data Protection Act 2018.
+La présente Politique de confidentialité explique comment NextFour (« nous », « notre ») collecte, utilise, conserve et partage vos données personnelles lorsque vous utilisez l'application mobile NextFour, notre site web nextfour.app et les services associés (le « Service »). Le Service est fourni par NextFour Ltd, société immatriculée en Angleterre et au pays de Galles, et nous nous conformons au Règlement général sur la protection des données du Royaume-Uni (UK GDPR) ainsi qu'au Data Protection Act 2018.
 
 ## 1. Qui sommes-nous
 
@@ -85,13 +85,27 @@ Lorsqu'une source publie une adresse de contact pour un club, nous pouvons la co
 
 Si vous gérez un club et souhaitez que sa fiche soit corrigée ou supprimée, ou si vous vous opposez à ce que nous conservions une adresse de contact, écrivez à [clubs@nextfour.app](mailto:clubs@nextfour.app). Un club peut aussi revendiquer sa fiche dans l'application pour la gérer directement.
 
-## 9. Conservation des données
+## 9. Ce site web
+
+Cette section concerne notre site web, nextfour.app, y compris l'annuaire des clubs et des séances.
+
+- **Ni cookies, ni mesure d'audience, ni publicité.** Le site ne dépose aucun cookie, n'utilise aucun outil de mesure d'audience ou de suivi et n'affiche aucune publicité ; il ne demande donc pas de consentement aux cookies.
+- **Votre choix de thème :** si vous choisissez le mode clair ou sombre, ce choix est enregistré dans le stockage local de votre navigateur pour que la page suivante s'ouvre de la même façon. Il reste sur votre appareil. Choisir Auto, ou effacer les données du site dans votre navigateur, le supprime.
+- **Recherche par code postal et « Près de moi » :** le code postal que vous saisissez est comparé, dans votre navigateur, à une liste de secteurs postaux que la page télécharge depuis notre site ; le code postal lui-même n'est jamais envoyé, ni à nous ni à quiconque. « Près de moi » utilise la demande de localisation de votre navigateur, et votre position n'est utilisée que dans votre navigateur, pour trier les résultats.
+- **Hébergement :** le site est hébergé sur GitHub Pages, exploité par GitHub, Inc. Comme tout hébergeur, GitHub reçoit votre adresse IP et les pages que vous demandez, et les conserve dans ses journaux pour faire fonctionner et sécuriser le service.
+- **Cartes :** les pages des clubs et des salles affichent une carte, qui se charge lorsque vous la faites défiler à l'écran. Les images de la carte proviennent de la OpenStreetMap Foundation, qui reçoit votre adresse IP et la zone de carte affichée.
+- **Liens vers d'autres sites :** le site d'un club, la page de réservation d'un exploitant, les itinéraires et les boutiques d'applications sont des sites distincts, avec leurs propres politiques de confidentialité.
+- **Les e-mails que vous nous envoyez :** si vous nous écrivez depuis le site, par exemple pour corriger une fiche, nous utilisons ce que vous envoyez pour vous répondre et faire la correction.
+
+Notre base légale pour l'hébergement et les cartes est l'intérêt légitime : vous montrer les pages et les cartes que vous demandez, et assurer la sécurité du site.
+
+## 10. Conservation des données
 
 Nous conservons vos données tant que votre compte est actif. Lorsque vous supprimez votre compte dans l'application, nous supprimons ou anonymisons immédiatement vos données personnelles. Lorsque vous nous le demandez par e-mail, nous le faisons dans un délai de 30 jours. Les copies figurant dans nos sauvegardes de base de données sont supprimées à l'expiration de ces sauvegardes et ne sont pas utilisées entre-temps.
 
 Les résultats de matchs anonymisés, qui ne peuvent plus être reliés à vous, peuvent être conservés sans limite de durée afin que les statistiques des autres joueurs restent exactes. Lorsque la loi nous impose de conserver des données (par exemple les registres financiers), elles font l'objet d'une limitation de traitement.
 
-## 10. Vos droits
+## 11. Vos droits
 
 En vertu du UK GDPR, vous avez le droit de :
 
@@ -105,23 +119,23 @@ En vertu du UK GDPR, vous avez le droit de :
 
 Pour exercer l'un de ces droits, écrivez à [privacy@nextfour.app](mailto:privacy@nextfour.app). Consultez également la page [Suppression du compte et des données](/fr/delete-account.html).
 
-## 11. Sécurité
+## 12. Sécurité
 
 Les données sont stockées chiffrées au repos par Supabase et transmises via HTTPS. L'accès à la base de données est contrôlé par des politiques de sécurité au niveau des lignes. Nous limitons l'accès administratif et ne journalisons pas les mots de passe en clair (l'authentification est gérée par Supabase Auth ou par les prestataires sociaux).
 
-## 12. Enfants
+## 13. Enfants
 
 NextFour est destiné aux utilisateurs âgés de 13 ans et plus. Si vous nous indiquez avoir moins de 18 ans, nous désactivons Firebase Analytics pour vous, cessons de transmettre vos sports à notre prestataire publicitaire et demandons à Google d'appliquer ses protections pour adolescents aux publicités que vous voyez. Si vous pensez qu'un enfant de moins de 13 ans a créé un compte, veuillez nous contacter afin que nous puissions le supprimer.
 
-## 13. Transferts internationaux
+## 14. Transferts internationaux
 
-Plusieurs de nos sous-traitants sont établis aux États-Unis, notamment Google (Firebase, AdMob et la connexion Google), Apple, Meta, RevenueCat et Resend. Lorsque des données sont transférées en dehors du Royaume-Uni ou de l'EEE, elles sont protégées par une décision d'adéquation du Royaume-Uni (comme le UK-US data bridge), l'International Data Transfer Agreement du Royaume-Uni, les clauses contractuelles types de l'UE ou une garantie équivalente. Vous pouvez nous demander quelle garantie s'applique à un prestataire, et en obtenir une copie, à l'adresse [privacy@nextfour.app](mailto:privacy@nextfour.app).
+Plusieurs de nos sous-traitants sont établis aux États-Unis, notamment Google (Firebase, AdMob et la connexion Google), Apple, Meta, RevenueCat, Resend et GitHub (qui héberge le site). Lorsque des données sont transférées en dehors du Royaume-Uni ou de l'EEE, elles sont protégées par une décision d'adéquation du Royaume-Uni (comme le UK-US data bridge), l'International Data Transfer Agreement du Royaume-Uni, les clauses contractuelles types de l'UE ou une garantie équivalente. Vous pouvez nous demander quelle garantie s'applique à un prestataire, et en obtenir une copie, à l'adresse [privacy@nextfour.app](mailto:privacy@nextfour.app).
 
-## 14. Modifications de la présente politique
+## 15. Modifications de la présente politique
 
 Nous pouvons mettre à jour la présente politique de temps à autre. Les modifications importantes seront annoncées dans l'application ou par e-mail. La date de « Dernière mise à jour » en haut de page reflète la révision la plus récente.
 
-## 15. Contact
+## 16. Contact
 
 Pour toute question relative à la confidentialité ou pour exercer vos droits, contactez : [privacy@nextfour.app](mailto:privacy@nextfour.app)
 
