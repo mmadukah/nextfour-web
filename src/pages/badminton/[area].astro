@@ -56,10 +56,11 @@ const facts = area.clubs.length > 0
   : dropIns > 0 ? `${plural(dropIns, 'drop-in session')} a week` : '';
 const title = fitTitle(area.clubs.length
   ? [
-    `Badminton in ${area.name}: ${area.clubs.length} clubs and club nights | NextFour`,
-    `Badminton in ${area.name}: ${area.clubs.length} clubs | NextFour`,
-    `Badminton in ${area.name} | NextFour`,
-    `Badminton in ${area.name}`,
+    // Leads with "Badminton clubs in <area>", the words people search for.
+    `Badminton clubs in ${area.name}: ${plural(area.clubs.length, 'club')} and ${plural(nights, 'night')} a week | NextFour`,
+    `Badminton clubs in ${area.name}: ${plural(area.clubs.length, 'club')} | NextFour`,
+    `Badminton clubs in ${area.name} | NextFour`,
+    `Badminton clubs in ${area.name}`,
   ]
   : [`Badminton in ${area.name}: drop-in sessions | NextFour`, `Badminton in ${area.name} | NextFour`, `Badminton in ${area.name}`]);
 const what = [
@@ -190,7 +191,7 @@ const allHeading = `${plural(area.clubs.length, 'club')}, ${plural(nights, 'nigh
 
   <section class="hero">
     <div>
-      <h1><span class="h1-lead">Badminton in</span> {area.name}</h1>
+      <h1><span class="h1-lead">{area.clubs.length > 0 ? 'Badminton clubs in' : 'Badminton in'}</span> {area.name}</h1>
       <p class="intro">
         Where to play badminton in {area.name} this week.{' '}
         {area.clubs.length > 0 ? 'Every club below shows its nights, times, venue and playing level.' : 'Drop-in sessions below show their days, times and prices.'}
