@@ -1,10 +1,10 @@
 ---
 title: Terms & Conditions
-meta: "Last updated: 10 October 2026"
+meta: "Last updated: 2 November 2026"
 description: "The terms for using NextFour: your account, subscriptions and payments, acceptable use, club and session features, and how to contact us."
 ---
 
-These Terms & Conditions ("Terms") govern your use of the NextFour mobile application and any related services (together, the "Service") provided by NextFour Ltd, a company registered in England and Wales under company number 17355223, whose registered office is at 167-169 Great Portland Street, 5th Floor, London, W1W 5PF, United Kingdom ("NextFour", "we", "us", "our"). By creating an account or using the Service, you agree to these Terms. If you do not agree, do not use the Service.
+These Terms & Conditions ("Terms") govern your use of the NextFour mobile application, our website nextfour.app (including its club and venue directory), and any related services (together, the "Service") provided by NextFour Ltd, a company registered in England and Wales under company number 17355223, whose registered office is at 167-169 Great Portland Street, 5th Floor, London, W1W 5PF, United Kingdom ("NextFour", "we", "us", "our"). By creating an account or using the Service, you agree to these Terms. If you do not agree, do not use the Service.
 
 ## 1. Eligibility
 
@@ -36,6 +36,7 @@ You agree not to:
 - Upload content that is illegal, abusive, defamatory, hateful, or sexually explicit.
 - Attempt to disrupt, reverse-engineer, or gain unauthorised access to the Service or its underlying systems.
 - Scrape, harvest, or otherwise collect data from other users without their consent.
+- Use automated means (such as scrapers, bots or scripts) to copy or extract all or a substantial part of the Service's content, including the club and venue directory, without our written permission. Search engines may crawl and index the website to show it in search results.
 - Use the Service to send unsolicited communications.
 
 We reserve the right to suspend or terminate accounts that breach these rules, with or without notice.
@@ -54,7 +55,7 @@ Hosts and deputies have additional permissions within their own clubs and sessio
 
 ## 7. Intellectual property
 
-All rights in the Service, including the NextFour name, logo, software, designs, and documentation, are owned by us or our licensors. You are granted a personal, non-exclusive, non-transferable, revocable licence to use the Service for its intended purpose. No other rights are granted.
+All rights in the Service, including the NextFour name, logo, software, designs, and documentation, are owned by us or our licensors. This includes the club and venue directory as a whole: we research, compile and check it ourselves, and we hold the database right and copyright in it. This does not change a club's ownership of details it submits itself (section 5). You are granted a personal, non-exclusive, non-transferable, revocable licence to use the Service for its intended purpose. No other rights are granted.
 
 ## 8. Third-party services
 

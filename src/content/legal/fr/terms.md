@@ -1,10 +1,10 @@
 ---
 title: Conditions générales
-meta: "Dernière mise à jour : 10 octobre 2026"
+meta: "Dernière mise à jour : 2 novembre 2026"
 description: "Les conditions d’utilisation de NextFour : votre compte, les abonnements et paiements, l’usage acceptable, les clubs et sessions, et nous contacter."
 ---
 
-Les présentes Conditions générales (« Conditions ») régissent votre utilisation de l'application mobile NextFour et de tout service associé (ensemble, le « Service ») fourni par NextFour Ltd, société immatriculée en Angleterre et au pays de Galles sous le numéro 17355223, dont le siège social se situe au 167-169 Great Portland Street, 5th Floor, Londres, W1W 5PF, Royaume-Uni (« NextFour », « nous », « notre »). En créant un compte ou en utilisant le Service, vous acceptez les présentes Conditions. Si vous ne les acceptez pas, n'utilisez pas le Service.
+Les présentes Conditions générales (« Conditions ») régissent votre utilisation de l'application mobile NextFour, de notre site web nextfour.app (y compris son annuaire des clubs et des lieux) et de tout service associé (ensemble, le « Service ») fourni par NextFour Ltd, société immatriculée en Angleterre et au pays de Galles sous le numéro 17355223, dont le siège social se situe au 167-169 Great Portland Street, 5th Floor, Londres, W1W 5PF, Royaume-Uni (« NextFour », « nous », « notre »). En créant un compte ou en utilisant le Service, vous acceptez les présentes Conditions. Si vous ne les acceptez pas, n'utilisez pas le Service.
 
 ## 1. Admissibilité
 
@@ -36,6 +36,7 @@ Vous vous engagez à ne pas :
 - Téléverser du contenu illégal, abusif, diffamatoire, haineux ou sexuellement explicite.
 - Tenter de perturber, de désosser ou d'accéder sans autorisation au Service ou à ses systèmes sous-jacents.
 - Extraire, collecter ou recueillir des données d'autres utilisateurs sans leur consentement.
+- Utiliser des moyens automatisés (robots, scripts ou outils d'extraction, par exemple) pour copier ou extraire tout ou partie substantielle du contenu du Service, y compris l'annuaire des clubs et des lieux, sans notre autorisation écrite. Les moteurs de recherche peuvent explorer et indexer le site web pour l'afficher dans leurs résultats.
 - Utiliser le Service pour envoyer des communications non sollicitées.
 
 Nous nous réservons le droit de suspendre ou de résilier les comptes qui enfreignent ces règles, avec ou sans préavis.
@@ -54,7 +55,7 @@ Les hôtes et les adjoints disposent d'autorisations supplémentaires au sein de
 
 ## 7. Propriété intellectuelle
 
-Tous les droits relatifs au Service, y compris le nom NextFour, le logo, le logiciel, les designs et la documentation, appartiennent à nous-mêmes ou à nos concédants de licence. Une licence personnelle, non exclusive, non transférable et révocable vous est accordée pour utiliser le Service aux fins prévues. Aucun autre droit n'est accordé.
+Tous les droits relatifs au Service, y compris le nom NextFour, le logo, le logiciel, les designs et la documentation, appartiennent à nous-mêmes ou à nos concédants de licence. Cela comprend l'annuaire des clubs et des lieux dans son ensemble : nous le recherchons, le compilons et le vérifions nous-mêmes, et nous détenons le droit sui generis sur la base de données ainsi que le droit d'auteur sur celui-ci. Cela ne modifie pas la propriété d'un club sur les informations qu'il soumet lui-même (section 5). Une licence personnelle, non exclusive, non transférable et révocable vous est accordée pour utiliser le Service aux fins prévues. Aucun autre droit n'est accordé.
 
 ## 8. Services tiers
 
