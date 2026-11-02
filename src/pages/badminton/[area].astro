@@ -8,11 +8,12 @@
 // The night picker runs in the browser and only hides cards and dims rows,
 // so every listing is in the HTML for crawlers.
 import Directory from '../../layouts/Directory.astro';
+import { offerLd, organizerLd } from '../../data/event-ld';
 import ClubCard from '../../components/directory/ClubCard.astro';
 import DropInCard from '../../components/directory/DropInCard.astro';
 import {
   getDirectory, nearbyLinks, weeklyNights, newestCheck, checkedText, weeklyDropIns, groupedRows, dropInRows,
-  nextDate, fitTitle, fitDescription, DAY_NAMES, SHORT_DAYS, WEEK_ORDER, type Area,
+  nextDate, fitTitle, fitDescription, timeRange, DAY_NAMES, SHORT_DAYS, WEEK_ORDER, type Area,
 } from '../../data/directory';
 
 export async function getStaticPaths() {
@@ -91,6 +92,7 @@ const dropInLd = area.dropIns.flatMap((v) => v.sessions.flatMap((s) => s.night.d
   '@context': 'https://schema.org',
   '@type': 'SportsEvent',
   name: `${s.title} at ${v.venueName}`,
+  description: `${s.title}: a badminton session at ${v.venueName} every ${DAY_NAMES[d]}, ${timeRange(s.night)}${v.operators.length ? `, run by ${v.operators[0]}` : ''}. ${s.night.levels}.`,
   sport: 'Badminton',
   startDate: `${nextDate(d, today)}T${s.night.start}`,
   ...(s.night.end ? { endDate: `${nextDate(d, today)}T${s.night.end}` } : {}),
@@ -105,13 +107,8 @@ const dropInLd = area.dropIns.flatMap((v) => v.sessions.flatMap((s) => s.night.d
     ...(v.venue.address ? { address: v.venue.address } : {}),
     geo: { '@type': 'GeoCoordinates', latitude: v.venue.lat, longitude: v.venue.lng },
   },
-  ...(v.operators.length ? { organizer: { '@type': 'Organization', name: v.operators[0] } } : {}),
-  ...(s.night.price ? {
-    offers: {
-      '@type': 'Offer', price: s.night.price.replace(/[^0-9.]/g, ''), priceCurrency: 'GBP',
-      ...(s.bookingUrl ? { url: s.bookingUrl } : {}), availability: 'https://schema.org/InStock',
-    },
-  } : {}),
+  ...organizerLd(v.operators[0] ?? null),
+  ...offerLd(s.night.price, s.bookingUrl ?? new URL(v.venueUrl, site).href),
   url: new URL(v.venueUrl, site).href,
 }))));
 

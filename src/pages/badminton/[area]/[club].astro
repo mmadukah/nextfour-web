@@ -7,6 +7,7 @@
 // pages are linked instead. The summary is written here from the facts,
 // never the stored description, which can name where the club was found.
 import Directory from '../../../layouts/Directory.astro';
+import { offerLd } from '../../../data/event-ld';
 import AppFeaturesCompact from '../../../components/directory/AppFeaturesCompact.astro';
 import NightLine from '../../../components/directory/NightLine.astro';
 import VenueMap from '../../../components/directory/VenueMap.astro';
@@ -124,6 +125,7 @@ const eventsLd = club.nights.filter((n) => n.days.length > 0).flatMap((n) => n.d
   '@context': 'https://schema.org',
   '@type': 'SportsEvent',
   name: `${club.name}: ${DAY_NAMES[d]} club night`,
+  description: `${club.name} plays badminton at ${n.venue.name} every ${DAY_NAMES[d]}, ${timeRange(n)}. ${n.levels}.`,
   sport: 'Badminton',
   startDate: `${nextDate(d, today)}T${n.start}`,
   ...(n.end ? { endDate: `${nextDate(d, today)}T${n.end}` } : {}),
@@ -139,6 +141,8 @@ const eventsLd = club.nights.filter((n) => n.days.length > 0).flatMap((n) => n.d
   },
   location: placeLd(n.venue),
   organizer: { '@type': 'SportsOrganization', name: club.name, url: pageUrl },
+  performer: { '@type': 'SportsOrganization', name: club.name, url: pageUrl },
+  ...offerLd(n.price, pageUrl),
   url: pageUrl,
 })));
 
