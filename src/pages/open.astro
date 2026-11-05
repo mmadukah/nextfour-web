@@ -55,11 +55,10 @@ const anyStoreLive = PLAY_URL !== null || APP_STORE_URL !== null;
 
   <script is:inline>
     // Whether the installed app can pick the club or session up after an
-    // install (Play referrer club=/session=, the pasted /open link). Not until
-    // the app release in phase 2 of WEB_APP_LINKS.md: set true then. Before
-    // it, the app would answer a pasted /open link with "That isn't a
-    // NextFour link", so the App Store button copies nothing.
-    const CARRIED = false;
+    // install (Play referrer club=/session=, the pasted /open link). True
+    // since app v1.34.1 (phase 2 of WEB_APP_LINKS.md). Apps older than that
+    // answer a pasted /open link with "That isn't a NextFour link".
+    const CARRIED = true;
     const params = new URLSearchParams(location.search);
     const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     // A club wins when both are given, as in the app.
