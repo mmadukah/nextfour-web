@@ -41,7 +41,7 @@ Need a hand with NextFour? Most questions are answered below. If you're still st
 
 <dl class="faq">
   <dt>What do the paid plans unlock?</dt>
-  <dd>Hosting is free: as many sessions as you like, with Pegboard or Manual picking and the Session Board on a courtside tablet. Pro adds Skill-based picking, King of the Court, player pairing, deputies, calling names aloud and QR or NFC check-in. Club adds club admin, player grading and dedicated Club Board terminals. See <a href="/how-it-works.html">How it works</a> for the full list.</dd>
+  <dd>Hosting is free: as many sessions as you like, with Pegboard, Manual or Skill-based picking and the Session Board on a courtside tablet. Pro adds King of the Court, player pairing, deputies, calling names aloud and QR or NFC check-in. Club adds club admin, player grading and dedicated Club Board terminals. See <a href="/how-it-works.html">How it works</a> for the full list.</dd>
 
   <dt>How do I manage or cancel my subscription?</dt>
   <dd>

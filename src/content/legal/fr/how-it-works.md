@@ -31,7 +31,7 @@ L’organisateur en choisit un pour chaque session.
 |---|---|---|
 | Pegboard (tableau) | Le joueur dont c’est le tour | Gratuit |
 | Manuel | L’organisateur | Gratuit |
-| Par niveau | NextFour, automatiquement | Pro |
+| Par niveau | NextFour, automatiquement | Gratuit |
 | Roi du terrain | Les vainqueurs restent ; les challengers viennent de la file | Pro |
 
 ### Pegboard (tableau)
@@ -99,6 +99,7 @@ Le serveur refuse tout changement qui mettrait un joueur sur deux matchs, placer
 - **Résultats :** l’organisateur choisit si les joueurs saisissent les scores ou seulement l’équipe gagnante. Avec un score cible (21 au badminton, 11 au squash et au tennis de table), les scores ne peuvent pas être négatifs ni à égalité, donc chaque match a un vainqueur. Saisissez le score du perdant et la feuille propose celui du vainqueur (21 points, deux points d’écart, jusqu’à 30 au badminton). Sans score cible, tout score est accepté, y compris un match nul.
 - **Historique :** chaque match est gardé avec ses joueurs, ses équipes et son score. Les joueurs voient gratuitement leur nombre de matchs et leur taux de victoire. La formule Performance ajoute l’historique complet, le classement de chaque soirée jouée, et les meilleurs partenaires et rivaux les plus coriaces.
 - **Classements :** chaque joueur a un classement Elo par sport et par format : simple, double, et mixte (chaque côté un homme et une dame). Après chaque match, chaque joueur est évalué contre la moyenne de l’autre côté (facteur K de 32, jamais sous 100). Les matchs nuls ne comptent pas. Un nouveau format part du classement du joueur dans un autre format du même sport, sinon de son niveau déclaré (Débutant 1200 à Professionnel 1800), sinon de 1500. Les classements servent à la sélection intelligente et à la sélection par niveau. Ils ne sont pas affichés comme un tableau de ligue, pour que personne ne joue pour protéger un chiffre.
+- **Groupes de niveau (gratuit) :** l’organisateur ou un adjoint peut placer chaque joueur dans un groupe de 1 à 4 pour une session. Le groupe fixe le classement de départ du joueur, réparti sur les niveaux de la session, pour que les matchs soient équilibrés dès la première soirée. Un joueur sans groupe part du milieu de la salle. Seuls l’organisateur et les adjoints voient les groupes.
 
 ## Le tableau dans la salle
 
@@ -133,7 +134,7 @@ NextFour ne gère pas les paiements. Vous pouvez afficher le prix par personne d
 
 - **Gratuit :** trouvez des sessions, inscrivez-vous et jouez. Organisez autant de sessions que vous voulez avec la sélection Pegboard ou manuelle, le tableau de session et les sondages de disponibilité.
 - **Performance :** toutes vos statistiques et votre historique, vos meilleurs partenaires et vos rivaux les plus coriaces, sans publicité.
-- **Pro :** la sélection par niveau, le Roi du terrain, les binômes, les adjoints, l’annonce des noms à voix haute, l’enregistrement par QR code et NFC, les sessions récurrentes, les sessions sur invitation et les rapports de présence.
+- **Pro :** le Roi du terrain, les binômes, les adjoints, l’annonce des noms à voix haute, l’enregistrement par QR code et NFC, les sessions récurrentes, les sessions sur invitation et les rapports de présence.
 - **Club :** tout Pro, plus l’administration du club, le classement des joueurs, les classements du club et des terminaux Tableau de club dédiés.
 
 Les prix s’affichent dans l’application avant tout abonnement. Les abonnements sont facturés via l’App Store ou Google Play.
