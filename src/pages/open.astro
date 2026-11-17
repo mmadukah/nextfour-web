@@ -17,7 +17,7 @@
 // shown comes from /open-names.json, built at deploy time and fetched after
 // the page works without it.
 import Base from '../layouts/Base.astro';
-import { PLAY_URL, APP_STORE_URL } from '../store-links';
+import { PLAY_URL, APP_STORE_URL, APP_STORE_CAMPAIGN_PREFIX } from '../store-links';
 import '../styles/handoff.css';
 
 const anyStoreLive = PLAY_URL !== null || APP_STORE_URL !== null;
@@ -53,7 +53,7 @@ const anyStoreLive = PLAY_URL !== null || APP_STORE_URL !== null;
     </ol>
   </main>
 
-  <script is:inline>
+  <script is:inline define:vars={{ APP_STORE_CAMPAIGN_PREFIX }}>
     // Whether the installed app can pick the club or session up after an
     // install (Play referrer club=/session=, the pasted /open link). True
     // since app v1.34.1 (phase 2 of WEB_APP_LINKS.md). Apps older than that
@@ -70,7 +70,7 @@ const anyStoreLive = PLAY_URL !== null || APP_STORE_URL !== null;
     const appStore = document.getElementById('appstore');
     const tracking = 'utm_source=nextfour_web&utm_campaign=' + src;
     if (play) play.href += '&referrer=' + encodeURIComponent((id ? kind + '=' + id + '&' : '') + tracking);
-    if (appStore) appStore.href += '?ct=' + encodeURIComponent(src);
+    if (appStore && APP_STORE_CAMPAIGN_PREFIX) appStore.href = APP_STORE_CAMPAIGN_PREFIX + encodeURIComponent(src);
 
     // Words for the club or session, named once its name arrives. The app
     // knows the id even when the names file does not (a club published since

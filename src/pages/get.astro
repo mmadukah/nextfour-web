@@ -18,7 +18,7 @@
 // Not an App Links path: nothing in the app handles /get.
 import Directory from '../layouts/Directory.astro';
 import AppFeatures from '../components/directory/AppFeatures.astro';
-import { PLAY_URL, APP_STORE_URL } from '../store-links';
+import { PLAY_URL, APP_STORE_URL, APP_STORE_CAMPAIGN_PREFIX } from '../store-links';
 import { getDirectory } from '../data/directory';
 
 const dir = await getDirectory();
@@ -107,13 +107,13 @@ const qrSvg = (await import('../../public/get-qr.svg?raw')).default;
 
   <AppFeatures band={false} />
 
-  <script is:inline define:vars={{ PLAY_URL, APP_STORE_URL }}>
+  <script is:inline define:vars={{ PLAY_URL, APP_STORE_CAMPAIGN_PREFIX }}>
     (() => {
       const params = new URLSearchParams(location.search);
       // Sources are short words; anything else is dropped rather than passed on.
       const raw = params.get('src') ?? '';
       const src = /^[a-z0-9-]{1,32}$/.test(raw) ? raw : 'get-page';
-      const ios = APP_STORE_URL && `${APP_STORE_URL}?ct=${encodeURIComponent(src)}`;
+      const ios = APP_STORE_CAMPAIGN_PREFIX && APP_STORE_CAMPAIGN_PREFIX + encodeURIComponent(src);
       const android = PLAY_URL && `${PLAY_URL}&referrer=${encodeURIComponent(`utm_source=nextfour_web&utm_campaign=${src}`)}`;
       if (ios) document.getElementById('ios').href = ios;
       if (android) document.getElementById('android').href = android;
@@ -123,7 +123,12 @@ const qrSvg = (await import('../../public/get-qr.svg?raw')).default;
       const ua = navigator.userAgent;
       const isApple = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
       const target = /Android/.test(ua) ? android : isApple ? ios : null;
-      if (target) { location.replace(target); return; }
+      if (target) {
+        // The redirect is the store visit for a phone: count it as the click.
+        window.nfCount?.((target === android ? 'store-android-' : 'store-ios-') + src);
+        location.replace(target);
+        return;
+      }
 
       // Arrived from a club page: name the club.
       const clubs = JSON.parse(document.getElementById('get').dataset.clubs || '{}');

@@ -1,6 +1,6 @@
 ---
 title: Politique de confidentialité
-meta: "Dernière mise à jour : 31 octobre 2026"
+meta: "Dernière mise à jour : 17 novembre 2026"
 description: "Comment NextFour collecte, utilise et protège vos données personnelles selon le RGPD britannique, et comment les consulter, modifier ou supprimer."
 ---
 
@@ -89,7 +89,8 @@ Si vous gérez un club et souhaitez que sa fiche soit corrigée ou supprimée, o
 
 Cette section concerne notre site web, nextfour.app, y compris l'annuaire des clubs et des séances.
 
-- **Ni cookies, ni mesure d'audience, ni publicité.** Le site ne dépose aucun cookie, n'utilise aucun outil de mesure d'audience ou de suivi et n'affiche aucune publicité ; il ne demande donc pas de consentement aux cookies.
+- **Ni cookies, ni publicité.** Le site ne dépose aucun cookie et n'affiche aucune publicité ; il ne demande donc pas de consentement aux cookies.
+- **Mesure des visites :** nous comptons les visites et les clics qui mènent aux boutiques d'applications avec GoatCounter, un service de mesure d'audience respectueux de la vie privée, pour savoir quelles pages aident à trouver l'application. Chaque mesure envoie la page consultée (sans identifiant de club ni de séance), le site qui vous a amené, la largeur de votre écran et le titre de la page. GoatCounter reçoit votre adresse IP et les informations de votre navigateur pour traiter la requête, mais ne les conserve pas avec la visite, ne dépose aucun cookie et ne vous suit pas d'un site à l'autre. Ces mesures ne nous permettent pas de vous identifier.
 - **Votre choix de thème :** si vous choisissez le mode clair ou sombre, ce choix est enregistré dans le stockage local de votre navigateur pour que la page suivante s'ouvre de la même façon. Il reste sur votre appareil. Choisir Auto, ou effacer les données du site dans votre navigateur, le supprime.
 - **Recherche par code postal et « Près de moi » :** le code postal que vous saisissez est comparé, dans votre navigateur, à une liste de secteurs postaux que la page télécharge depuis notre site ; le code postal lui-même n'est jamais envoyé, ni à nous ni à quiconque. « Près de moi » utilise la demande de localisation de votre navigateur, et votre position n'est utilisée que dans votre navigateur, pour trier les résultats.
 - **Hébergement :** le site est hébergé sur GitHub Pages, exploité par GitHub, Inc. Comme tout hébergeur, GitHub reçoit votre adresse IP et les pages que vous demandez, et les conserve dans ses journaux pour faire fonctionner et sécuriser le service.
@@ -97,7 +98,7 @@ Cette section concerne notre site web, nextfour.app, y compris l'annuaire des cl
 - **Liens vers d'autres sites :** le site d'un club, la page de réservation d'un exploitant, les itinéraires et les boutiques d'applications sont des sites distincts, avec leurs propres politiques de confidentialité.
 - **Les e-mails que vous nous envoyez :** si vous nous écrivez depuis le site, par exemple pour corriger une fiche, nous utilisons ce que vous envoyez pour vous répondre et faire la correction.
 
-Notre base légale pour l'hébergement et les cartes est l'intérêt légitime : vous montrer les pages et les cartes que vous demandez, et assurer la sécurité du site.
+Notre base légale pour l'hébergement, les cartes et la mesure des visites est l'intérêt légitime : vous montrer les pages et les cartes que vous demandez, assurer la sécurité du site et savoir quelles pages sont utiles.
 
 ## 10. Conservation des données
 

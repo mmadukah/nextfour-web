@@ -96,6 +96,11 @@ const time = clubTimeText(club);
 const next = soonest(club.nights.map((night) => ({ night })), new Date());
 // "Claim Chew Park Keynsham": the name without its "Badminton Club" tail.
 const shortName = club.name.replace(/\s+Badminton Club\b.*$/i, '') || club.name;
+// An unclaimed club's page, for a player to send to whoever runs it.
+// ?via=share marks the visits it brings back (src/analytics.ts).
+const shareUrl = `${pageUrl}?via=share`;
+const shareText = `Have you seen this? ${club.name} is listed on NextFour. Whoever runs our nights can claim the page for free, keep the times right and run the queue on a digital pegboard.`;
+const whatsappHref = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`;
 const correction = `mailto:clubs@nextfour.app?subject=${encodeURIComponent(`Correction: ${club.name}`)}&body=${encodeURIComponent(`Page: ${pageUrl}\n\nWhat needs changing:\n`)}`;
 
 // schema.org: the club, where it plays, and each weekly night as an event
@@ -255,6 +260,17 @@ const crumbs = [
     }
     .steps strong { display: block; }
     .small { margin: 14px 0 0; font-size: 13px; color: var(--muted); }
+    .share { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line); }
+    .share p { margin: 0 0 12px; font-size: 15px; color: var(--body); }
+    .share strong { color: var(--ink); }
+    .share-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .share-btn, .share-more {
+      flex: 1 1 auto; min-height: 44px; padding: 0 18px; border-radius: 999px; display: inline-flex; align-items: center;
+      justify-content: center; gap: 8px; font: inherit; font-size: 15px; font-weight: 700; text-decoration: none; cursor: pointer;
+    }
+    .share-btn, .share-more { background: none; color: var(--ink); border: 1.5px solid var(--line-strong); }
+    .share-btn:hover, .share-more:hover { color: var(--ink); border-color: var(--ink); }
+    .share-more[hidden] { display: none; }
     .about { padding: 20px 24px; }
     .about h2 { margin: 0 0 8px; font-size: 16px; }
     .about p { margin: 0; font-size: 14px; color: var(--body); }
@@ -413,6 +429,16 @@ const crumbs = [
               <li><span class="n">3</span><span><strong>Update your listing</strong><span class="muted">Changes show on this page.</span></span></li>
             </ol>
           </details>
+          <div class="share" id="share" data-text={shareText} data-url={shareUrl} data-title={`${club.name} on NextFour`}>
+            <p><strong>Not the organiser?</strong> Send this page to whoever runs the nights.</p>
+            <div class="share-actions">
+              <a class="share-btn" href={whatsappHref} rel="noopener" target="_blank">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21l1.7-5A8.5 8.5 0 1 1 8 19.3z"></path></svg>
+                Send on WhatsApp
+              </a>
+              <button class="share-more" id="share-more" type="button" hidden>Share another way</button>
+            </div>
+          </div>
         </section>
       )}
       <section class="box about" aria-labelledby="about-h">
@@ -437,6 +463,25 @@ const crumbs = [
     </section>
   )}
 
+  {!club.claimed && (
+    <script is:inline>
+      // The phone's own share sheet, where there is one (Messenger, texts,
+      // email as well as WhatsApp). The WhatsApp link works without it.
+      (() => {
+        const box = document.getElementById('share');
+        const more = document.getElementById('share-more');
+        if (!box || !more || !navigator.share) return;
+        more.hidden = false;
+        more.addEventListener('click', async () => {
+          const { title, text, url } = box.dataset;
+          try {
+            await navigator.share({ title, text, url });
+            window.nfCount?.('share-native');
+          } catch (_) {}
+        });
+      })();
+    </script>
+  )}
   <!-- An unclaimed club's page is often found by its own organiser, so its banner speaks to them. -->
   <AppFeaturesCompact variant={club.claimed ? 'claimed' : 'unclaimed'} clubName={club.name} src={club.claimed ? 'club-claimed' : 'club-unclaimed'} clubId={club.id} />
 

@@ -4,7 +4,7 @@
 // in the site's shared header (Directory.astro) with its own footer. The
 // words are the table's; the design only adds the short labels marked below.
 import Directory from '../layouts/Directory.astro';
-import { PLAY_URL, APP_STORE_URL } from '../store-links';
+import { PLAY_URL, APP_STORE_URL, appStoreLink } from '../store-links';
 import { INSTAGRAM_URL, FACEBOOK_URL } from '../social-links';
 
 interface Props {
@@ -278,7 +278,7 @@ const hostPoints = [s.hosts.body, s.hosts.terminal];
 const [, endTime, endText] = s.story.ending.match(/^(\S+)\.\s+(.*)$/) ?? ['', '', s.story.ending];
 
 // Store links carry the "Get the app" tracking (REDESIGN-BRIEF): src=home.
-const appStore = APP_STORE_URL && `${APP_STORE_URL}?ct=home`;
+const appStore = appStoreLink('home');
 const play = PLAY_URL && `${PLAY_URL}&referrer=${encodeURIComponent('utm_source=nextfour_web&utm_campaign=home')}`;
 
 const qrSvg = (await import('../../public/get-qr.svg?raw')).default;

@@ -1,5 +1,6 @@
 ---
 import ThemeHead from '../components/ThemeHead.astro';
+import { GOATCOUNTER_CODE } from '../analytics';
 
 // Minimal HTML shell shared by every page. Page-specific <style> blocks and
 // extra <head> tags are supplied via the `head` slot.
@@ -54,6 +55,7 @@ const publicPath = canonicalPath
 const canonical = new URL(publicPath, Astro.site).href;
 const imageUrl = new URL(image, Astro.site).href;
 const social = ogDescription ?? description;
+const countUrl = GOATCOUNTER_CODE && `https://${GOATCOUNTER_CODE}.goatcounter.com/count`;
 ---
 
 <!DOCTYPE html>
@@ -86,6 +88,58 @@ const social = ogDescription ?? description;
     <meta name="twitter:image" content={imageUrl} />
 
     {themed && <ThemeHead light="#f3f5ee" dark="#0f1923" />}
+    {countUrl && (
+      <script is:inline define:vars={{ countUrl }}>
+        // Counts this visit and the clicks that lead towards the app (see
+        // src/analytics.ts). window.nfCount(name) counts one more event, for
+        // pages that leave by script (the /get redirect).
+        (() => {
+          const off = navigator.webdriver || /^(localhost|127\.|\[::1\])/.test(location.hostname);
+          const send = (q) => {
+            if (off) return;
+            const url = countUrl + '?' + new URLSearchParams({ ...q, rnd: String(Math.random()).slice(2, 8) });
+            try { fetch(url, { keepalive: true, mode: 'no-cors', credentials: 'omit' }); }
+            catch (_) { new Image().src = url; }
+          };
+          const clean = (v) => (v || '').replace(/[^a-z0-9-]/gi, '').slice(0, 40);
+          window.nfCount = (name) => send({ p: name, t: name, e: 'true' });
+
+          const params = new URLSearchParams(location.search);
+          const src = clean(params.get('src'));
+          // A link shared from a club page comes back with ?via=share.
+          const via = clean(params.get('via'));
+          send({
+            p: location.pathname + (src ? '?src=' + src : ''),
+            t: document.title,
+            r: via ? via + '-share' : document.referrer,
+            s: String(screen.width),
+          });
+
+          // The clicks on the way to the app, named by where they go and the
+          // button's ?src= (or the store's campaign).
+          const nameOf = (a) => {
+            let u;
+            try { u = new URL(a.href, location.href); } catch (_) { return null; }
+            const q = u.searchParams;
+            if (u.hostname === 'apps.apple.com') return 'store-ios-' + (clean(q.get('ct')) || 'none');
+            if (u.hostname === 'play.google.com') {
+              const ref = new URLSearchParams(q.get('referrer') || '');
+              return 'store-android-' + (clean(ref.get('utm_campaign')) || (ref.get('claim') ? 'claim-code' : 'none'));
+            }
+            if (u.hostname === 'wa.me') return 'share-whatsapp';
+            if (u.origin !== location.origin) return null;
+            if (u.pathname === '/get.html' || u.pathname === '/get') return 'get-' + (clean(q.get('src')) || 'none');
+            if (u.pathname === '/open' || u.pathname === '/open.html') return 'open-' + (clean(q.get('src')) || 'none');
+            return null;
+          };
+          document.addEventListener('click', (ev) => {
+            const a = ev.target instanceof Element && ev.target.closest('a[href]');
+            const name = a && (a.protocol === 'app.nextfour.mobile:' ? 'open-app' : nameOf(a));
+            if (name) window.nfCount(name);
+          }, { capture: true });
+        })();
+      </script>
+    )}
     <slot name="head" />
   </head>
   <body>

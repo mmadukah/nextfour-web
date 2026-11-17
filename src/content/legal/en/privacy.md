@@ -1,6 +1,6 @@
 ---
 title: Privacy Policy
-meta: "Last updated: 31 October 2026"
+meta: "Last updated: 17 November 2026"
 description: "How NextFour collects, uses and protects your personal data under UK GDPR, and how to see, change or delete what we hold about you."
 ---
 
@@ -89,7 +89,8 @@ If you run a club and want its listing corrected or removed, or you object to us
 
 This section covers our website, nextfour.app, including the club and session directory.
 
-- **No cookies, analytics or advertising.** The website sets no cookies, has no analytics or tracking, and shows no ads, so it does not ask for cookie consent.
+- **No cookies or advertising.** The website sets no cookies and shows no ads, so it does not ask for cookie consent.
+- **Visit counts:** we count visits and the clicks that lead to the app stores with GoatCounter, a privacy-friendly analytics service, so we can see which pages help people find the app. Each count sends the page you are on (without any club or session id), the site that sent you, your screen width and the page title. GoatCounter receives your IP address and browser details to make the request, but does not store them against the visit, does not set cookies and does not track you across sites. We cannot identify you from these counts.
 - **Your theme choice:** if you choose light or dark mode, the choice is saved in your browser's local storage so the next page opens the same way. It stays on your device. Choosing Auto, or clearing your browser's data for the site, removes it.
 - **Postcode search and "Near me":** a postcode you type is matched in your browser against a list of postcode districts that the page downloads from us, so the postcode itself is never sent to us or anyone else. "Near me" uses your browser's own location prompt, and your position is used only in your browser, to sort the results.
 - **Hosting:** the website is hosted on GitHub Pages, run by GitHub, Inc. Like any web host, GitHub receives your IP address and the pages you request, and keeps them in server logs to run and secure the service.
@@ -97,7 +98,7 @@ This section covers our website, nextfour.app, including the club and session di
 - **Links to other sites:** a club's website, an operator's booking page, map directions and the app stores are separate sites with their own privacy policies.
 - **Emails you send us:** if you email us from the website, for example to correct a listing, we use what you send to reply and to put things right.
 
-Our lawful basis for the hosting and map requests is legitimate interests: showing you the pages and maps you asked for, and keeping the website secure.
+Our lawful basis for the hosting, map requests and visit counts is legitimate interests: showing you the pages and maps you asked for, keeping the website secure, and learning which pages are useful.
 
 ## 10. Data retention
 
