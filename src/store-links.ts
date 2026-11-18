@@ -18,7 +18,7 @@ export const APP_STORE_URL: string | null =
 // the pt= number from App Store Connect: Apps > App Analytics > Campaigns >
 // Generate a campaign link. Null leaves the ct-only links, which still work
 // as links.
-export const APPLE_PROVIDER_TOKEN: string | null = null;
+export const APPLE_PROVIDER_TOKEN: string | null = '128896747';
 
 /** The App Store link with what comes before the campaign name: append it, URI-encoded. */
 export const APP_STORE_CAMPAIGN_PREFIX: string | null = APP_STORE_URL
