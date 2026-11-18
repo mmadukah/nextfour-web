@@ -1,0 +1,21 @@
+---
+// On a phone, the hand-off pages (open, join, claim, club-claim) show only
+// that phone's store, as the main button. A desktop, or anything we can't
+// place, keeps both. Place it straight after the #play and #appstore buttons
+// so it runs before they are drawn. Detection matches /get.html: iPadOS
+// reports itself as a Mac, so a Mac with a touch screen is an iPad.
+---
+
+<script is:inline>
+  (() => {
+    const play = document.getElementById('play');
+    const appStore = document.getElementById('appstore');
+    if (!play || !appStore) return;
+    const ua = navigator.userAgent;
+    const isApple = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    const [mine, other] = /Android/.test(ua) ? [play, appStore] : isApple ? [appStore, play] : [];
+    if (!mine) return;
+    mine.classList.remove('btn-secondary');
+    other.hidden = true;
+  })();
+</script>

@@ -18,6 +18,7 @@
 // the page works without it.
 import Base from '../layouts/Base.astro';
 import { PLAY_URL, APP_STORE_URL, APP_STORE_CAMPAIGN_PREFIX } from '../store-links';
+import StoreOrder from '../components/StoreOrder.astro';
 import '../styles/handoff.css';
 
 const anyStoreLive = PLAY_URL !== null || APP_STORE_URL !== null;
@@ -40,6 +41,7 @@ const anyStoreLive = PLAY_URL !== null || APP_STORE_URL !== null;
         Download on the App Store
       </a>
     )}
+    <StoreOrder />
     {!anyStoreLive && (
       <p class="pending">Search for <strong>NextFour</strong> in your app store.</p>
     )}
