@@ -9,4 +9,4 @@
 // only its ?src=, never a club or session id), the referring site, the
 // screen width and the page title; GoatCounter sees the IP address and
 // browser but keeps neither against the visit.
-export const GOATCOUNTER_CODE: string | null = null;
+export const GOATCOUNTER_CODE: string | null = 'nextfour';
