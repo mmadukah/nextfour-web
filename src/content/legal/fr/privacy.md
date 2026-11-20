@@ -1,6 +1,6 @@
 ---
 title: Politique de confidentialité
-meta: "Dernière mise à jour : 17 novembre 2026"
+meta: "Dernière mise à jour : 20 novembre 2026"
 description: "Comment NextFour collecte, utilise et protège vos données personnelles selon le RGPD britannique, et comment les consulter, modifier ou supprimer."
 ---
 
@@ -83,7 +83,7 @@ Pour aider les joueurs à trouver où jouer, certaines fiches de clubs et de sé
 
 Lorsqu'une source publie une adresse de contact pour un club, nous pouvons la conserver, sans la publier, afin de contacter le club au sujet de sa fiche. Elle n'apparaît pas dans l'application. Notre base légale est l'intérêt légitime : aider les joueurs à trouver des clubs et garder les fiches exactes.
 
-Si vous gérez un club et souhaitez que sa fiche soit corrigée ou supprimée, ou si vous vous opposez à ce que nous conservions une adresse de contact, écrivez à [clubs@nextfour.app](mailto:clubs@nextfour.app). Un club peut aussi revendiquer sa fiche dans l'application pour la gérer directement.
+Si vous gérez un club et souhaitez que sa fiche soit corrigée ou supprimée, ou si vous vous opposez à ce que nous conservions une adresse de contact, écrivez à [clubs@nextfour.app](mailto:clubs@nextfour.app). Un club peut aussi revendiquer sa fiche, depuis sa page sur ce site ou dans l'application, pour la gérer directement.
 
 ## 9. Ce site web
 
@@ -97,6 +97,7 @@ Cette section concerne notre site web, nextfour.app, y compris l'annuaire des cl
 - **Cartes :** les pages des clubs et des salles affichent une carte, qui se charge lorsque vous la faites défiler à l'écran. Les images de la carte proviennent de la OpenStreetMap Foundation, qui reçoit votre adresse IP et la zone de carte affichée.
 - **Liens vers d'autres sites :** le site d'un club, la page de réservation d'un exploitant, les itinéraires et les boutiques d'applications sont des sites distincts, avec leurs propres politiques de confidentialité.
 - **Les e-mails que vous nous envoyez :** si vous nous écrivez depuis le site, par exemple pour corriger une fiche, nous utilisons ce que vous envoyez pour vous répondre et faire la correction.
+- **Revendiquer un club :** si vous revendiquez un club avec le formulaire de sa page, nous recevons votre nom, votre adresse e-mail, votre rôle dans le club et le message éventuel que vous ajoutez, ainsi qu'une forme codée de votre adresse IP, utilisée uniquement pour limiter les demandes répétées (nous ne conservons jamais l'adresse elle-même). Nous les utilisons pour vérifier la demande et vous envoyer par e-mail le lien qui vous confie le club. Nous les supprimons 90 jours après notre décision. Notre base légale est l'intérêt légitime : confier chaque club aux personnes qui le gèrent.
 
 Notre base légale pour l'hébergement, les cartes et la mesure des visites est l'intérêt légitime : vous montrer les pages et les cartes que vous demandez, assurer la sécurité du site et savoir quelles pages sont utiles.
 

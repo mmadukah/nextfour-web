@@ -1,6 +1,6 @@
 ---
 title: Privacy Policy
-meta: "Last updated: 17 November 2026"
+meta: "Last updated: 20 November 2026"
 description: "How NextFour collects, uses and protects your personal data under UK GDPR, and how to see, change or delete what we hold about you."
 ---
 
@@ -83,7 +83,7 @@ To help players find somewhere to play, some club and session listings in NextFo
 
 Where a source publishes a contact address for a club, we may keep it privately so that we can contact the club about its listing. It is not shown in the app. Our lawful basis is legitimate interests: helping players find clubs and keeping listings accurate.
 
-If you run a club and want its listing corrected or removed, or you object to us holding a contact address, email [clubs@nextfour.app](mailto:clubs@nextfour.app). A club can also claim its listing in the app to manage it directly.
+If you run a club and want its listing corrected or removed, or you object to us holding a contact address, email [clubs@nextfour.app](mailto:clubs@nextfour.app). A club can also claim its listing, from its page on this website or in the app, to manage it directly.
 
 ## 9. This website
 
@@ -97,6 +97,7 @@ This section covers our website, nextfour.app, including the club and session di
 - **Maps:** club and venue pages show a map, which loads when you scroll to it. Its map images come from the OpenStreetMap Foundation, which receives your IP address and the area of the map shown.
 - **Links to other sites:** a club's website, an operator's booking page, map directions and the app stores are separate sites with their own privacy policies.
 - **Emails you send us:** if you email us from the website, for example to correct a listing, we use what you send to reply and to put things right.
+- **Claiming a club:** if you claim a club using the form on its page, we receive your name, email address, your role at the club and any note you add, together with a coded form of your IP address that we use only to limit repeated requests (we never store the address itself). We use them to check the claim and to email you the link that hands the club over. We delete them 90 days after we decide the claim. Our lawful basis is legitimate interests: handing each club to the people who run it.
 
 Our lawful basis for the hosting, map requests and visit counts is legitimate interests: showing you the pages and maps you asked for, keeping the website secure, and learning which pages are useful.
 

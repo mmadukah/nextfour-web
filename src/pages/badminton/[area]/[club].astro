@@ -14,7 +14,7 @@ import VenueMap from '../../../components/directory/VenueMap.astro';
 import {
   getDirectory, clubDaysText, checkedText, shortDate, townOf, nearbyClubs, nextDate, sortedRows, dayRows,
   addressLines, clubTimeText, clubDaysShort, fitTitle, fitDescription, slugify, openLink, soonest, longDate, timeRange, pounds,
-  DAY_NAMES, SHORT_DAYS, WEEK_ORDER, type Club,
+  DAY_NAMES, SHORT_DAYS, WEEK_ORDER, claimEndpoint, type Club,
 } from '../../../data/directory';
 
 export async function getStaticPaths() {
@@ -96,6 +96,9 @@ const time = clubTimeText(club);
 const next = soonest(club.nights.map((night) => ({ night })), new Date());
 // "Claim Chew Park Keynsham": the name without its "Badminton Club" tail.
 const shortName = club.name.replace(/\s+Badminton Club\b.*$/i, '') || club.name;
+// The web claim form posts here (docs/plans/WEB_CLUB_CLAIM.md in the app
+// repo); without it the page keeps the app's claim button.
+const claimUrl = club.claimed ? null : claimEndpoint();
 // An unclaimed club's page, for a player to send to whoever runs it.
 // ?via=share marks the visits it brings back (src/analytics.ts).
 const shareUrl = `${pageUrl}?via=share`;
@@ -251,6 +254,24 @@ const crumbs = [
       display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 16px; font-weight: 800;
     }
     .claim details { margin-top: 14px; font-size: 14px; }
+    .claim-btn.primary { background: var(--btn-bg); color: var(--btn-fg); border-color: var(--btn-bg); cursor: pointer; font: inherit; font-size: 16px; font-weight: 800; }
+    .claim-btn.primary:disabled { opacity: 0.6; cursor: progress; }
+    .claim-btn[hidden], .claim-form[hidden], .claim-done[hidden], .claim-err[hidden] { display: none; }
+    .claim-form { display: flex; flex-direction: column; gap: 14px; margin-top: 4px; }
+    .claim-form label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 700; color: var(--ink); }
+    .claim-form .opt { font-weight: 400; color: var(--muted); }
+    .claim-form input, .claim-form select, .claim-form textarea {
+      min-height: 48px; padding: 10px 14px; border-radius: 12px; border: 1.5px solid var(--field-line);
+      background: var(--bg); color: var(--ink); font: inherit; font-size: 16px; font-weight: 400;
+    }
+    .claim-form textarea { resize: vertical; }
+    .claim-form input:focus, .claim-form select:focus, .claim-form textarea:focus { outline: none; border-color: var(--eyebrow); box-shadow: 0 0 0 1.5px var(--eyebrow); }
+    .claim-form .hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+    .claim-form .small { margin: 0; }
+    .claim-err { margin: 0; padding: 10px 14px; border-radius: 12px; background: var(--alert-bg); color: var(--alert-fg); font-size: 14px; }
+    .claim-done { padding: 14px 16px; border-radius: 12px; background: var(--tag-bg); color: var(--tag-fg); font-size: 15px; }
+    .claim-done p { margin: 6px 0 0; }
+    .claim-web .app-link { display: inline-flex; align-items: center; min-height: 44px; margin-top: 6px; font-size: 14px; }
     .claim summary { cursor: pointer; font-weight: 700; min-height: 44px; display: flex; align-items: center; }
     .steps { margin: 4px 0 0; padding: 18px 0 0; list-style: none; display: flex; flex-direction: column; gap: 14px; border-top: 1px solid var(--line); }
     .steps li { display: flex; gap: 12px; font-size: 15px; }
@@ -420,14 +441,52 @@ const crumbs = [
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg>{t}</li>
             ))}
           </ul>
-          <a class="claim-btn" href={openLink('club', club.id, 'claim')}>Claim it in the app</a>
+          {claimUrl ? (
+            <div class="claim-web">
+              <button class="claim-btn primary" id="claim-open" type="button" aria-expanded="false" aria-controls="claim-form">Claim this club</button>
+              <form class="claim-form" id="claim-form" data-endpoint={claimUrl} data-club={club.id} hidden novalidate>
+                <label>Your name<input name="name" autocomplete="name" maxlength="100" required /></label>
+                <label>Email<input name="email" type="email" autocomplete="email" maxlength="254" required /></label>
+                <label>Your role at the club
+                  <select name="role" required>
+                    <option value="secretary">Secretary</option>
+                    <option value="chair">Chair</option>
+                    <option value="organiser">Organiser</option>
+                    <option value="coach">Coach</option>
+                    <option value="other">Other</option>
+                  </select>
+                </label>
+                <label>Anything we should know? <span class="opt">(optional)</span><textarea name="note" rows="3" maxlength="1000"></textarea></label>
+                {/* A field people never see: whatever fills it in is not a person. */}
+                <label class="hp" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off" /></label>
+                <p class="claim-err" id="claim-err" role="alert" hidden></p>
+                <button class="claim-btn primary" type="submit">Send claim</button>
+                <p class="small">We use these details only to check and answer your claim, and delete them after 90 days. <a href="/privacy.html">Privacy</a></p>
+              </form>
+              <div class="claim-done" id="claim-done" role="status" hidden>
+                <strong>Thanks, we've got it.</strong>
+                <p>We check every claim by hand and will email you a link, usually within a day. Open it on your phone to take the club over in the app.</p>
+              </div>
+              <a class="link app-link" href={openLink('club', club.id, 'claim')}>I already have the app</a>
+            </div>
+          ) : (
+            <a class="claim-btn" href={openLink('club', club.id, 'claim')}>Claim it in the app</a>
+          )}
           <details>
             <summary>How claiming works</summary>
-            <ol class="steps">
-              <li><span class="n">1</span><span><strong>Get the NextFour app</strong><span class="muted">Free on iPhone and Android.</span></span></li>
-              <li><span class="n">2</span><span><strong>Find this club and tap Claim</strong><span class="muted">We check each claim by hand before handing the club over.</span></span></li>
-              <li><span class="n">3</span><span><strong>Update your listing</strong><span class="muted">Changes show on this page.</span></span></li>
-            </ol>
+            {claimUrl ? (
+              <ol class="steps">
+                <li><span class="n">1</span><span><strong>Send us your details</strong><span class="muted">A minute here, no app needed.</span></span></li>
+                <li><span class="n">2</span><span><strong>We check and email you a link</strong><span class="muted">Every claim is checked by hand, usually within a day.</span></span></li>
+                <li><span class="n">3</span><span><strong>Open it in the NextFour app</strong><span class="muted">Free on iPhone and Android. The club and its nights are yours to manage.</span></span></li>
+              </ol>
+            ) : (
+              <ol class="steps">
+                <li><span class="n">1</span><span><strong>Get the NextFour app</strong><span class="muted">Free on iPhone and Android.</span></span></li>
+                <li><span class="n">2</span><span><strong>Find this club and tap Claim</strong><span class="muted">We check each claim by hand before handing the club over.</span></span></li>
+                <li><span class="n">3</span><span><strong>Update your listing</strong><span class="muted">Changes show on this page.</span></span></li>
+              </ol>
+            )}
           </details>
           <div class="share" id="share" data-text={shareText} data-url={shareUrl} data-title={`${club.name} on NextFour`}>
             <p><strong>Not the organiser?</strong> Send this page to whoever runs the nights.</p>
@@ -461,6 +520,66 @@ const crumbs = [
         ))}
       </ul>
     </section>
+  )}
+
+  {claimUrl && (
+    <script is:inline>
+      // The claim form: opens in place, posts to web-club-claim, and says
+      // what happened. claim-form and claim-sent count in GoatCounter.
+      (() => {
+        const open = document.getElementById('claim-open');
+        const form = document.getElementById('claim-form');
+        const done = document.getElementById('claim-done');
+        const err = document.getElementById('claim-err');
+        if (!open || !form || !done || !err) return;
+        let shownAt = 0;
+        open.addEventListener('click', () => {
+          open.hidden = true;
+          open.setAttribute('aria-expanded', 'true');
+          form.hidden = false;
+          shownAt = Date.now();
+          form.querySelector('input[name="name"]')?.focus();
+          window.nfCount?.('claim-form');
+        });
+        const MESSAGES = {
+          invalid: 'Check your name and email address, then try again.',
+          already_claimed: "This club has just been claimed. If that wasn't you, email clubs@nextfour.app.",
+          not_found: "This club can no longer be claimed here. Email clubs@nextfour.app and we'll help.",
+          rate_limited: "We've had a few claims for this already. We'll be in touch, or email clubs@nextfour.app.",
+        };
+        const fail = (text) => { err.textContent = text; err.hidden = false; };
+        form.addEventListener('submit', async (ev) => {
+          ev.preventDefault();
+          err.hidden = true;
+          if (!form.checkValidity()) return fail(MESSAGES.invalid);
+          const send = form.querySelector('button[type="submit"]');
+          send.disabled = true;
+          try {
+            const res = await fetch(form.dataset.endpoint, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                ...Object.fromEntries(new FormData(form)),
+                club_id: form.dataset.club,
+                elapsed_ms: Date.now() - shownAt,
+              }),
+            });
+            const body = await res.json().catch(() => ({}));
+            if (body.outcome === 'received') {
+              form.hidden = true;
+              done.hidden = false;
+              window.nfCount?.('claim-sent');
+              return;
+            }
+            fail(MESSAGES[body.outcome] || 'Something went wrong. Please try again in a minute.');
+          } catch (_) {
+            fail("Couldn't send. Check your connection and try again.");
+          } finally {
+            send.disabled = false;
+          }
+        });
+      })();
+    </script>
   )}
 
   {!club.claimed && (

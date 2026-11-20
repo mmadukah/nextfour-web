@@ -568,6 +568,17 @@ export function nearbyAreas(dir: Directory, area: { lat: number; lng: number; sl
  * /open page with the store buttons when not. `src` is the button, for the
  * install tracking /get.html also does.
  */
+/**
+ * Where a club page's claim form posts: the web-club-claim function, which
+ * sits beside web-directory, or CLAIM_URL to point a local build elsewhere.
+ * Null when the build has neither, and the page keeps "Claim it in the app".
+ */
+export function claimEndpoint(): string | null {
+  if (process.env.CLAIM_URL) return process.env.CLAIM_URL;
+  const dir = process.env.DIRECTORY_URL;
+  return dir ? new URL('web-club-claim', dir).href : null;
+}
+
 export function openLink(kind: 'club' | 'session', id: string, src: string): string {
   return `/open?${new URLSearchParams({ [kind]: id, src })}`;
 }
