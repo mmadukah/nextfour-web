@@ -54,7 +54,17 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
 const facts = area.clubs.length > 0
   ? `${plural(area.clubs.length, 'club')} with ${plural(nights, 'night')} a week${dropIns > 0 ? `, plus ${plural(dropIns, 'drop-in session')}` : ''}`
   : dropIns > 0 ? `${plural(dropIns, 'drop-in session')} a week` : '';
-const title = fitTitle(area.clubs.length
+const title = fitTitle(area.clubs.length && dropIns
+  ? [
+    // With drop-ins too, leads with "Badminton in <area>": it matches "badminton near me"
+    // and "badminton <area>" searches, which want anywhere to play, not only a club.
+    `Badminton in ${area.name}: ${plural(area.clubs.length, 'club')} and drop-in sessions | NextFour`,
+    `Badminton in ${area.name}: clubs and drop-in sessions | NextFour`,
+    `Badminton in ${area.name}: clubs and drop-ins | NextFour`,
+    `Badminton in ${area.name}: clubs and drop-ins`,
+    `Badminton in ${area.name}`,
+  ]
+  : area.clubs.length
   ? [
     // Leads with "Badminton clubs in <area>", the words people search for.
     `Badminton clubs in ${area.name}: ${plural(area.clubs.length, 'club')} and ${plural(nights, 'night')} a week | NextFour`,
